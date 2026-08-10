@@ -1,12 +1,13 @@
 package com.team3.gudit.user.domain.entity;
 
+import com.team3.gudit.auth.oauth2.AuthProvider;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "USERS")
+@Table(name = "users")
 @Getter
 @Builder
 @AllArgsConstructor
@@ -17,16 +18,44 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true)
+    @Column(name = "kakao_id", unique = true)
     private Long kakaoId;
-    @Column(unique = true)
+
+    @Column(name = "nickname", unique = true)
     private String nickname;
-    @Column(unique = true)
+
+    @Column(name = "email", unique = true)
     private String email;
-    @Column(nullable = false)
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role", nullable = false, length = 20)
     private Role role;
-    @Column(nullable = false)
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "provider", nullable = false, length = 20)
+    @Builder.Default
+    private AuthProvider provider = AuthProvider.KAKAO;
+
+    @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
-    @Column(nullable = false)
+
+    @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
+
+    public User updateProfile(String nickname) {
+        this.nickname = nickname;
+        return this;
+    }
+
+    @PrePersist
+    protected void onCreate() {
+        LocalDateTime now = LocalDateTime.now();
+        this.createdAt = now;
+        this.updatedAt = now;
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        this.updatedAt = LocalDateTime.now();
+    }
 }
