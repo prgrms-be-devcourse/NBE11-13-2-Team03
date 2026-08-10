@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>구매 상세 | Gudit</title>
+
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<header th:replace="~{fragments/header :: header}"></header>
+
+<main class="main purchase-detail-page">
+
+    <a href="/mypage/purchases" class="back-link">
+        ← 내 구매 내역으로 돌아가기
+    </a>
+
+    <section class="purchase-detail">
+
+        <div class="purchase-detail-image">
+            <div class="detail-mock-keyring">
+                GUDIT
+            </div>
+        </div>
+
+        <div class="purchase-detail-content">
+
+            <div class="purchase-detail-header">
+                <div>
+                    <span class="purchase-status status-purchased">
+                        PURCHASED
+                    </span>
+
+                    <h1>개발자 키링</h1>
+                    <p class="purchase-detail-price">15,000원</p>
+                </div>
+            </div>
+
+            <div class="purchase-detail-info">
+
+                <div class="purchase-detail-row">
+                    <span>수량</span>
+                    <strong>1개</strong>
+                </div>
+
+                <div class="purchase-detail-row">
+                    <span>구매 금액</span>
+                    <strong>15,000원</strong>
+                </div>
+
+                <div class="purchase-detail-row">
+                    <span>구매 상태</span>
+                    <strong class="purchase-state-text">PURCHASED</strong>
+                </div>
+
+                <div class="purchase-detail-row">
+                    <span>구매 일시</span>
+                    <strong>2026.08.10 15:40</strong>
+                </div>
+
+            </div>
+
+            <div class="purchase-detail-message">
+                구매가 완료되었습니다.<br>
+                구매 취소가 가능한 경우 아래 버튼을 통해 취소할 수 있습니다.
+            </div>
+
+            <button
+                    type="button"
+                    class="cancel-purchase-button">
+                구매 취소
+            </button>
+
+        </div>
+
+    </section>
+
+</main>
+
+</body>
+</html>

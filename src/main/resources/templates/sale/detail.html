@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>개발자 키링 | Gudit</title>
+
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<header th:replace="~{fragments/header :: header}"></header>
+
+<main class="main sale-detail-page">
+
+    <a href="/sales" class="back-link">
+        ← 판매 목록으로 돌아가기
+    </a>
+
+    <section class="sale-detail">
+
+        <div class="sale-detail-left">
+
+            <div class="detail-image-wrap">
+                <div class="detail-mock-keyring">
+                    GUDIT
+                </div>
+            </div>
+
+        </div>
+
+        <div class="sale-detail-right">
+
+            <span class="status-badge detail-status status-on-sale">
+                판매 중
+            </span>
+
+            <h1 class="detail-product-name">
+                개발자 키링
+            </h1>
+
+            <p class="detail-price">
+                15,000원
+            </p>
+
+            <p class="detail-description">
+                Gudit 로고가 담긴 심플한 디자인의 한정 아크릴 키링입니다.
+            </p>
+
+            <div class="detail-info-card">
+
+                <div class="detail-info-row">
+                    <span>판매 상태</span>
+                    <strong class="on-sale-text">판매 중</strong>
+                </div>
+
+                <div class="detail-info-row">
+                    <span>남은 수량</span>
+                    <strong class="stock-emphasis">17 / 100</strong>
+                </div>
+
+                <div class="detail-stock-bar">
+                    <div class="detail-stock-bar-fill"
+                         style="width: 17%;">
+                    </div>
+                </div>
+
+                <div class="detail-info-row">
+                    <span>판매 기간</span>
+                    <strong>
+                        2026.08.10 18:00 ~ 20:00
+                    </strong>
+                </div>
+
+                <div class="detail-info-row">
+                    <span>구매 가능 수량</span>
+                    <strong>1개</strong>
+                </div>
+
+            </div>
+
+            <div class="countdown-card">
+                <span class="countdown-label">
+                    판매 종료까지 남은 시간
+                </span>
+
+                <div class="countdown">
+                    <div>
+                        <strong>00</strong>
+                        <span>시간</span>
+                    </div>
+
+                    <span class="countdown-colon">:</span>
+
+                    <div>
+                        <strong>14</strong>
+                        <span>분</span>
+                    </div>
+
+                    <span class="countdown-colon">:</span>
+
+                    <div>
+                        <strong>38</strong>
+                        <span>초</span>
+                    </div>
+                </div>
+            </div>
+
+            <button
+                    type="button"
+                    class="purchase-button">
+                구매하기
+            </button>
+
+            <p class="purchase-notice">
+                판매가 시작되면 선착순으로 구매가 진행됩니다.
+                한 계정당 1개만 구매할 수 있습니다.
+            </p>
+
+        </div>
+
+    </section>
+
+</main>
+
+</body>
+</html>
