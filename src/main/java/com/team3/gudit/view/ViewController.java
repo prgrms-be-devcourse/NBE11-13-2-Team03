@@ -30,4 +30,34 @@ public class ViewController {
     public String purchaseDetail() {
         return "purchase/detail";
     }
+
+    @GetMapping("/admin/goods")
+    public String adminGoodsList() {
+        return "admin/goods-list";
+    }
+
+    @GetMapping("/admin/goods/new")
+    public String adminGoodsCreate() {
+        return "admin/goods-form";
+    }
+
+    @GetMapping("/admin/goods/{goodsId}/edit")
+    public String adminGoodsEdit() {
+        return "admin/goods-form";
+    }
+
+    @GetMapping("/admin/sales")
+    public String adminSaleList() {
+        return "admin/sale-list";
+    }
+
+    @GetMapping("/admin/sales/new")
+    public String adminSaleCreate() {
+        return "admin/sale-form";
+    }
+
+    @GetMapping("/admin/sales/{saleId}/edit")
+    public String adminSaleEdit() {
+        return "admin/sale-form";
+    }
 }
