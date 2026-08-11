@@ -1,4 +1,4 @@
-package com.team3.gudit.domain.goodsSalses.dto;
+package com.team3.gudit.domain.goodsSales.dto;
 
 import java.time.LocalDateTime;
 

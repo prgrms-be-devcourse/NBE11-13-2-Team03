@@ -1,8 +1,8 @@
-package com.team3.gudit.domain.goodsSalses.service;
+package com.team3.gudit.domain.goodsSales.service;
 
-import com.team3.gudit.domain.goodsSalses.domain.entity.Sale;
-import com.team3.gudit.domain.goodsSalses.domain.repository.SaleRepository;
-import com.team3.gudit.domain.goodsSalses.dto.SaleResponseDto;
+import com.team3.gudit.domain.goodsSales.domain.entity.Sale;
+import com.team3.gudit.domain.goodsSales.domain.repository.SaleRepository;
+import com.team3.gudit.domain.goodsSales.dto.SaleResponseDto;
 import com.team3.gudit.global.exception.SaleNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Primary;

@@ -1,4 +1,4 @@
-package com.team3.gudit.domain.goodsSalses.domain.enums;
+package com.team3.gudit.domain.goodsSales.domain.enums;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

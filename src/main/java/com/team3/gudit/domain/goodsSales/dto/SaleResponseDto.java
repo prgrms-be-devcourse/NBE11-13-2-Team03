@@ -1,7 +1,7 @@
-package com.team3.gudit.domain.goodsSalses.dto;
+package com.team3.gudit.domain.goodsSales.dto;
 
-import com.team3.gudit.domain.goodsSalses.domain.entity.Sale;
-import com.team3.gudit.domain.goodsSalses.domain.enums.SaleStatus;
+import com.team3.gudit.domain.goodsSales.domain.entity.Sale;
+import com.team3.gudit.domain.goodsSales.domain.enums.SaleStatus;
 import lombok.Builder;
 
 import java.time.LocalDateTime;

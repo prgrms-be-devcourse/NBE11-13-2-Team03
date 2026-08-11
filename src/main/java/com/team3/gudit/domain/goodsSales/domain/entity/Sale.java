@@ -1,7 +1,7 @@
-package com.team3.gudit.domain.goodsSalses.domain.entity;
+package com.team3.gudit.domain.goodsSales.domain.entity;
 
 import com.team3.gudit.domain.goods.domain.entity.Goods;
-import com.team3.gudit.domain.goodsSalses.domain.enums.SaleStatus;
+import com.team3.gudit.domain.goodsSales.domain.enums.SaleStatus;
 import com.team3.gudit.global.exception.NotEnoughStockException;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

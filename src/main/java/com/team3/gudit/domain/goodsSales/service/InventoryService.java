@@ -1,6 +1,6 @@
-package com.team3.gudit.domain.goodsSalses.service;
+package com.team3.gudit.domain.goodsSales.service;
 
-import com.team3.gudit.domain.goodsSalses.dto.SaleResponseDto;
+import com.team3.gudit.domain.goodsSales.dto.SaleResponseDto;
 
 public interface InventoryService {
 
