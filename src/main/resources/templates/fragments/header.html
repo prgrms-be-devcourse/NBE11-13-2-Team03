@@ -15,10 +15,31 @@
             </nav>
 
             <div class="auth-area">
+
                 <a href="/oauth2/authorization/kakao"
-                   class="login-button">
-                    카카오 로그인
+                   id="login-link"
+                   class="kakao-header-login">
+                    <img src="/images/kakao_login_small.png"
+                         alt="카카오 로그인">
                 </a>
+
+                <div id="user-area"
+                     class="user-area"
+                     hidden>
+
+        <span id="user-name"
+              class="user-name">
+            사용자님
+        </span>
+
+                    <button type="button"
+                            id="logout-button"
+                            class="logout-button">
+                        로그아웃
+                    </button>
+
+                </div>
+
             </div>
         </div>
     </div>
