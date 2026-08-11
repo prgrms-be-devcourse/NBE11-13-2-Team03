@@ -65,4 +65,10 @@ public class GoodsApiController {
         return ResponseEntity.ok().body(response);
     }
 
+    @DeleteMapping("/{goodsId}")
+    public ResponseEntity<Void> deleteGoods(@PathVariable Long goodsId) {
+        goodsService.deleteGoods(goodsId);
+        return ResponseEntity.noContent().build();
+    }
+
 }

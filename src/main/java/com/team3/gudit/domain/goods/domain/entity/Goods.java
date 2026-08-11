@@ -84,4 +84,8 @@ public class Goods {
     public void updateGoodsStatus(GoodsStatus status) {
         this.status =  status;
     }
+
+    public void deactivate() {
+        this.status = GoodsStatus.INACTIVE;
+    }
 }

@@ -111,6 +111,16 @@ public class GoodsService {
         return goodsMapper.toStatusUpdateResponse(goods);
     }
 
+    @Transactional
+    public void deleteGoods(Long id) {
+        Goods goods = findByIdOrThrow(id);
+
+        goods.deactivate();
+
+        log.info("[굿즈 삭제 완료] goodsId={}", id);
+    }
+
+
     private Goods findByIdOrThrow(Long id) {
         log.debug("[메뉴 조회] menuId={}", id);
 
