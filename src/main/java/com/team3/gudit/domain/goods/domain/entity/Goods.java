@@ -1,6 +1,6 @@
 package com.team3.gudit.domain.goods.domain.entity;
 
-import com.team3.gudit.domain.goods.dto.GoodsUpdateRequest;
+import com.team3.gudit.domain.goods.domain.enums.GoodsStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -17,7 +17,6 @@ import static lombok.AccessLevel.PROTECTED;
 @Entity
 @Table(name = "GOODS")
 @Getter
-@Builder
 @NoArgsConstructor(access = PROTECTED)
 @AllArgsConstructor(access = PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
@@ -27,14 +26,20 @@ public class Goods {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private String name;
 
     @Column(length = 100)
     private String description;
 
+    @Column(nullable = false)
     private Integer price;
+
     private String imageUrl;
-    private Boolean active;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private GoodsStatus status;
 
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -44,27 +49,25 @@ public class Goods {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
+    @Builder
+    private Goods(Long id, String name, String description, Integer price, String imageUrl, GoodsStatus status) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.price = price;
+        this.imageUrl = imageUrl;
+        this.status = status;
+    }
+
     public static Goods of(String name, String description, Integer price, String imageUrl) {
         return Goods.builder()
                 .name(name)
                 .description(description)
                 .price(price)
                 .imageUrl(imageUrl)
-                .active(true)
+                .status(GoodsStatus.ACTIVE)
                 .build();
     }
-
-
-    public static Goods from(Goods goods) {
-        return Goods.builder()
-                .name(goods.getName())
-                .description(goods.getDescription())
-                .price(goods.getPrice())
-                .imageUrl(goods.getImageUrl())
-                .active(true)
-                .build();
-    }
-
 
     public void updateGoodsInfo(
             String name,
@@ -78,7 +81,7 @@ public class Goods {
         this.imageUrl = imageUrl;
     }
 
-    public void updateActive(boolean active) {
-        this.active = active;
+    public void updateGoodsStatus(GoodsStatus status) {
+        this.status =  status;
     }
 }
