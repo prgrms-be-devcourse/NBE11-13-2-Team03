@@ -5,8 +5,6 @@ import com.team3.gudit.user.domain.entity.User;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.time.LocalDateTime;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
@@ -35,8 +33,6 @@ class PurchaseTest {
         assertThat(purchase.getStatus()).isEqualTo(PurchaseStatus.PURCHASED);
         assertThat(purchase.getPurchasedAt()).isNotNull();
         assertThat(purchase.getCanceledAt()).isNull();
-        assertThat(purchase.getCreatedAt()).isNotNull();
-        assertThat(purchase.getUpdatedAt()).isNotNull();
     }
 
     @Test
@@ -53,14 +49,11 @@ class PurchaseTest {
                 15000
         );
 
-        LocalDateTime beforeUpdate = purchase.getUpdatedAt();
-
         // when
         purchase.cancel();
 
         // then
         assertThat(purchase.getStatus()).isEqualTo(PurchaseStatus.CANCELED);
         assertThat(purchase.getCanceledAt()).isNotNull();
-        assertThat(purchase.getUpdatedAt()).isAfterOrEqualTo(beforeUpdate);
     }
 }

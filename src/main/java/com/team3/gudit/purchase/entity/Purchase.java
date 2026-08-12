@@ -6,6 +6,9 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
@@ -21,6 +24,7 @@ import java.time.LocalDateTime;
 )
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@EntityListeners(AuditingEntityListener.class)
 public class Purchase {
 
     @Id
@@ -51,28 +55,21 @@ public class Purchase {
     @Column(name = "canceled_at")
     private LocalDateTime canceledAt;
 
-    @Column(name = "created_at", nullable = false)
+    @CreatedDate
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    @LastModifiedDate
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
-    private Purchase(
-            User user,
-            Sale sale,
-            int quantity,
-            int purchasePrice
-    ) {
-        LocalDateTime now = LocalDateTime.now();
-
+    private Purchase(User user, Sale sale, int quantity, int purchasePrice) {
         this.user = user;
         this.sale = sale;
         this.quantity = quantity;
         this.purchasePrice = purchasePrice;
         this.status = PurchaseStatus.PURCHASED;
-        this.purchasedAt = now;
-        this.createdAt = now;
-        this.updatedAt = now;
+        this.purchasedAt = LocalDateTime.now();
     }
 
     public static Purchase create(
@@ -87,6 +84,5 @@ public class Purchase {
     public void cancel() {
         this.status = PurchaseStatus.CANCELED;
         this.canceledAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
     }
 }
