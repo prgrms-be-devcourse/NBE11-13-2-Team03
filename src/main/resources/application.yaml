@@ -38,3 +38,8 @@ jwt:
   secret_key: ${JWT_SECRET_KEY}
   access-token-validity: 2h
   refresh-token-validity: 7d
+
+toss:
+  payments:
+    client-key: ${TOSS_CLIENT_KEY}
+    secret-key: ${TOSS_SECRET_KEY}

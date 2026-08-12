@@ -20,6 +20,9 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+                .csrf(csrf -> csrf
+                        .ignoringRequestMatchers("/payments/test/**")
+                )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/",
@@ -27,6 +30,10 @@ public class SecurityConfig {
                                 "/login-failure.html",
                                 "/oauth2/**",
                                 "/login/**"
+                        ).permitAll()
+                        .requestMatchers(
+                                "/payments/test",
+                                "/payments/test/**"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
