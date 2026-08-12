@@ -21,7 +21,8 @@ public class InventoryServiceImpl implements InventoryService {
     public void decreaseStock(Long saleId, int quantity) {
         Sale sale = saleRepository.findByIdWithLock(saleId)
                 .orElseThrow(() -> new SaleNotFoundException(saleId));
-
+        sale.validateSalePeriod();
+        sale.validatePurchaseQuantity(quantity);
         sale.decreaseStock(quantity);
     }
 

@@ -90,23 +90,32 @@ public class Sale {
     }
 
     public void restoreStock(int count) {
+
+
         this.remainingStock += count;
 
-        if (this.status == SaleStatus.SOLD_OUT && this.remainingStock > 0) {
+        if (this.status == SaleStatus.CLOSED || this.status == SaleStatus.DELETED) {
+           return;
+        }
+
+        if (this.status == SaleStatus.SOLD_OUT && isWithinSalePeriod() && remainingStock > 0) {
             this.status = SaleStatus.ON_SALE;
         }
     }
 
     public void validateSalePeriod() {
         LocalDateTime now = LocalDateTime.now();
-        boolean isSaleTime = (!now.isBefore(this.startAt)) && now.isBefore(this.endAt);
 
-        if (!isSaleTime) {
+        if (!isWithinSalePeriod()) {
             throw new InvalidSalePeriodException();
         }
 
         if (this.status == SaleStatus.CLOSED) {
             throw new SaleClosedException();
+        }
+
+        if (this.status != SaleStatus.ON_SALE) {
+            throw new IllegalStateException("현재 구매 가능한 상태가 아닙니다. (현재 상태: " + this.status + ")");
         }
     }
 
@@ -141,6 +150,11 @@ public class Sale {
         }
 
         this.status = SaleStatus.DELETED;
+    }
+
+    private boolean isWithinSalePeriod() {
+        LocalDateTime now = LocalDateTime.now();
+        return (!now.isBefore(this.startAt)) && now.isBefore(this.endAt);
     }
 
     private void validateModifiable() {
