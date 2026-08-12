@@ -1,4 +1,4 @@
-package com.team3.gudit.domain.goodsSales.dto.reqeust;
+package com.team3.gudit.domain.goodsSales.dto.request;
 
 import com.team3.gudit.domain.goodsSales.domain.enums.SaleStatus;
 

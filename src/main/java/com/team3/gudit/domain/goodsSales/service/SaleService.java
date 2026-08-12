@@ -1,8 +1,8 @@
 package com.team3.gudit.domain.goodsSales.service;
 
-import com.team3.gudit.domain.goodsSales.dto.reqeust.SaleCreateRequestDto;
-import com.team3.gudit.domain.goodsSales.dto.reqeust.SaleStatusUpdateRequestDto;
-import com.team3.gudit.domain.goodsSales.dto.reqeust.SaleUpdateRequestDto;
+import com.team3.gudit.domain.goodsSales.dto.request.SaleCreateRequestDto;
+import com.team3.gudit.domain.goodsSales.dto.request.SaleStatusUpdateRequestDto;
+import com.team3.gudit.domain.goodsSales.dto.request.SaleUpdateRequestDto;
 import com.team3.gudit.domain.goodsSales.dto.response.SaleCreateResponseDto;
 import com.team3.gudit.domain.goodsSales.dto.response.SaleDetailResponseDto;
 import com.team3.gudit.domain.goodsSales.dto.response.SaleListResponseDto;
