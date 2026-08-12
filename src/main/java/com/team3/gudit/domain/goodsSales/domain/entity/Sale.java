@@ -2,7 +2,7 @@ package com.team3.gudit.domain.goodsSales.domain.entity;
 
 import com.team3.gudit.domain.goods.domain.entity.Goods;
 import com.team3.gudit.domain.goodsSales.domain.enums.SaleStatus;
-import com.team3.gudit.global.exception.NotEnoughStockException;
+import com.team3.gudit.global.exception.*;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.springframework.http.HttpStatus;
 
 import java.time.LocalDateTime;
 
@@ -77,23 +78,6 @@ public class Sale {
         this.endAt = endAt;
     }
 
-    /**
-     * 판매 생성 정적 팩토리 메서드
-     */
-    public static Sale createSale(Goods goods, Long createdBy, Integer initialStock,
-                                  Integer maxPurchaseQuantity, LocalDateTime startAt, LocalDateTime endAt) {
-        return Sale.builder()
-                .goods(goods)
-                .createdBy(createdBy)
-                .initialStock(initialStock)
-                .remainingStock(initialStock) // 초기 잔여 재고 = 초기 재고
-                .maxPurchaseQuantity(maxPurchaseQuantity)
-                .status(SaleStatus.READY)
-                .startAt(startAt)
-                .endAt(endAt)
-                .build();
-    }
-
     public void decreaseStock(int count) {
         if (this.remainingStock - count < 0) {
             throw new NotEnoughStockException("재고가 부족합니다. (현재 재고: " + this.remainingStock + ")");
@@ -113,7 +97,56 @@ public class Sale {
         }
     }
 
+    public void validateSalePeriod() {
+        LocalDateTime now = LocalDateTime.now();
+        boolean isSaleTime = (!now.isBefore(this.startAt)) && now.isBefore(this.endAt);
+
+        if (!isSaleTime) {
+            throw new InvalidSalePeriodException();
+        }
+
+        if (this.status == SaleStatus.CLOSED) {
+            throw new SaleClosedException();
+        }
+    }
+
+    public void validatePurchaseQuantity(int purchaseQuantity) {
+        if (this.maxPurchaseQuantity < purchaseQuantity) {
+            throw new PurchaseQuantityException();
+        }
+    }
+
+    public void updateSaleInfo(
+            Integer initialStock,
+            Integer maxPurchaseQuantity,
+            LocalDateTime startAt,
+            LocalDateTime endAt
+    ) {
+        validateModifiable();
+
+        this.initialStock = initialStock;
+        this.remainingStock = initialStock;
+        this.maxPurchaseQuantity = maxPurchaseQuantity;
+        this.startAt = startAt;
+        this.endAt = endAt;
+    }
+
     public void updateSaleStatus(SaleStatus status) {
         this.status = status;
     }
+
+    public void deleteSale() {
+        if (this.status == SaleStatus.ON_SALE) {
+            throw new IllegalStateException("진행 중인 판매 상품은 삭제할 수 없습니다. 먼저 중단 처리하세요.");
+        }
+
+        this.status = SaleStatus.DELETED;
+    }
+
+    private void validateModifiable() {
+        if (this.status != SaleStatus.READY) {
+            throw new IllegalStateException("판매 대기(READY) 상태에서만 정보를 수정할 수 있습니다.");
+        }
+    }
+
 }

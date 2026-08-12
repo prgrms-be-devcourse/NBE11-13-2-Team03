@@ -7,22 +7,22 @@ import lombok.Builder;
 import java.time.LocalDateTime;
 
 @Builder
-public record SaleResponseDto(
-        Long id,
-        Long goodsId,
-        String goodsName,
-        Integer price,
-        int initialStock,
-        int remainingStock,
-        Integer maxPurchaseQuantity,
-        SaleStatus status,
-        LocalDateTime startAt,
-        LocalDateTime endAt,
-        LocalDateTime createdAt
+public record SaleDetailResponseDto(
+    Long id,
+    Long goodsId,
+    String goodsName,
+    Integer price,
+    int initialStock,
+    int remainingStock,
+    Integer maxPurchaseQuantity,
+    SaleStatus status,
+    LocalDateTime startAt,
+    LocalDateTime endAt,
+    LocalDateTime createdAt
 ) {
 
-    public static SaleResponseDto from(Sale sale) {
-        return SaleResponseDto.builder()
+    public static SaleDetailResponseDto from(Sale sale) {
+        return SaleDetailResponseDto.builder()
                 .id(sale.getId())
                 .goodsId(sale.getGoods().getId())
                 .goodsName(sale.getGoods().getName())
