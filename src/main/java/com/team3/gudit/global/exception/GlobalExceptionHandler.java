@@ -40,8 +40,6 @@ public class GlobalExceptionHandler {
     // 2. @Valid 검증 예외 처리
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidException(MethodArgumentNotValidException exception) {
-        log.error("Validation Error", exception);
-
         Map<String, String> fieldErrors = exception
                 .getBindingResult()
                 .getFieldErrors()
@@ -54,10 +52,15 @@ public class GlobalExceptionHandler {
                         ),
                         (first, second) -> first, LinkedHashMap::new
                 ));
+
+        log.warn("Validation failed: {}", fieldErrors);
+
+        ErrorCode errorCode = GlobalErrorCode.INVALID_INPUT_VALUE;
         ErrorResponse response = ErrorResponse.validation(
-                "COMMON_001",
-                "입력값이 올바르지 않습니다.",
-                fieldErrors);
+                errorCode.getCode(),
+                errorCode.getMessage(),
+                fieldErrors
+        );
 
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
@@ -67,10 +70,22 @@ public class GlobalExceptionHandler {
     // 3. 파라미터 타입 불일치 예외 처리
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<ErrorResponse> handleMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException exception) {
-        log.error("MethodArgumentTypeMismatchException", exception);
+        log.warn(
+                "Argument type mismatch. parameter={}, value={}",
+                exception.getName(),
+                exception.getValue()
+        );
+
+        ErrorCode errorCode = GlobalErrorCode.TYPE_MISMATCH;
+        ErrorResponse response = ErrorResponse.validation(
+                errorCode.getCode(),
+                errorCode.getMessage(),
+                Map.of()
+        );
+
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(ErrorResponse.validation(exception.getErrorCode(), exception.getMessage(), Map.ofEntries()));
+                .body(response);
     }
 
     // 4. 예상치 못한 500 서버 내부 에러 처리
