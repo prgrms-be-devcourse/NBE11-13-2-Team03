@@ -1,7 +1,7 @@
-package com.team3.gudit.domain.goodsSales.dto.reqeust;
+package com.team3.gudit.goodsSales.dto.reqeust;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.team3.gudit.domain.goods.constant.DateformatConstant;
+import com.team3.gudit.goods.constant.DateformatConstant;
 
 import java.time.LocalDateTime;
 

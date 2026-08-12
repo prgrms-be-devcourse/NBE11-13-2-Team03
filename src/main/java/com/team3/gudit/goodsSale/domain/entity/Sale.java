@@ -1,7 +1,7 @@
-package com.team3.gudit.domain.goodsSales.domain.entity;
+package com.team3.gudit.goodsSales.domain.entity;
 
-import com.team3.gudit.domain.goods.domain.entity.Goods;
-import com.team3.gudit.domain.goodsSales.domain.enums.SaleStatus;
+import com.team3.gudit.goods.domain.entity.Goods;
+import com.team3.gudit.goodsSales.domain.enums.SaleStatus;
 import com.team3.gudit.global.exception.*;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -11,7 +11,6 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import org.springframework.http.HttpStatus;
 
 import java.time.LocalDateTime;
 
