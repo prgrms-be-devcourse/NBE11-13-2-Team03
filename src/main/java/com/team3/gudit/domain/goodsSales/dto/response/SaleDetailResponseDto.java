@@ -1,4 +1,4 @@
-package com.team3.gudit.domain.goodsSales.dto;
+package com.team3.gudit.domain.goodsSales.dto.response;
 
 import com.team3.gudit.domain.goodsSales.domain.entity.Sale;
 import com.team3.gudit.domain.goodsSales.domain.enums.SaleStatus;

@@ -1,6 +1,12 @@
 package com.team3.gudit.domain.goodsSales.controller;
 
-import com.team3.gudit.domain.goodsSales.dto.*;
+import com.team3.gudit.domain.goodsSales.dto.reqeust.SaleCreateRequestDto;
+import com.team3.gudit.domain.goodsSales.dto.reqeust.SaleStatusUpdateRequestDto;
+import com.team3.gudit.domain.goodsSales.dto.reqeust.SaleUpdateRequestDto;
+import com.team3.gudit.domain.goodsSales.dto.response.SaleCreateResponseDto;
+import com.team3.gudit.domain.goodsSales.dto.response.SaleDetailResponseDto;
+import com.team3.gudit.domain.goodsSales.dto.response.SaleListResponseDto;
+import com.team3.gudit.domain.goodsSales.dto.response.SaleStatusUpdateResponseDto;
 import com.team3.gudit.domain.goodsSales.service.SaleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
