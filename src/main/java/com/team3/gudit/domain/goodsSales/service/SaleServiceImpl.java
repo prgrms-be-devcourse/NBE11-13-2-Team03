@@ -23,7 +23,6 @@ import java.util.List;
 @RequiredArgsConstructor
 @Transactional
 public class SaleServiceImpl implements SaleService {
-
     private final SaleRepository saleRepository;
     private final GoodsRepository goodsRepository;
 
@@ -49,6 +48,7 @@ public class SaleServiceImpl implements SaleService {
         return SaleDetailResponseDto.from(sale);
     }
 
+    @Override
     @Transactional(readOnly = true)
     public List<SaleListResponseDto> saleList() {
         return saleRepository.findAll().stream()
@@ -72,6 +72,7 @@ public class SaleServiceImpl implements SaleService {
         return SaleDetailResponseDto.from(sale);
     }
 
+    @Override
     @Transactional
     public SaleStatusUpdateResponseDto updateSaleStatus(Long saleId, SaleStatusUpdateRequestDto request) {
         Sale sale = saleRepository.findById(saleId)
