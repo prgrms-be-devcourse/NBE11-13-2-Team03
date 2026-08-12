@@ -21,10 +21,10 @@ public class User {
     @Column(name = "kakao_id", unique = true)
     private Long kakaoId;
 
-    @Column(name = "nickname", unique = true)
+    @Column(name = "nickname")
     private String nickname;
 
-    @Column(name = "email", unique = true)
+    @Column(name = "email")
     private String email;
 
     @Enumerated(EnumType.STRING)

@@ -50,4 +50,12 @@ public class RefreshToken {
     protected void onUpdate() {
         this.updatedAt = LocalDateTime.now();
     }
+
+    public void rotate(
+            String tokenHash,
+            LocalDateTime expiresAt
+    ) {
+        this.tokenHash = tokenHash;
+        this.expiresAt = expiresAt;
+    }
 }
