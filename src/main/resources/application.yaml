@@ -6,6 +6,10 @@ spring:
     driver-class-name: org.postgresql.Driver
     username: postgres
     password: 1234
+  servlet:
+    multipart:
+      max-fi지le-size: 10MB
+      max-request-size: 10MB
   security:
     oauth2:
       client:
