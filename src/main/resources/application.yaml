@@ -1,15 +1,18 @@
 spring:
   application:
     name: Gudit
+
   datasource:
     url: jdbc:postgresql://localhost:5432/gudit
     driver-class-name: org.postgresql.Driver
     username: postgres
     password: 1234
+
   servlet:
     multipart:
-      max-fi지le-size: 10MB
+      max-file-size: 10MB
       max-request-size: 10MB
+
   security:
     oauth2:
       client:
@@ -23,15 +26,18 @@ spring:
             scope:
               - profile_nickname
               - account_email
+
         provider:
           kakao:
             authorization-uri: https://kauth.kakao.com/oauth/authorize # 인가페이지
             token-uri: https://kauth.kakao.com/oauth/token # 코드 -> 토큰 교환
             user-info-uri: https://kapi.kakao.com/v2/user/me # 사용자 정보 조회
             user-name-attribute: id
+
   jpa:
     hibernate:
       ddl-auto: update
+
 jwt:
   issuer: test@naver.com
   secret_key: ${JWT_SECRET_KEY}

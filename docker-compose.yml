@@ -7,7 +7,7 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: "1234"
-      POSTGRES_DB: testdb
+      POSTGRES_DB: gudit
     volumes:
       - postgres_data:/var/lib/postgresql/data
     restart: always

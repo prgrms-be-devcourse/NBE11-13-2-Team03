@@ -43,11 +43,10 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-security-test'
     testImplementation 'org.springframework.boot:spring-boot-starter-thymeleaf-test'
     testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
-    runtimeOnly 'com.h2database:h2'
 
     testCompileOnly 'org.projectlombok:lombok'
 
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    testRuntimeOnly 'com.h2database:h2'
 
     testAnnotationProcessor 'org.projectlombok:lombok'
 }
