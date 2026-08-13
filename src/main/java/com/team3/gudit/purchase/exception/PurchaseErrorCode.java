@@ -25,12 +25,6 @@ public enum PurchaseErrorCode implements ErrorCode {
             HttpStatus.CONFLICT,
             "PURCHASE_003",
             "이미 취소된 구매입니다."
-    ),
-
-    PURCHASE_CANNOT_CANCEL(
-            HttpStatus.CONFLICT,
-            "PURCHASE_004",
-            "현재 상태에서는 구매를 취소할 수 없습니다."
     );
 
     private final HttpStatus status;

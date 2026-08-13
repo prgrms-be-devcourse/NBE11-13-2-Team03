@@ -112,11 +112,6 @@ public class PurchaseService {
         }
 
         Sale sale = purchase.getSale();
-        LocalDateTime now = LocalDateTime.now();
-
-        if (!now.isBefore(sale.getEndAt())) {
-            throw new BusinessException(PurchaseErrorCode.PURCHASE_CANNOT_CANCEL);
-        }
 
         inventoryService.restoreStock(
                 sale.getId(),

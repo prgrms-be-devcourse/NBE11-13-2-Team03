@@ -176,9 +176,6 @@ class PurchaseServiceTest {
         given(sale.getId())
                 .willReturn(saleId);
 
-        given(sale.getEndAt())
-                .willReturn(LocalDateTime.now().plusHours(1));
-
         Purchase purchase = Purchase.create(
                 user,
                 sale,
@@ -202,7 +199,7 @@ class PurchaseServiceTest {
     }
 
     @Test
-    @DisplayName("판매가 종료된 후에는 구매를 취소할 수 없다")
+    @DisplayName("판매가 종료된 후에도 구매를 취소할 수 있다")
     void cancelAfterSaleEnd() {
         // given
         Purchase purchase = mock(Purchase.class);
@@ -217,18 +214,17 @@ class PurchaseServiceTest {
         given(purchase.getSale())
                 .willReturn(sale);
 
-        given(sale.getEndAt())
-                .willReturn(LocalDateTime.now().minusHours(1));
+        given(purchase.getQuantity())
+                .willReturn(1);
 
-        // when & then
-        assertThatThrownBy(
-                () -> purchaseService.cancel(userId, purchaseId)
-        )
-                .isInstanceOf(BusinessException.class)
-                .satisfies(exception -> {
-                    BusinessException businessException = (BusinessException) exception;
-                    assertThat(businessException.getErrorCode())
-                            .isEqualTo(PurchaseErrorCode.PURCHASE_CANNOT_CANCEL);
-                });
+        given(sale.getId())
+                .willReturn(saleId);
+
+        // when
+        purchaseService.cancel(userId, purchaseId);
+
+        // then
+        verify(inventoryService).restoreStock(saleId, 1);
+        verify(purchase).cancel();
     }
 }
