@@ -2,6 +2,7 @@ package com.team3.gudit.auth.filter;
 
 import com.team3.gudit.auth.jwt.TokenProvider;
 import com.team3.gudit.auth.jwt.TokenStatus;
+import com.team3.gudit.auth.jwt.TokenType;
 import com.team3.gudit.user.domain.entity.User;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -34,16 +35,15 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
 
         String token = resolveToken(request);
 
-        if (token != null) {
-            TokenStatus status = tokenProvider.validateToken(token);
+        if (token != null
+                && tokenProvider.validateToken(token, TokenType.ACCESS)
+                == TokenStatus.VALID) {
 
-            if (status == TokenStatus.VALID) {
-                Authentication authentication =
-                        tokenProvider.getAuthentication(token);
+            Authentication authentication =
+                    tokenProvider.getAuthentication(token);
 
-                SecurityContextHolder.getContext()
-                        .setAuthentication(authentication);
-            }
+            SecurityContextHolder.getContext()
+                    .setAuthentication(authentication);
         }
 
         filterChain.doFilter(request, response);

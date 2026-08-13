@@ -1,10 +1,6 @@
 package com.team3.gudit.purchase.service;
 
-import com.team3.gudit.domain.goodsSales.domain.entity.Sale;
-import com.team3.gudit.domain.goodsSales.domain.enums.SaleStatus;
-import com.team3.gudit.domain.goodsSales.domain.repository.SaleRepository;
-import com.team3.gudit.domain.goodsSales.service.InventoryService;
-import com.team3.gudit.global.exception.*;
+import com.team3.gudit.global.exception.BusinessException;
 import com.team3.gudit.purchase.dto.PurchaseCancelResponse;
 import com.team3.gudit.purchase.dto.PurchaseCreateResponse;
 import com.team3.gudit.purchase.dto.PurchaseDetailResponse;
@@ -12,9 +8,15 @@ import com.team3.gudit.purchase.dto.PurchaseListResponse;
 import com.team3.gudit.purchase.dto.PurchaseSummaryResponse;
 import com.team3.gudit.purchase.entity.Purchase;
 import com.team3.gudit.purchase.entity.PurchaseStatus;
+import com.team3.gudit.purchase.exception.PurchaseErrorCode;
 import com.team3.gudit.purchase.repository.PurchaseRepository;
+import com.team3.gudit.sale.domain.entity.Sale;
+import com.team3.gudit.sale.domain.repository.SaleRepository;
+import com.team3.gudit.sale.exception.SaleErrorCode;
+import com.team3.gudit.sale.service.InventoryService;
 import com.team3.gudit.user.domain.entity.User;
 import com.team3.gudit.user.domain.repository.UserRepository;
+import com.team3.gudit.user.exception.UserErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,28 +38,20 @@ public class PurchaseService {
     public PurchaseCreateResponse purchase(Long userId, Long saleId) {
 
         if (purchaseRepository.existsByUserIdAndSaleId(userId, saleId)) {
-            throw new DuplicatePurchaseException();
+            throw new BusinessException(PurchaseErrorCode.DUPLICATE_PURCHASE);
         }
 
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+                .orElseThrow(() -> new BusinessException(
+                        UserErrorCode.USER_NOT_FOUND,
+                        "User not found. userId=" + userId
+                ));
 
         Sale sale = saleRepository.findById(saleId)
-                .orElseThrow(() -> new SaleNotFoundException(saleId));
-
-        LocalDateTime now = LocalDateTime.now();
-
-        if (now.isBefore(sale.getStartAt())) {
-            throw new SaleUnavailableException("아직 판매 시작 전입니다.");
-        }
-
-        if (!now.isBefore(sale.getEndAt())) {
-            throw new SaleUnavailableException("판매가 종료되었습니다.");
-        }
-
-        if (sale.getStatus() != SaleStatus.ON_SALE) {
-            throw new SaleUnavailableException("현재 구매할 수 없는 판매입니다.");
-        }
+                .orElseThrow(() -> new BusinessException(
+                        SaleErrorCode.SALE_NOT_FOUND,
+                        "Sale not found. saleId=" + saleId
+                ));
 
         inventoryService.decreaseStock(saleId, 1);
 
@@ -96,7 +90,10 @@ public class PurchaseService {
     public PurchaseDetailResponse getPurchase(Long userId, Long purchaseId) {
 
         Purchase purchase = purchaseRepository.findByIdAndUserId(purchaseId, userId)
-                .orElseThrow(() -> new PurchaseNotFoundException(purchaseId));
+                .orElseThrow(() -> new BusinessException(
+                        PurchaseErrorCode.PURCHASE_NOT_FOUND,
+                        "Purchase not found. purchaseId=" + purchaseId
+                ));
 
         return toDetailResponse(purchase);
     }
@@ -105,18 +102,16 @@ public class PurchaseService {
     public PurchaseCancelResponse cancel(Long userId, Long purchaseId) {
 
         Purchase purchase = purchaseRepository.findByIdAndUserId(purchaseId, userId)
-                .orElseThrow(() -> new PurchaseNotFoundException(purchaseId));
+                .orElseThrow(() -> new BusinessException(
+                        PurchaseErrorCode.PURCHASE_NOT_FOUND,
+                        "Purchase not found. purchaseId=" + purchaseId
+                ));
 
         if (purchase.getStatus() == PurchaseStatus.CANCELED) {
-            throw new AlreadyCanceledPurchaseException();
+            throw new BusinessException(PurchaseErrorCode.PURCHASE_ALREADY_CANCELED);
         }
 
         Sale sale = purchase.getSale();
-        LocalDateTime now = LocalDateTime.now();
-
-        if (!now.isBefore(sale.getEndAt())) {
-            throw new SaleUnavailableException("판매가 종료되어 구매를 취소할 수 없습니다.");
-        }
 
         inventoryService.restoreStock(
                 sale.getId(),

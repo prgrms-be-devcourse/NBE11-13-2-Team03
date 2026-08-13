@@ -26,6 +26,7 @@ import java.util.Date;
 public class TokenProvider {
 
     private static final String CLAIM_ROLE = "role";
+    private static final String CLAIM_TOKEN_TYPE = "token_type";
 
     private final JwtProperties jwtProperties;
 
@@ -69,7 +70,7 @@ public class TokenProvider {
         );
     }
 
-    public String generateToken(User user, Duration validity) {
+    public String generateToken(User user, Duration validity, TokenType tokenType) {
         Date now = new Date();
         Date expiration =
                 new Date(now.getTime() + validity.toMillis());
@@ -90,22 +91,49 @@ public class TokenProvider {
                         user.getRole().name()
                 )
 
+                .claim(
+                        CLAIM_TOKEN_TYPE,
+                        tokenType.name()
+                )
+
                 .signWith(secretKey, Jwts.SIG.HS512)
                 .compact();
     }
 
-    public TokenStatus validateToken(String token) {
+    public TokenType getTokenType(String token) {
+        Claims claims = getClaims(token);
+
+        return TokenType.valueOf(
+                claims.get(CLAIM_TOKEN_TYPE, String.class)
+        );
+    }
+
+    public TokenStatus validateToken(
+            String token,
+            TokenType expectedType
+    ) {
         try {
-            jwtParser.parseSignedClaims(token);
+            Claims claims = jwtParser
+                    .parseSignedClaims(token)
+                    .getPayload();
+
+            String issuer = claims.getIssuer();
+            String tokenType =
+                    claims.get(CLAIM_TOKEN_TYPE, String.class);
+
+            if (!jwtProperties.getIssuer().equals(issuer)) {
+                return TokenStatus.INVALID;
+            }
+
+            if (!expectedType.name().equals(tokenType)) {
+                return TokenStatus.INVALID;
+            }
 
             return TokenStatus.VALID;
 
         } catch (ExpiredJwtException e) {
-
             return TokenStatus.EXPIRED;
-
         } catch (Exception e) {
-
             return TokenStatus.INVALID;
         }
     }
