@@ -90,8 +90,6 @@ public class Sale {
     }
 
     public void restoreStock(int count) {
-
-
         this.remainingStock += count;
 
         if (this.status == SaleStatus.CLOSED || this.status == SaleStatus.DELETED) {
@@ -115,7 +113,7 @@ public class Sale {
         }
 
         if (this.status != SaleStatus.ON_SALE) {
-            throw new IllegalStateException("현재 구매 가능한 상태가 아닙니다. (현재 상태: " + this.status + ")");
+            throw new BusinessException(SaleErrorCode.SALE_CLOSED);
         }
     }
 

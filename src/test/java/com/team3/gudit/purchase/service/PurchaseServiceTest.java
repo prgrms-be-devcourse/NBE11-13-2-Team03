@@ -9,9 +9,7 @@ import com.team3.gudit.purchase.entity.PurchaseStatus;
 import com.team3.gudit.purchase.exception.PurchaseErrorCode;
 import com.team3.gudit.purchase.repository.PurchaseRepository;
 import com.team3.gudit.sale.domain.entity.Sale;
-import com.team3.gudit.sale.domain.enums.SaleStatus;
 import com.team3.gudit.sale.domain.repository.SaleRepository;
-import com.team3.gudit.sale.exception.SaleErrorCode;
 import com.team3.gudit.sale.service.InventoryService;
 import com.team3.gudit.user.domain.entity.User;
 import com.team3.gudit.user.domain.repository.UserRepository;
@@ -126,7 +124,7 @@ class PurchaseServiceTest {
     }
 
     @Test
-    @DisplayName("판매 중인 상품을 구매하면 재고를 차감하고 구매 내역을 저장한다")
+    @DisplayName("판매 상품을 구매하면 재고를 차감하고 구매 내역을 저장한다")
     void purchaseSuccess() {
         // given
         User user = mock(User.class);
@@ -144,15 +142,6 @@ class PurchaseServiceTest {
 
         given(sale.getId())
                 .willReturn(saleId);
-
-        given(sale.getStartAt())
-                .willReturn(LocalDateTime.now().minusHours(1));
-
-        given(sale.getEndAt())
-                .willReturn(LocalDateTime.now().plusHours(1));
-
-        given(sale.getStatus())
-                .willReturn(SaleStatus.ON_SALE);
 
         given(sale.getGoods())
                 .willReturn(goods);
@@ -175,102 +164,6 @@ class PurchaseServiceTest {
 
         verify(inventoryService).decreaseStock(saleId, 1);
         verify(purchaseRepository).save(any(Purchase.class));
-    }
-
-    @Test
-    @DisplayName("판매 시작 전에는 구매할 수 없다")
-    void purchaseBeforeSaleStart() {
-        // given
-        User user = mock(User.class);
-        Sale sale = mock(Sale.class);
-
-        given(purchaseRepository.existsByUserIdAndSaleId(userId, saleId))
-                .willReturn(false);
-
-        given(userRepository.findById(userId))
-                .willReturn(Optional.of(user));
-
-        given(saleRepository.findById(saleId))
-                .willReturn(Optional.of(sale));
-
-        given(sale.getStartAt())
-                .willReturn(LocalDateTime.now().plusHours(1));
-
-        // when & then
-        assertThatThrownBy(() -> purchaseService.purchase(userId, saleId))
-                .isInstanceOf(BusinessException.class)
-                .satisfies(exception -> {
-                    BusinessException businessException = (BusinessException) exception;
-                    assertThat(businessException.getErrorCode())
-                            .isEqualTo(SaleErrorCode.INVALID_SALE_PERIOD);
-                });
-    }
-
-    @Test
-    @DisplayName("판매 종료 후에는 구매할 수 없다")
-    void purchaseAfterSaleEnd() {
-        // given
-        User user = mock(User.class);
-        Sale sale = mock(Sale.class);
-
-        given(purchaseRepository.existsByUserIdAndSaleId(userId, saleId))
-                .willReturn(false);
-
-        given(userRepository.findById(userId))
-                .willReturn(Optional.of(user));
-
-        given(saleRepository.findById(saleId))
-                .willReturn(Optional.of(sale));
-
-        given(sale.getStartAt())
-                .willReturn(LocalDateTime.now().minusHours(2));
-
-        given(sale.getEndAt())
-                .willReturn(LocalDateTime.now().minusHours(1));
-
-        // when & then
-        assertThatThrownBy(() -> purchaseService.purchase(userId, saleId))
-                .isInstanceOf(BusinessException.class)
-                .satisfies(exception -> {
-                    BusinessException businessException = (BusinessException) exception;
-                    assertThat(businessException.getErrorCode())
-                            .isEqualTo(SaleErrorCode.INVALID_SALE_PERIOD);
-                });
-    }
-
-    @Test
-    @DisplayName("판매 중 상태가 아니면 구매할 수 없다")
-    void purchaseUnavailableStatus() {
-        // given
-        User user = mock(User.class);
-        Sale sale = mock(Sale.class);
-
-        given(purchaseRepository.existsByUserIdAndSaleId(userId, saleId))
-                .willReturn(false);
-
-        given(userRepository.findById(userId))
-                .willReturn(Optional.of(user));
-
-        given(saleRepository.findById(saleId))
-                .willReturn(Optional.of(sale));
-
-        given(sale.getStartAt())
-                .willReturn(LocalDateTime.now().minusHours(1));
-
-        given(sale.getEndAt())
-                .willReturn(LocalDateTime.now().plusHours(1));
-
-        given(sale.getStatus())
-                .willReturn(SaleStatus.READY);
-
-        // when & then
-        assertThatThrownBy(() -> purchaseService.purchase(userId, saleId))
-                .isInstanceOf(BusinessException.class)
-                .satisfies(exception -> {
-                    BusinessException businessException = (BusinessException) exception;
-                    assertThat(businessException.getErrorCode())
-                            .isEqualTo(SaleErrorCode.SALE_CLOSED);
-                });
     }
 
     @Test
@@ -336,41 +229,6 @@ class PurchaseServiceTest {
                     BusinessException businessException = (BusinessException) exception;
                     assertThat(businessException.getErrorCode())
                             .isEqualTo(PurchaseErrorCode.PURCHASE_CANNOT_CANCEL);
-                });
-    }
-
-    @Test
-    @DisplayName("품절된 판매 상품은 구매할 수 없다")
-    void purchaseSoldOut() {
-        // given
-        User user = mock(User.class);
-        Sale sale = mock(Sale.class);
-
-        given(purchaseRepository.existsByUserIdAndSaleId(userId, saleId))
-                .willReturn(false);
-
-        given(userRepository.findById(userId))
-                .willReturn(Optional.of(user));
-
-        given(saleRepository.findById(saleId))
-                .willReturn(Optional.of(sale));
-
-        given(sale.getStartAt())
-                .willReturn(LocalDateTime.now().minusHours(1));
-
-        given(sale.getEndAt())
-                .willReturn(LocalDateTime.now().plusHours(1));
-
-        given(sale.getStatus())
-                .willReturn(SaleStatus.SOLD_OUT);
-
-        // when & then
-        assertThatThrownBy(() -> purchaseService.purchase(userId, saleId))
-                .isInstanceOf(BusinessException.class)
-                .satisfies(exception -> {
-                    BusinessException businessException = (BusinessException) exception;
-                    assertThat(businessException.getErrorCode())
-                            .isEqualTo(SaleErrorCode.NOT_ENOUGH_STOCK);
                 });
     }
 }

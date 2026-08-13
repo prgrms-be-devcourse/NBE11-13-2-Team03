@@ -11,7 +11,6 @@ import com.team3.gudit.purchase.entity.PurchaseStatus;
 import com.team3.gudit.purchase.exception.PurchaseErrorCode;
 import com.team3.gudit.purchase.repository.PurchaseRepository;
 import com.team3.gudit.sale.domain.entity.Sale;
-import com.team3.gudit.sale.domain.enums.SaleStatus;
 import com.team3.gudit.sale.domain.repository.SaleRepository;
 import com.team3.gudit.sale.exception.SaleErrorCode;
 import com.team3.gudit.sale.service.InventoryService;
@@ -53,20 +52,6 @@ public class PurchaseService {
                         SaleErrorCode.SALE_NOT_FOUND,
                         "Sale not found. saleId=" + saleId
                 ));
-
-        LocalDateTime now = LocalDateTime.now();
-
-        if (now.isBefore(sale.getStartAt()) || !now.isBefore(sale.getEndAt())) {
-            throw new BusinessException(SaleErrorCode.INVALID_SALE_PERIOD);
-        }
-
-        if (sale.getStatus() == SaleStatus.SOLD_OUT) {
-            throw new BusinessException(SaleErrorCode.NOT_ENOUGH_STOCK);
-        }
-
-        if (sale.getStatus() != SaleStatus.ON_SALE) {
-            throw new BusinessException(SaleErrorCode.SALE_CLOSED);
-        }
 
         inventoryService.decreaseStock(saleId, 1);
 
