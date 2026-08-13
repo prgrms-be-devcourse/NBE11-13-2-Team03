@@ -1,7 +1,7 @@
-package com.team3.gudit.domain.goods.domain.repository;
+package com.team3.gudit.goods.domain.repository;
 
-import com.team3.gudit.domain.goods.domain.entity.Goods;
-import com.team3.gudit.domain.goods.domain.enums.GoodsStatus;
+import com.team3.gudit.goods.domain.entity.Goods;
+import com.team3.gudit.goods.domain.enums.GoodsStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

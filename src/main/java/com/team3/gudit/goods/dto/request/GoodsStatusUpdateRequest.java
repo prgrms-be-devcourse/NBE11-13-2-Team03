@@ -1,6 +1,6 @@
-package com.team3.gudit.domain.goods.dto.request;
+package com.team3.gudit.goods.dto.request;
 
-import com.team3.gudit.domain.goods.domain.enums.GoodsStatus;
+import com.team3.gudit.goods.domain.enums.GoodsStatus;
 import jakarta.validation.constraints.NotNull;
 
 public record GoodsStatusUpdateRequest(

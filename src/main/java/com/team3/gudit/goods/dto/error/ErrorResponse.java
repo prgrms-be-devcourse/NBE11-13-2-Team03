@@ -1,5 +1,4 @@
-package com.team3.gudit.domain.goods.dto.error;
-import com.team3.gudit.domain.goods.constant.DateformatConstant;
+package com.team3.gudit.goods.dto.error;
 import lombok.Builder;
 
 import java.time.LocalDateTime;

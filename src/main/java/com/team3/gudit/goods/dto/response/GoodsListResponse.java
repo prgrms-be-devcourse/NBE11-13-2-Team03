@@ -1,6 +1,6 @@
-package com.team3.gudit.domain.goods.dto.response;
+package com.team3.gudit.goods.dto.response;
 
-import com.team3.gudit.domain.goods.domain.enums.GoodsStatus;
+import com.team3.gudit.goods.domain.enums.GoodsStatus;
 import lombok.Builder;
 
 

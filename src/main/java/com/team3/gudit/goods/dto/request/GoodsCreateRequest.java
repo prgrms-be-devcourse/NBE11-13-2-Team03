@@ -1,4 +1,4 @@
-package com.team3.gudit.domain.goods.dto.request;
+package com.team3.gudit.goods.dto.request;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;

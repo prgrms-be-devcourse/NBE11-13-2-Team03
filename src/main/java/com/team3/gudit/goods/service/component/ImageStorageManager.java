@@ -1,7 +1,8 @@
-package com.team3.gudit.domain.goods.service.component;
+package com.team3.gudit.goods.service.component;
 
-import com.team3.gudit.domain.goods.constant.PathConstant;
-import com.team3.gudit.global.exception.ImageStorageException;
+import com.team3.gudit.global.exception.BusinessException;
+import com.team3.gudit.goods.constant.PathConstant;
+import com.team3.gudit.goods.exception.ImageErrorCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
@@ -34,14 +35,14 @@ public class ImageStorageManager {
                     .normalize();
 
             if(!targetPath.startsWith(PathConstant.THUMBNAIL_DIRECTORY)) {
-                throw new ImageStorageException("올바르지 않은 이미지 파일명입니다.");
+                throw new BusinessException(ImageErrorCode.INVALID_IMAGE_FILENAME);
             }
             image.transferTo(targetPath);
 
             return IMAGE_URL_PREFIX + storedFilename;
 
         } catch (IOException e) {
-            throw new ImageStorageException("이미지 저장에 실패했습니다", e);
+            throw new BusinessException(ImageErrorCode.IMAGE_STORAGE_FAILED, e);
         }
     }
 
@@ -83,7 +84,7 @@ public class ImageStorageManager {
 
         String contentType = image.getContentType();
         if (contentType == null || !contentType.startsWith("image/")) {
-            throw new ImageStorageException("이미지 파일만 업로드할 수 있습니다.");
+            throw new BusinessException(ImageErrorCode.INVALID_IMAGE_TYPE);
         }
     }
     private String sanitizeFilename(String originalFilename) {

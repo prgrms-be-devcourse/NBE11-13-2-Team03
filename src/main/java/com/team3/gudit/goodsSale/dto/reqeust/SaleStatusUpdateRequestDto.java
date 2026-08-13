@@ -1,6 +1,6 @@
-package com.team3.gudit.goodsSales.dto.reqeust;
+package com.team3.gudit.goodsSale.dto.reqeust;
 
-import com.team3.gudit.goodsSales.domain.enums.SaleStatus;
+import com.team3.gudit.goodsSale.domain.enums.SaleStatus;
 
 public record SaleStatusUpdateRequestDto(
         SaleStatus status

@@ -1,4 +1,4 @@
-package com.team3.gudit.domain.goods.domain.enums;
+package com.team3.gudit.goods.domain.enums;
 
 public enum GoodsStatus {
     ACTIVE,

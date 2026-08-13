@@ -1,4 +1,4 @@
-package com.team3.gudit.goodsSales.dto.reqeust;
+package com.team3.gudit.goodsSale.dto.reqeust;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.team3.gudit.goods.constant.DateformatConstant;

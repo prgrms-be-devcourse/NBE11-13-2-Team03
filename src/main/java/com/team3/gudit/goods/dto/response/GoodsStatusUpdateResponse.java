@@ -1,8 +1,8 @@
-package com.team3.gudit.domain.goods.dto.response;
+package com.team3.gudit.goods.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.team3.gudit.domain.goods.constant.DateformatConstant;
-import com.team3.gudit.domain.goods.domain.enums.GoodsStatus;
+import com.team3.gudit.goods.constant.DateformatConstant;
+import com.team3.gudit.goods.domain.enums.GoodsStatus;
 import lombok.Builder;
 
 import java.time.LocalDateTime;

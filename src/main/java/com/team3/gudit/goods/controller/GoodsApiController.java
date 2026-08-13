@@ -1,10 +1,11 @@
-package com.team3.gudit.domain.goods.controller;
+package com.team3.gudit.goods.controller;
 
-import com.team3.gudit.domain.goods.dto.request.GoodsCreateRequest;
-import com.team3.gudit.domain.goods.dto.request.GoodsStatusUpdateRequest;
-import com.team3.gudit.domain.goods.dto.request.GoodsUpdateRequest;
+import com.team3.gudit.goods.dto.request.GoodsCreateRequest;
+import com.team3.gudit.goods.dto.request.GoodsStatusUpdateRequest;
+import com.team3.gudit.goods.dto.request.GoodsUpdateRequest;
 import com.team3.gudit.domain.goods.dto.response.*;
-import com.team3.gudit.domain.goods.service.GoodsService;
+import com.team3.gudit.goods.dto.response.*;
+import com.team3.gudit.goods.service.GoodsService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

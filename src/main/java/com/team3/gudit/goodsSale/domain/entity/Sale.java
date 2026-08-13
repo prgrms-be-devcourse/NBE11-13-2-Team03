@@ -1,8 +1,9 @@
-package com.team3.gudit.goodsSales.domain.entity;
+package com.team3.gudit.goodsSale.domain.entity;
 
 import com.team3.gudit.goods.domain.entity.Goods;
-import com.team3.gudit.goodsSales.domain.enums.SaleStatus;
+import com.team3.gudit.goodsSale.domain.enums.SaleStatus;
 import com.team3.gudit.global.exception.*;
+import com.team3.gudit.goodsSale.exception.SaleErrorCode;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -79,7 +80,7 @@ public class Sale {
 
     public void decreaseStock(int count) {
         if (this.remainingStock - count < 0) {
-            throw new NotEnoughStockException("재고가 부족합니다. (현재 재고: " + this.remainingStock + ")");
+            throw new BusinessException(SaleErrorCode.NOT_ENOUGH_STOCK);
         }
         this.remainingStock -= count;
 
@@ -106,11 +107,11 @@ public class Sale {
         LocalDateTime now = LocalDateTime.now();
 
         if (!isWithinSalePeriod()) {
-            throw new InvalidSalePeriodException();
+            throw new BusinessException(SaleErrorCode.INVALID_SALE_PERIOD);
         }
 
         if (this.status == SaleStatus.CLOSED) {
-            throw new SaleClosedException();
+            throw new BusinessException(SaleErrorCode.SALE_CLOSED);
         }
 
         if (this.status != SaleStatus.ON_SALE) {
@@ -120,7 +121,7 @@ public class Sale {
 
     public void validatePurchaseQuantity(int purchaseQuantity) {
         if (this.maxPurchaseQuantity < purchaseQuantity) {
-            throw new PurchaseQuantityException();
+            throw new BusinessException(SaleErrorCode.EXCEEDED_PURCHASE_QUANTITY);
         }
     }
 

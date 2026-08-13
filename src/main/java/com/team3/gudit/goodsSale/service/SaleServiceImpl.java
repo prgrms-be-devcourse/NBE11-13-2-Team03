@@ -1,18 +1,19 @@
-package com.team3.gudit.goodsSales.service;
+package com.team3.gudit.goodsSale.service;
 
+import com.team3.gudit.global.exception.BusinessException;
 import com.team3.gudit.goods.domain.entity.Goods;
 import com.team3.gudit.goods.domain.repository.GoodsRepository;
-import com.team3.gudit.goodsSales.domain.entity.Sale;
-import com.team3.gudit.goodsSales.domain.repository.SaleRepository;
-import com.team3.gudit.goodsSales.dto.reqeust.SaleCreateRequestDto;
-import com.team3.gudit.goodsSales.dto.reqeust.SaleStatusUpdateRequestDto;
-import com.team3.gudit.goodsSales.dto.reqeust.SaleUpdateRequestDto;
-import com.team3.gudit.goodsSales.dto.response.SaleCreateResponseDto;
-import com.team3.gudit.goodsSales.dto.response.SaleDetailResponseDto;
-import com.team3.gudit.goodsSales.dto.response.SaleListResponseDto;
-import com.team3.gudit.goodsSales.dto.response.SaleStatusUpdateResponseDto;
-import com.team3.gudit.global.exception.GoodsNotFoundException;
-import com.team3.gudit.global.exception.SaleNotFoundException;
+import com.team3.gudit.goods.exception.GoodsErrorCode;
+import com.team3.gudit.goodsSale.domain.entity.Sale;
+import com.team3.gudit.goodsSale.domain.repository.SaleRepository;
+import com.team3.gudit.goodsSale.dto.reqeust.SaleCreateRequestDto;
+import com.team3.gudit.goodsSale.dto.reqeust.SaleStatusUpdateRequestDto;
+import com.team3.gudit.goodsSale.dto.reqeust.SaleUpdateRequestDto;
+import com.team3.gudit.goodsSale.dto.response.SaleCreateResponseDto;
+import com.team3.gudit.goodsSale.dto.response.SaleDetailResponseDto;
+import com.team3.gudit.goodsSale.dto.response.SaleListResponseDto;
+import com.team3.gudit.goodsSale.dto.response.SaleStatusUpdateResponseDto;
+import com.team3.gudit.goodsSale.exception.SaleErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,7 +31,7 @@ public class SaleServiceImpl implements SaleService {
     @Transactional
     public SaleCreateResponseDto createSale(SaleCreateRequestDto request) {
         Goods goods = goodsRepository.findById(request.goodsId())
-                .orElseThrow(() -> new GoodsNotFoundException(request.goodsId()));
+                .orElseThrow(() -> new BusinessException(GoodsErrorCode.GOODS_NOT_FOUND));
 
         Sale sale = request.toEntity(goods);
 
@@ -43,7 +44,7 @@ public class SaleServiceImpl implements SaleService {
     @Transactional(readOnly = true)
     public SaleDetailResponseDto saleDetail(Long id) {
         Sale sale = saleRepository.findById(id)
-                .orElseThrow(() -> new SaleNotFoundException(id));
+                .orElseThrow(() -> new BusinessException(SaleErrorCode.SALE_NOT_FOUND));
 
         return SaleDetailResponseDto.from(sale);
     }
@@ -60,7 +61,7 @@ public class SaleServiceImpl implements SaleService {
     @Transactional
     public SaleDetailResponseDto updateSale(Long saleId, SaleUpdateRequestDto request) {
         Sale sale = saleRepository.findById(saleId)
-                .orElseThrow(() -> new SaleNotFoundException(saleId));
+                .orElseThrow(() -> new BusinessException(SaleErrorCode.SALE_NOT_FOUND));
 
         sale.updateSaleInfo(
                 request.initialStock(),
@@ -76,7 +77,7 @@ public class SaleServiceImpl implements SaleService {
     @Transactional
     public SaleStatusUpdateResponseDto updateSaleStatus(Long saleId, SaleStatusUpdateRequestDto request) {
         Sale sale = saleRepository.findById(saleId)
-                .orElseThrow(() -> new SaleNotFoundException(saleId));
+                .orElseThrow(() -> new BusinessException(SaleErrorCode.SALE_NOT_FOUND));
 
         sale.updateSaleStatus(request.status());
 
@@ -87,7 +88,7 @@ public class SaleServiceImpl implements SaleService {
     @Transactional
     public void deleteSale(Long id) {
         Sale sale = saleRepository.findById(id)
-                .orElseThrow(() -> new SaleNotFoundException(id));
+                .orElseThrow(() -> new BusinessException(SaleErrorCode.SALE_NOT_FOUND));
 
         sale.deleteSale();
     }

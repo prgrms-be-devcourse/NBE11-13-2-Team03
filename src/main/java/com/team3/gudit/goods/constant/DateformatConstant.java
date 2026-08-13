@@ -1,4 +1,4 @@
-package com.team3.gudit.domain.goods.constant;
+package com.team3.gudit.goods.constant;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;

@@ -1,6 +1,6 @@
-package com.team3.gudit.domain.goods.config;
+package com.team3.gudit.goods.config;
 
-import com.team3.gudit.domain.goods.constant.PathConstant;
+import com.team3.gudit.goods.constant.PathConstant;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;

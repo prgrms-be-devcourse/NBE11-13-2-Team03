@@ -1,6 +1,6 @@
-package com.team3.gudit.domain.goods.domain.entity;
+package com.team3.gudit.goods.domain.entity;
 
-import com.team3.gudit.domain.goods.domain.enums.GoodsStatus;
+import com.team3.gudit.goods.domain.enums.GoodsStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

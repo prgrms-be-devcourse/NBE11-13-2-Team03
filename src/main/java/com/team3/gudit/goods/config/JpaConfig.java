@@ -1,4 +1,4 @@
-package com.team3.gudit.domain.goods.config;
+package com.team3.gudit.goods.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;

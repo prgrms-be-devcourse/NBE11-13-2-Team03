@@ -1,15 +1,16 @@
-package com.team3.gudit.domain.goods.service;
+package com.team3.gudit.goods.service;
 
-import com.team3.gudit.domain.goods.domain.entity.Goods;
-import com.team3.gudit.domain.goods.domain.enums.GoodsStatus;
-import com.team3.gudit.domain.goods.domain.repository.GoodsRepository;
-import com.team3.gudit.domain.goods.dto.request.GoodsCreateRequest;
-import com.team3.gudit.domain.goods.dto.request.GoodsStatusUpdateRequest;
-import com.team3.gudit.domain.goods.dto.request.GoodsUpdateRequest;
-import com.team3.gudit.domain.goods.dto.response.*;
-import com.team3.gudit.domain.goods.mapper.GoodsMapper;
-import com.team3.gudit.domain.goods.service.component.ImageStorageManager;
-import com.team3.gudit.global.exception.GoodsNotFoundException;
+import com.team3.gudit.global.exception.BusinessException;
+import com.team3.gudit.goods.domain.entity.Goods;
+import com.team3.gudit.goods.domain.enums.GoodsStatus;
+import com.team3.gudit.goods.domain.repository.GoodsRepository;
+import com.team3.gudit.goods.dto.request.GoodsCreateRequest;
+import com.team3.gudit.goods.dto.request.GoodsStatusUpdateRequest;
+import com.team3.gudit.goods.dto.request.GoodsUpdateRequest;
+import com.team3.gudit.goods.dto.response.*;
+import com.team3.gudit.goods.exception.GoodsErrorCode;
+import com.team3.gudit.goods.mapper.GoodsMapper;
+import com.team3.gudit.goods.service.component.ImageStorageManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -60,7 +61,7 @@ public class GoodsService {
     @Transactional(readOnly = true)
     public GoodsDetailResponse goodsDetail(Long id) {
         Goods goods = goodsRepository.findByIdAndStatus(id,  GoodsStatus.ACTIVE)
-                .orElseThrow(GoodsNotFoundException::new);
+                .orElseThrow(() -> new BusinessException(GoodsErrorCode.GOODS_NOT_FOUND));
 
         return  goodsMapper.toDetailResponse(goods);
     }
@@ -125,7 +126,7 @@ public class GoodsService {
         log.debug("[메뉴 조회] menuId={}", id);
 
         return goodsRepository.findById(id)
-                .orElseThrow(() -> new GoodsNotFoundException(id));
+                .orElseThrow(() -> new BusinessException(GoodsErrorCode.GOODS_NOT_FOUND));
     }
 
 }

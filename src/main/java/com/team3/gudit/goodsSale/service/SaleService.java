@@ -1,12 +1,12 @@
-package com.team3.gudit.goodsSales.service;
+package com.team3.gudit.goodsSale.service;
 
-import com.team3.gudit.goodsSales.dto.reqeust.SaleCreateRequestDto;
-import com.team3.gudit.goodsSales.dto.reqeust.SaleStatusUpdateRequestDto;
-import com.team3.gudit.goodsSales.dto.reqeust.SaleUpdateRequestDto;
-import com.team3.gudit.goodsSales.dto.response.SaleCreateResponseDto;
-import com.team3.gudit.goodsSales.dto.response.SaleDetailResponseDto;
-import com.team3.gudit.goodsSales.dto.response.SaleListResponseDto;
-import com.team3.gudit.goodsSales.dto.response.SaleStatusUpdateResponseDto;
+import com.team3.gudit.goodsSale.dto.reqeust.SaleCreateRequestDto;
+import com.team3.gudit.goodsSale.dto.reqeust.SaleStatusUpdateRequestDto;
+import com.team3.gudit.goodsSale.dto.reqeust.SaleUpdateRequestDto;
+import com.team3.gudit.goodsSale.dto.response.SaleCreateResponseDto;
+import com.team3.gudit.goodsSale.dto.response.SaleDetailResponseDto;
+import com.team3.gudit.goodsSale.dto.response.SaleListResponseDto;
+import com.team3.gudit.goodsSale.dto.response.SaleStatusUpdateResponseDto;
 
 import java.util.List;
 

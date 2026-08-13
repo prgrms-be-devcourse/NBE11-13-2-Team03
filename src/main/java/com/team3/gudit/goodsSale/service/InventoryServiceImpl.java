@@ -1,8 +1,9 @@
-package com.team3.gudit.goodsSales.service;
+package com.team3.gudit.goodsSale.service;
 
-import com.team3.gudit.goodsSales.domain.entity.Sale;
-import com.team3.gudit.goodsSales.domain.repository.SaleRepository;
-import com.team3.gudit.global.exception.SaleNotFoundException;
+import com.team3.gudit.global.exception.BusinessException;
+import com.team3.gudit.goodsSale.domain.entity.Sale;
+import com.team3.gudit.goodsSale.domain.repository.SaleRepository;
+import com.team3.gudit.goodsSale.exception.SaleErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
@@ -20,7 +21,7 @@ public class InventoryServiceImpl implements InventoryService {
     @Transactional
     public void decreaseStock(Long saleId, int quantity) {
         Sale sale = saleRepository.findByIdWithLock(saleId)
-                .orElseThrow(() -> new SaleNotFoundException(saleId));
+                .orElseThrow(() -> new BusinessException(SaleErrorCode.SALE_NOT_FOUND));
         sale.validateSalePeriod();
         sale.validatePurchaseQuantity(quantity);
         sale.decreaseStock(quantity);
@@ -30,7 +31,7 @@ public class InventoryServiceImpl implements InventoryService {
     @Transactional
     public void restoreStock(Long saleId, int quantity) {
         Sale sale = saleRepository.findByIdWithLock(saleId)
-                .orElseThrow(() -> new SaleNotFoundException(saleId));
+                .orElseThrow(() -> new BusinessException(SaleErrorCode.SALE_NOT_FOUND));
 
         sale.restoreStock(quantity);
     }
