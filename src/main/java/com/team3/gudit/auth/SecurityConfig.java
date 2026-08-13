@@ -3,6 +3,7 @@ package com.team3.gudit.auth;
 import com.team3.gudit.auth.filter.TokenAuthenticationFilter;
 import com.team3.gudit.auth.oauth2.OAuth2FailureHandler;
 import com.team3.gudit.auth.oauth2.OAuth2SuccessHandler;
+import com.team3.gudit.auth.security.CustomAuthenticationEntryPoint;
 import com.team3.gudit.auth.service.CustomOAuth2UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -20,6 +21,7 @@ public class SecurityConfig {
     private final OAuth2SuccessHandler oAuth2SuccessHandler;
     private final OAuth2FailureHandler oAuth2FailureHandler;
     private final TokenAuthenticationFilter tokenAuthenticationFilter;
+    private final CustomAuthenticationEntryPoint authenticationEntryPoint;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, CustomOAuth2UserService customOAuth2UserService) throws Exception {
@@ -45,6 +47,12 @@ public class SecurityConfig {
                         )
                         .successHandler(oAuth2SuccessHandler)
                         .failureHandler(oAuth2FailureHandler)
+                )
+
+                .exceptionHandling(exception ->
+                        exception.authenticationEntryPoint(
+                                authenticationEntryPoint
+                        )
                 )
 
                 // access 토큰 검사

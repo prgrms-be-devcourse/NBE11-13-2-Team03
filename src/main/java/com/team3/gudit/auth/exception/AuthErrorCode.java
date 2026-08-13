@@ -8,7 +8,6 @@ import org.springframework.http.HttpStatus;
 @Getter
 @RequiredArgsConstructor
 public enum AuthErrorCode implements ErrorCode {
-
     REFRESH_TOKEN_NOT_FOUND(
             HttpStatus.UNAUTHORIZED,
             "AUTH_001",
@@ -37,6 +36,18 @@ public enum AuthErrorCode implements ErrorCode {
             HttpStatus.UNAUTHORIZED,
             "AUTH_005",
             "올바른 Refresh Token이 아닙니다."
+    ),
+
+    ACCESS_TOKEN_NOT_FOUND(
+            HttpStatus.UNAUTHORIZED,
+            "AUTH_006",
+            "Access Token이 없습니다."
+    ),
+
+    INVALID_ACCESS_TOKEN(
+            HttpStatus.UNAUTHORIZED,
+            "AUTH_007",
+            "유효하지 않음 Access Token입니다."
     );
 
     private final HttpStatus status;
