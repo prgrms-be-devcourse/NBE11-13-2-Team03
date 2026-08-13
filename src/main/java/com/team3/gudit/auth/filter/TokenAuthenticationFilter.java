@@ -1,5 +1,6 @@
 package com.team3.gudit.auth.filter;
 
+import com.team3.gudit.auth.exception.AuthErrorCode;
 import com.team3.gudit.auth.jwt.TokenProvider;
 import com.team3.gudit.auth.jwt.TokenStatus;
 import com.team3.gudit.auth.jwt.TokenType;
@@ -35,16 +36,47 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
 
         String token = resolveToken(request);
 
-        if (token != null
-                && tokenProvider.validateToken(token, TokenType.ACCESS)
-                == TokenStatus.VALID) {
+        if (token == null) {
+            request.setAttribute(
+                    "auth_error",
+                    AuthErrorCode.ACCESS_TOKEN_NOT_FOUND
+            );
 
-            Authentication authentication =
-                    tokenProvider.getAuthentication(token);
-
-            SecurityContextHolder.getContext()
-                    .setAuthentication(authentication);
+            filterChain.doFilter(request, response);
+            return;
         }
+
+        TokenStatus status =
+                tokenProvider.validateToken(
+                        token,
+                        TokenType.ACCESS
+                );
+
+        if (status == TokenStatus.EXPIRED) {
+            request.setAttribute(
+                    "auth_error",
+                    AuthErrorCode.INVALID_ACCESS_TOKEN
+            );
+
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        if (status == TokenStatus.INVALID) {
+            request.setAttribute(
+                    "auth_error",
+                    AuthErrorCode.INVALID_ACCESS_TOKEN
+            );
+
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        Authentication authentication =
+                tokenProvider.getAuthentication(token);
+
+        SecurityContextHolder.getContext()
+                .setAuthentication(authentication);
 
         filterChain.doFilter(request, response);
     }
