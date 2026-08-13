@@ -3,9 +3,12 @@ package com.team3.gudit.auth.service;
 import com.team3.gudit.auth.domain.entity.RefreshToken;
 import com.team3.gudit.auth.domain.repository.RefreshTokenRepository;
 import com.team3.gudit.auth.dto.RefreshTokenResponseDto;
+import com.team3.gudit.auth.exception.AuthErrorCode;
 import com.team3.gudit.auth.jwt.*;
+import com.team3.gudit.global.exception.BusinessException;
 import com.team3.gudit.user.domain.entity.User;
 import com.team3.gudit.user.domain.repository.UserRepository;
+import com.team3.gudit.user.exception.UserErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,43 +44,51 @@ public class TokenService {
 
     @Transactional
     public TokenPair refreshToken(String refreshToken) {
-        Long userId =
-                tokenProvider.getUserId(refreshToken);
-
-
-        if (refreshToken == null) {
-            throw new IllegalArgumentException(
-                    "Refresh Token이 없습니다."
+        if (refreshToken == null || refreshToken.isBlank()) {
+            throw new BusinessException(
+                    AuthErrorCode.REFRESH_TOKEN_NOT_FOUND
             );
         }
+
+        TokenStatus tokenStatus =
+                tokenProvider.validateToken(
+                        refreshToken,
+                        TokenType.REFRESH
+                );
+
+        if (tokenStatus == TokenStatus.EXPIRED) {
+            throw new BusinessException(
+                    AuthErrorCode.EXPIRED_REFRESH_TOKEN
+            );
+        }
+
+        if (tokenStatus != TokenStatus.VALID) {
+            throw new BusinessException(
+                    AuthErrorCode.INVALID_REFRESH_TOKEN
+            );
+        }
+
+        Long userId =
+                tokenProvider.getUserId(refreshToken);
 
         RefreshToken storedToken =
                 refreshTokenRepository.findByUserId(userId)
                         .orElseThrow(() ->
-                                new IllegalArgumentException(
-                                        "저장된 Refresh Token이 없습니다."
+                                new BusinessException(
+                                        AuthErrorCode.REFRESH_TOKEN_NOT_FOUND
                                 )
                         );
 
-        if (tokenProvider.validateToken(
-                refreshToken,
-                TokenType.REFRESH
-        ) != TokenStatus.VALID) {
-            throw new IllegalArgumentException(
-                    "Refresh Token이 없거나 유효하지 않습니다."
-            );
-        }
-
         if (tokenProvider.getTokenType(refreshToken) != TokenType.REFRESH) {
-            throw new IllegalArgumentException(
-                    "Refresh Token이 아닙니다."
+            throw new BusinessException(
+                    AuthErrorCode.INVALID_TOKEN_TYPE
             );
         }
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() ->
-                        new IllegalArgumentException(
-                                "사용자를 찾을 수 없습니다."
+                        new BusinessException(
+                                UserErrorCode.USER_NOT_FOUND
                         )
                 );
 

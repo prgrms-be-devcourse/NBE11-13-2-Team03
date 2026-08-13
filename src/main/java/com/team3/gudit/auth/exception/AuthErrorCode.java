@@ -33,10 +33,10 @@ public enum AuthErrorCode implements ErrorCode {
             "저장된 Refresh Token과 일치하지 않습니다."
     ),
 
-    ALREADY_LOGGED_OUT(
+    INVALID_TOKEN_TYPE(
             HttpStatus.UNAUTHORIZED,
             "AUTH_005",
-            "이미 로그아웃된 사용자입니다."
+            "올바른 Refresh Token이 아닙니다."
     );
 
     private final HttpStatus status;
