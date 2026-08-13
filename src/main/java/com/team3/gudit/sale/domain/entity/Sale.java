@@ -1,9 +1,9 @@
-package com.team3.gudit.goodsSale.domain.entity;
+package com.team3.gudit.sale.domain.entity;
 
 import com.team3.gudit.goods.domain.entity.Goods;
-import com.team3.gudit.goodsSale.domain.enums.SaleStatus;
+import com.team3.gudit.sale.domain.enums.SaleStatus;
 import com.team3.gudit.global.exception.*;
-import com.team3.gudit.goodsSale.exception.SaleErrorCode;
+import com.team3.gudit.sale.exception.SaleErrorCode;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

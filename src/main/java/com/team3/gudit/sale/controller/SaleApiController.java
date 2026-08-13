@@ -1,13 +1,13 @@
-package com.team3.gudit.goodsSale.controller;
+package com.team3.gudit.sale.controller;
 
-import com.team3.gudit.goodsSale.dto.reqeust.SaleCreateRequestDto;
-import com.team3.gudit.goodsSale.dto.reqeust.SaleStatusUpdateRequestDto;
-import com.team3.gudit.goodsSale.dto.reqeust.SaleUpdateRequestDto;
-import com.team3.gudit.goodsSale.dto.response.SaleCreateResponseDto;
-import com.team3.gudit.goodsSale.dto.response.SaleDetailResponseDto;
-import com.team3.gudit.goodsSale.dto.response.SaleListResponseDto;
-import com.team3.gudit.goodsSale.dto.response.SaleStatusUpdateResponseDto;
-import com.team3.gudit.goodsSale.service.SaleService;
+import com.team3.gudit.sale.dto.reqeust.SaleCreateRequestDto;
+import com.team3.gudit.sale.dto.reqeust.SaleStatusUpdateRequestDto;
+import com.team3.gudit.sale.dto.reqeust.SaleUpdateRequestDto;
+import com.team3.gudit.sale.dto.response.SaleCreateResponseDto;
+import com.team3.gudit.sale.dto.response.SaleDetailResponseDto;
+import com.team3.gudit.sale.dto.response.SaleListResponseDto;
+import com.team3.gudit.sale.dto.response.SaleStatusUpdateResponseDto;
+import com.team3.gudit.sale.service.SaleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

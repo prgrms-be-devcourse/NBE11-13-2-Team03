@@ -1,7 +1,7 @@
-package com.team3.gudit.goodsSale.dto.response;
+package com.team3.gudit.sale.dto.response;
 
-import com.team3.gudit.goodsSale.domain.entity.Sale;
-import com.team3.gudit.goodsSale.domain.enums.SaleStatus;
+import com.team3.gudit.sale.domain.entity.Sale;
+import com.team3.gudit.sale.domain.enums.SaleStatus;
 
 public record SaleStatusUpdateResponseDto(
         Long saleId,

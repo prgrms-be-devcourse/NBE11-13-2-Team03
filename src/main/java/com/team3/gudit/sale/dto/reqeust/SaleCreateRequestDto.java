@@ -1,10 +1,10 @@
-package com.team3.gudit.goodsSale.dto.reqeust;
+package com.team3.gudit.sale.dto.reqeust;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.team3.gudit.goods.constant.DateformatConstant;
 import com.team3.gudit.goods.domain.entity.Goods;
-import com.team3.gudit.goodsSale.domain.entity.Sale;
-import com.team3.gudit.goodsSale.domain.enums.SaleStatus;
+import com.team3.gudit.sale.domain.entity.Sale;
+import com.team3.gudit.sale.domain.enums.SaleStatus;
 
 import java.time.LocalDateTime;
 

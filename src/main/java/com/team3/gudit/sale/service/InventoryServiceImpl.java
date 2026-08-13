@@ -1,9 +1,9 @@
-package com.team3.gudit.goodsSale.service;
+package com.team3.gudit.sale.service;
 
 import com.team3.gudit.global.exception.BusinessException;
-import com.team3.gudit.goodsSale.domain.entity.Sale;
-import com.team3.gudit.goodsSale.domain.repository.SaleRepository;
-import com.team3.gudit.goodsSale.exception.SaleErrorCode;
+import com.team3.gudit.sale.domain.entity.Sale;
+import com.team3.gudit.sale.domain.repository.SaleRepository;
+import com.team3.gudit.sale.exception.SaleErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;

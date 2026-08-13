@@ -1,6 +1,6 @@
-package com.team3.gudit.goodsSale.domain.repository;
+package com.team3.gudit.sale.domain.repository;
 
-import com.team3.gudit.goodsSale.domain.entity.Sale;
+import com.team3.gudit.sale.domain.entity.Sale;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;

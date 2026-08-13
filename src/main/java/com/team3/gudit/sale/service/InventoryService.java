@@ -1,4 +1,4 @@
-package com.team3.gudit.goodsSale.service;
+package com.team3.gudit.sale.service;
 
 public interface InventoryService {
 

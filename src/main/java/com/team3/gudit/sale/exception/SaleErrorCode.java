@@ -1,4 +1,4 @@
-package com.team3.gudit.goodsSale.exception;
+package com.team3.gudit.sale.exception;
 
 import com.team3.gudit.global.exception.ErrorCode;
 import lombok.Getter;

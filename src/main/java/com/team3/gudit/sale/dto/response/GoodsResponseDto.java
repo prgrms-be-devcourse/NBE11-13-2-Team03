@@ -1,4 +1,4 @@
-package com.team3.gudit.goodsSale.dto.response;
+package com.team3.gudit.sale.dto.response;
 
 public record GoodsResponseDto(
     Long id,
