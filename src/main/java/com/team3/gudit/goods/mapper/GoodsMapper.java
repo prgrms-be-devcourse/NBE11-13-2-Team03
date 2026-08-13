@@ -5,7 +5,6 @@ import com.team3.gudit.goods.domain.enums.GoodsStatus;
 import com.team3.gudit.goods.dto.request.GoodsCreateRequest;
 import com.team3.gudit.goods.dto.request.GoodsStatusUpdateRequest;
 import com.team3.gudit.goods.dto.request.GoodsUpdateRequest;
-import com.team3.gudit.domain.goods.dto.response.*;
 import com.team3.gudit.goods.dto.response.*;
 import org.springframework.stereotype.Component;
 

@@ -1,6 +1,6 @@
 package com.team3.gudit.purchase.entity;
 
-import com.team3.gudit.domain.goodsSales.domain.entity.Sale;
+import com.team3.gudit.sale.domain.entity.Sale;
 import com.team3.gudit.user.domain.entity.User;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
