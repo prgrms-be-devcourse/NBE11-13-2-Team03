@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>결제 | GUDIT</title>
+
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+
+<body>
+
+<header th:replace="~{fragments/header :: header}"></header>
+
+<main class="main payment-page">
+
+    <a href="/sales/1" class="back-link">
+        ← 상품 상세로 돌아가기
+    </a>
+
+    <section class="payment-layout">
+
+        <!-- 상품 정보 -->
+        <div class="payment-product-card">
+
+            <div class="payment-product-image">
+                <div class="detail-mock-keyring">
+                    GUDIT
+                </div>
+            </div>
+
+            <div class="payment-product-content">
+
+                <span class="page-eyebrow">
+                    PAYMENT
+                </span>
+
+                <h1>
+                    주문 내용을 확인해 주세요
+                </h1>
+
+                <p class="payment-description">
+                    결제하기 전에 상품과 결제 금액을 다시 확인해 주세요.
+                </p>
+
+                <div class="payment-product-info">
+
+                    <div class="payment-info-row">
+                        <span>상품명</span>
+                        <strong>개발자 키링</strong>
+                    </div>
+
+                    <div class="payment-info-row">
+                        <span>구매 수량</span>
+                        <strong>1개</strong>
+                    </div>
+
+                    <div class="payment-info-row">
+                        <span>상품 금액</span>
+                        <strong>15,000원</strong>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- 결제 정보 -->
+        <aside class="payment-summary-card">
+
+            <h2>
+                결제 정보
+            </h2>
+
+            <div class="payment-summary">
+
+                <div class="payment-summary-row">
+                    <span>상품 금액</span>
+                    <strong>15,000원</strong>
+                </div>
+
+                <div class="payment-summary-row">
+                    <span>구매 수량</span>
+                    <strong>1개</strong>
+                </div>
+
+            </div>
+
+            <div class="payment-total">
+
+                <span>
+                    최종 결제 금액
+                </span>
+
+                <strong>
+                    15,000원
+                </strong>
+
+            </div>
+
+            <button
+                    id="payment-button"
+                    type="button"
+                    class="payment-submit-button">
+                15,000원 결제하기
+            </button>
+
+            <p class="payment-notice">
+                결제 버튼을 누르면 결제 서비스 화면으로 이동합니다.
+            </p>
+
+        </aside>
+
+    </section>
+
+</main>
+
+</body>
+</html>
