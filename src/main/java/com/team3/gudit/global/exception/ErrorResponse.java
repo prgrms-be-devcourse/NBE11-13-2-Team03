@@ -5,7 +5,7 @@ import java.util.Map;
 public record ErrorResponse(
         String code,
         String message,
-        Map<String, String> FieldErrors
+        Map<String, String> fieldErrors
 ) {
     // 기본
     public static ErrorResponse from(ErrorCode errorCode) {

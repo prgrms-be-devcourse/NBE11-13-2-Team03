@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Toss Payments Test</title>
+    <script src="https://js.tosspayments.com/v2/standard"></script>
+</head>
+<body>
+
+<h1>Gudit 결제 테스트</h1>
+
+<button id="payment-button" type="button">
+    결제하기
+</button>
+
+<script th:inline="javascript">
+    const clientKey = /*[[${clientKey}]]*/ "";
+    const orderId = /*[[${orderId}]]*/ "";
+    const amount = /*[[${amount}]]*/ 0;
+
+    const tossPayments = TossPayments(clientKey);
+    const payment = tossPayments.payment({
+        customerKey: TossPayments.ANONYMOUS
+    });
+
+    document
+        .getElementById("payment-button")
+        .addEventListener("click", async () => {
+
+            await payment.requestPayment({
+                method: "CARD",
+                amount: {
+                    currency: "KRW",
+                    value: amount
+                },
+                orderId: orderId,
+                orderName: "Gudit 테스트 굿즈",
+                successUrl: window.location.origin + "/payments/test/success",
+                failUrl: window.location.origin + "/payments/test/fail"
+            });
+        });
+</script>
+
+</body>
+</html>

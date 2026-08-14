@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>판매 등록 | Gudit</title>
+
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<header th:replace="~{fragments/header :: header}"></header>
+
+<main class="main admin-page">
+
+    <a href="/admin/sales" class="back-link">
+        ← 판매 관리로 돌아가기
+    </a>
+
+    <section class="admin-form-header">
+        <span class="page-eyebrow">ADMIN</span>
+        <h1>판매 등록</h1>
+        <p>판매할 굿즈와 수량, 판매 기간을 설정합니다.</p>
+    </section>
+
+    <section class="admin-form-card">
+
+        <form class="admin-form">
+
+            <div class="form-group">
+                <label for="goodsId">
+                    판매 상품
+                    <span class="required">*</span>
+                </label>
+
+                <select id="goodsId"
+                        name="goodsId"
+                        required>
+                    <option value="" selected disabled>
+                        판매할 상품을 선택하세요
+                    </option>
+                    <option value="1">
+                        개발자 키링
+                    </option>
+                    <option value="2">
+                        Gudit 티셔츠
+                    </option>
+                    <option value="3">
+                        한정 머그컵
+                    </option>
+                </select>
+
+                <p class="form-help">
+                    판매 가능한 상태의 상품만 선택할 수 있습니다.
+                </p>
+            </div>
+
+            <div class="form-group">
+                <label for="price">
+                    판매 가격
+                    <span class="required">*</span>
+                </label>
+
+                <div class="input-with-unit">
+                    <input
+                            type="number"
+                            id="price"
+                            name="price"
+                            min="0"
+                            placeholder="15000"
+                            required>
+
+                    <span>원</span>
+                </div>
+            </div>
+
+            <div class="form-row">
+
+                <div class="form-group">
+                    <label for="initialQuantity">
+                        초기 수량
+                        <span class="required">*</span>
+                    </label>
+
+                    <div class="input-with-unit">
+                        <input
+                                type="number"
+                                id="initialQuantity"
+                                name="initialQuantity"
+                                min="1"
+                                placeholder="100"
+                                required>
+
+                        <span>개</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="maxQuantityPerUser">
+                        1인 최대 구매 수량
+                        <span class="required">*</span>
+                    </label>
+
+                    <div class="input-with-unit">
+                        <input
+                                type="number"
+                                id="maxQuantityPerUser"
+                                name="maxQuantityPerUser"
+                                min="1"
+                                value="1"
+                                required>
+
+                        <span>개</span>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="form-row">
+
+                <div class="form-group">
+                    <label for="startAt">
+                        판매 시작 일시
+                        <span class="required">*</span>
+                    </label>
+
+                    <input
+                            type="datetime-local"
+                            id="startAt"
+                            name="startAt"
+                            required>
+                </div>
+
+                <div class="form-group">
+                    <label for="endAt">
+                        판매 종료 일시
+                        <span class="required">*</span>
+                    </label>
+
+                    <input
+                            type="datetime-local"
+                            id="endAt"
+                            name="endAt"
+                            required>
+                </div>
+
+            </div>
+
+            <div class="sale-form-notice">
+                판매 시작 시각 이전에는 <strong>판매 예정</strong> 상태로 표시되고,
+                판매가 시작되면 구매 요청을 받을 수 있습니다.
+                설정한 수량이 모두 소진되면 <strong>품절</strong> 상태가 됩니다.
+            </div>
+
+            <div class="admin-form-actions">
+                <a href="/admin/sales"
+                   class="secondary-button">
+                    취소
+                </a>
+
+                <button type="submit"
+                        class="primary-button form-submit-button">
+                    판매 등록
+                </button>
+            </div>
+
+        </form>
+
+    </section>
+
+</main>
+
+</body>
+</html>
