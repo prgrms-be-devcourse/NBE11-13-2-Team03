@@ -81,7 +81,7 @@ class AuthControllerTest {
                         "new-refresh-token"
                 );
 
-        when(tokenService.refreshToken(oldRefreshToken))
+        when(tokenService.reissueToken(oldRefreshToken))
                 .thenReturn(newTokenPair);
 
         when(jwtProperties.getAccessTokenValidity())
@@ -108,7 +108,7 @@ class AuthControllerTest {
 
         // then
         verify(tokenService)
-                .refreshToken(oldRefreshToken);
+                .reissueToken(oldRefreshToken);
 
         List<String> setCookieHeaders =
                 result.getResponse()
@@ -166,7 +166,7 @@ class AuthControllerTest {
     void reissue_withoutRefreshToken() throws Exception {
 
         // given
-        when(tokenService.refreshToken(null))
+        when(tokenService.reissueToken(null))
                 .thenThrow(
                         new IllegalArgumentException(
                                 "Refresh Token이 없습니다."
@@ -181,7 +181,7 @@ class AuthControllerTest {
                 .andExpect(status().is5xxServerError());
 
         verify(tokenService)
-                .refreshToken(null);
+                .reissueToken(null);
     }
 
 

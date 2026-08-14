@@ -12,6 +12,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 
 @Configuration
 @EnableWebSecurity
@@ -76,9 +77,11 @@ public class SecurityConfig {
                         .failureHandler(oAuth2FailureHandler)
                 )
 
-                .exceptionHandling(exception ->
-                        exception.authenticationEntryPoint(
-                                authenticationEntryPoint
+                .exceptionHandling(exception -> exception
+                        .defaultAuthenticationEntryPointFor(
+                                authenticationEntryPoint,
+                                PathPatternRequestMatcher.withDefaults()
+                                        .matcher("/api/**")
                         )
                 )
 

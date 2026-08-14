@@ -45,7 +45,7 @@ public class AuthController {
     ) {
 
         TokenService.TokenPair tokenPair =
-                tokenService.refreshToken(refreshToken);
+                tokenService.reissueToken(refreshToken);
 
         addTokenCookie(
                 response,
