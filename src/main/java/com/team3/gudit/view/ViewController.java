@@ -60,4 +60,19 @@ public class ViewController {
     public String adminSaleEdit() {
         return "admin/sale-form";
     }
+
+    @GetMapping("/payments")
+    public String payment() {
+        return "payment/payment";
+    }
+
+    @GetMapping("/payments/success")
+    public String paymentSuccess() {
+        return "payment/success";
+    }
+
+    @GetMapping("/payments/fail")
+    public String paymentFail() {
+        return "payment/fail";
+    }
 }

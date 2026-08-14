@@ -33,14 +33,36 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/",
+
+                                // 정적 리소스
+                                "/css/**",
+                                "/js/**",
+                                "/images/**",
+
+                                // OAuth2
                                 "/login-success.html",
                                 "/login-failure.html",
                                 "/oauth2/**",
                                 "/login/**",
-                                "/api/auth/reissue",
+
+                                // 사용자 화면
+                                "/sales",
+                                "/sales/**",
+                                "/payments",
+                                "/payments/**",
+                                "/mypage/**",
+
+                                // 관리자 화면
+                                "/admin/**",
+
+                                // 기존 결제 테스트 화면
                                 "/payments/test",
-                                "/payments/test/**"
+                                "/payments/test/**",
+
+                                // 인증
+                                "/api/auth/reissue"
                         ).permitAll()
+
                         .anyRequest().authenticated()
                 )
 

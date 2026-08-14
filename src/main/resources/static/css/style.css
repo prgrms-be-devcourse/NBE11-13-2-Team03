@@ -1258,9 +1258,340 @@ a {
     cursor: default;
 }
 
+/* =========================
+   11. Payment
+========================= */
+
+.payment-page {
+    padding-top: 46px;
+    padding-bottom: 100px;
+}
+
+.payment-layout {
+    display: grid;
+    grid-template-columns: 1.05fr 0.95fr;
+    gap: 32px;
+
+    align-items: start;
+}
+
+/* Product */
+
+.payment-product-card {
+    overflow: hidden;
+
+    border: 1px solid var(--border);
+    border-radius: 20px;
+
+    background: var(--bg-card);
+}
+
+.payment-product-image {
+    width: 100%;
+    min-height: 280px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    overflow: hidden;
+
+    background: #f0f5f9;
+}
+
+.payment-product-image .detail-mock-keyring {
+    width: 140px;
+    height: 220px;
+
+    flex-shrink: 0;
+    margin: 0;
+
+    font-size: 20px;
+}
+
+.payment-product-content {
+    padding: 26px;
+}
+
+.payment-product-content h1 {
+    margin-top: 4px;
+
+    font-size: 27px;
+    line-height: 1.3;
+    letter-spacing: -0.8px;
+}
+
+.payment-description {
+    margin-top: 10px;
+
+    font-size: 12px;
+    line-height: 1.7;
+
+    color: var(--text-sub);
+}
+
+.payment-product-info {
+    margin-top: 24px;
+
+    border-top: 1px solid var(--border);
+}
+
+.payment-info-row {
+    min-height: 48px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 20px;
+
+    border-bottom: 1px solid var(--border);
+
+    font-size: 12px;
+}
+
+.payment-info-row span {
+    color: var(--text-sub);
+}
+
+.payment-info-row strong {
+    text-align: right;
+
+    color: var(--text-main);
+}
+
+
+/* Payment Summary */
+
+.payment-summary-card {
+    position: sticky;
+    top: 96px;
+
+    padding: 26px;
+
+    border: 1px solid var(--border);
+    border-radius: 18px;
+
+    background: var(--bg-card);
+}
+
+.payment-summary-card h2 {
+    font-size: 18px;
+    letter-spacing: -0.4px;
+}
+
+.payment-summary {
+    margin-top: 22px;
+}
+
+.payment-summary-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 10px 0;
+
+    font-size: 13px;
+}
+
+.payment-summary-row span {
+    color: var(--text-sub);
+}
+
+.payment-summary-row strong {
+    color: var(--text-main);
+}
+
+.payment-total {
+    margin-top: 14px;
+    padding-top: 20px;
+
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+
+    gap: 16px;
+
+    border-top: 1px solid var(--border);
+}
+
+.payment-total span {
+    font-size: 13px;
+    font-weight: 700;
+
+    color: var(--text-main);
+}
+
+.payment-total strong {
+    font-size: 24px;
+    letter-spacing: -0.5px;
+
+    color: var(--primary);
+}
+
+.payment-submit-button {
+    width: 100%;
+    height: 54px;
+
+    margin-top: 26px;
+
+    border: 0;
+    border-radius: 11px;
+
+    font: inherit;
+    font-size: 15px;
+    font-weight: 700;
+
+    color: #ffffff;
+    background: var(--primary);
+
+    cursor: pointer;
+
+    transition:
+            background 0.2s ease,
+            transform 0.2s ease;
+}
+
+.payment-submit-button:hover {
+    background: var(--primary-hover);
+    transform: translateY(-1px);
+}
+
+.payment-notice {
+    margin-top: 12px;
+
+    text-align: center;
+
+    font-size: 11px;
+    line-height: 1.6;
+
+    color: var(--text-muted);
+}
 
 /* =========================
-   11. Admin Common
+   12. Payment Result
+========================= */
+
+.payment-result-page {
+    padding-top: 72px;
+    padding-bottom: 100px;
+}
+
+.payment-result-card {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 48px 44px;
+
+    border: 1px solid var(--border);
+    border-radius: 20px;
+
+    text-align: center;
+
+    background: var(--bg-card);
+}
+
+.payment-result-icon {
+    width: 64px;
+    height: 64px;
+
+    margin: 0 auto 24px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    font-size: 28px;
+    font-weight: 800;
+}
+
+.payment-result-icon.success {
+    color: #ffffff;
+    background: var(--primary);
+}
+
+.payment-result-card h1 {
+    margin-top: 4px;
+
+    font-size: 30px;
+    letter-spacing: -1px;
+}
+
+.payment-result-description {
+    margin-top: 12px;
+
+    font-size: 13px;
+    line-height: 1.7;
+
+    color: var(--text-sub);
+}
+
+.payment-result-info {
+    margin-top: 32px;
+
+    border-top: 1px solid var(--border);
+}
+
+.payment-result-row {
+    min-height: 52px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 20px;
+
+    border-bottom: 1px solid var(--border);
+
+    font-size: 13px;
+}
+
+.payment-result-row span {
+    color: var(--text-sub);
+}
+
+.payment-result-row strong {
+    text-align: right;
+
+    color: var(--text-main);
+}
+
+.payment-success-text {
+    color: var(--primary) !important;
+}
+
+.payment-result-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+
+    margin-top: 28px;
+}
+
+.payment-result-secondary,
+.payment-result-primary {
+    width: 100%;
+    min-width: 0;
+    height: 48px;
+    margin-top: 0;
+}
+
+.payment-result-icon.fail {
+    color: #ffffff;
+    background: #df6965;
+}
+
+.payment-fail-eyebrow {
+    color: #df6965;
+}
+
+.payment-fail-text {
+    color: #df5c58 !important;
+}
+
+/* =========================
+   13. Admin Common
 ========================= */
 
 .admin-page {
@@ -1524,7 +1855,7 @@ a {
 
 
 /* =========================
-   12. Admin Form
+   14. Admin Form
 ========================= */
 
 .admin-form-header {
@@ -1708,7 +2039,7 @@ a {
 
 
 /* =========================
-   13. Admin Sale List
+   15. Admin Sale List
 ========================= */
 
 /*
@@ -1818,7 +2149,7 @@ a {
 
 
 /* =========================
-   14. Responsive
+   16. Responsive
 ========================= */
 
 @media (max-width: 1000px) {
@@ -1835,6 +2166,14 @@ a {
 
     .detail-image-wrap {
         min-height: 420px;
+    }
+
+    .payment-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .payment-summary-card {
+        position: static;
     }
 
     .admin-sale-summary {
@@ -1970,6 +2309,42 @@ a {
 
     .detail-image-wrap {
         min-height: 340px;
+    }
+
+    .payment-page {
+        padding-top: 30px;
+    }
+
+    .payment-product-image {
+        min-height: 240px;
+    }
+
+    .payment-product-content {
+        padding: 22px;
+    }
+
+    .payment-product-content h1 {
+        font-size: 26px;
+    }
+
+    .payment-summary-card {
+        padding: 22px;
+    }
+
+    .payment-result-page {
+        padding-top: 40px;
+    }
+
+    .payment-result-card {
+        padding: 34px 22px;
+    }
+
+    .payment-result-card h1 {
+        font-size: 26px;
+    }
+
+    .payment-result-actions {
+        grid-template-columns: 1fr;
     }
 }
 
