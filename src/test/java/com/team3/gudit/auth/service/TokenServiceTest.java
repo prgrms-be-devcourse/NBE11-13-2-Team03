@@ -8,6 +8,7 @@ import com.team3.gudit.auth.jwt.RefreshTokenHasher;
 import com.team3.gudit.auth.jwt.TokenProvider;
 import com.team3.gudit.auth.jwt.TokenStatus;
 import com.team3.gudit.auth.jwt.TokenType;
+import com.team3.gudit.auth.redis.RefreshTokenCacheRepository;
 import com.team3.gudit.global.exception.BusinessException;
 import com.team3.gudit.user.domain.entity.Role;
 import com.team3.gudit.user.domain.entity.User;
@@ -52,6 +53,9 @@ class TokenServiceTest {
 
     @Mock
     private RefreshTokenRepository refreshTokenRepository;
+
+    @Mock
+    private RefreshTokenCacheRepository refreshTokenCacheRepository;
 
     @InjectMocks
     private TokenService tokenService;
@@ -109,7 +113,7 @@ class TokenServiceTest {
     @DisplayName(
             "토큰 발급 시 Access Token과 Refresh Token을 발급하고 Refresh Token을 저장한다"
     )
-    void issueToken_success_newRefreshToken() {
+    void issueToken_success_newReissueToken() {
 
         // given
         when(jwtProperties.getAccessTokenValidity())
@@ -176,7 +180,7 @@ class TokenServiceTest {
     @DisplayName(
             "기존 Refresh Token이 있으면 새로운 Refresh Token으로 갱신한다"
     )
-    void issueToken_success_existingRefreshToken() {
+    void issueToken_success_existingReissueToken() {
 
         // given
         RefreshToken storedToken =
@@ -238,8 +242,8 @@ class TokenServiceTest {
         assertThat(storedToken.getTokenHash())
                 .isEqualTo(STORED_HASH);
 
-        verify(refreshTokenRepository)
-                .save(storedToken);
+        verify(refreshTokenRepository, never())
+                .save(any(RefreshToken.class));
     }
 
 
@@ -251,7 +255,7 @@ class TokenServiceTest {
     @DisplayName(
             "유효한 Refresh Token이면 새로운 Access Token과 Refresh Token을 발급한다"
     )
-    void refreshToken_success() {
+    void reissueToken_success() {
 
         // given
         RefreshToken storedToken =
@@ -273,15 +277,20 @@ class TokenServiceTest {
         when(tokenProvider.getUserId(REFRESH_TOKEN))
                 .thenReturn(USER_ID);
 
+        // Redis Cache Miss
+        when(refreshTokenCacheRepository.findByUserId(USER_ID))
+                .thenReturn(Optional.empty());
+
+        // Cache Miss이므로 DB 조회
         when(refreshTokenRepository.findByUserId(USER_ID))
                 .thenReturn(
                         Optional.of(storedToken)
                 );
 
         when(refreshTokenHasher.matches(
-                STORED_HASH,
-                REFRESH_TOKEN
-        )).thenReturn(true);
+                REFRESH_TOKEN,
+                STORED_HASH
+                )).thenReturn(true);
 
         when(userRepository.findById(USER_ID))
                 .thenReturn(Optional.of(user));
@@ -313,7 +322,7 @@ class TokenServiceTest {
 
         // when
         TokenService.TokenPair result =
-                tokenService.refreshToken(
+                tokenService.reissueToken(
                         REFRESH_TOKEN
                 );
 
@@ -325,6 +334,7 @@ class TokenServiceTest {
         assertThat(result.refreshToken())
                 .isEqualTo(NEW_REFRESH_TOKEN);
 
+        // 기존 DB RefreshToken 엔티티가 새 hash로 rotate 되었는지
         assertThat(storedToken.getTokenHash())
                 .isEqualTo(NEW_HASH);
 
@@ -342,6 +352,14 @@ class TokenServiceTest {
                         REFRESH_VALIDITY,
                         TokenType.REFRESH
                 );
+
+        // 재발급 후 새로운 Refresh Token hash가 Redis에 저장되었는지
+        verify(refreshTokenCacheRepository)
+                .save(
+                        eq(USER_ID),
+                        eq(NEW_HASH),
+                        any(Duration.class)
+                );
     }
 
 
@@ -353,14 +371,14 @@ class TokenServiceTest {
     @DisplayName(
             "Refresh Token이 null이면 REFRESH_TOKEN_NOT_FOUND 예외가 발생한다"
     )
-    void refreshToken_fail_nullToken() {
+    void reissueToken_fail_nullToken() {
 
         // when
         BusinessException exception =
                 assertThrows(
                         BusinessException.class,
                         () ->
-                                tokenService.refreshToken(
+                                tokenService.reissueToken(
                                         null
                                 )
                 );
@@ -385,14 +403,14 @@ class TokenServiceTest {
     @DisplayName(
             "Refresh Token이 빈 문자열이면 REFRESH_TOKEN_NOT_FOUND 예외가 발생한다"
     )
-    void refreshToken_fail_blankToken() {
+    void reissueToken_fail_blankToken() {
 
         // when
         BusinessException exception =
                 assertThrows(
                         BusinessException.class,
                         () ->
-                                tokenService.refreshToken(
+                                tokenService.reissueToken(
                                         " "
                                 )
                 );
@@ -417,7 +435,7 @@ class TokenServiceTest {
     @DisplayName(
             "만료된 Refresh Token이면 EXPIRED_REFRESH_TOKEN 예외가 발생한다"
     )
-    void refreshToken_fail_expiredToken() {
+    void reissueToken_fail_expiredToken() {
 
         // given
         when(tokenProvider.validateToken(
@@ -433,7 +451,7 @@ class TokenServiceTest {
                 assertThrows(
                         BusinessException.class,
                         () ->
-                                tokenService.refreshToken(
+                                tokenService.reissueToken(
                                         REFRESH_TOKEN
                                 )
                 );
@@ -460,7 +478,7 @@ class TokenServiceTest {
     @DisplayName(
             "유효하지 않은 Refresh Token이면 INVALID_REFRESH_TOKEN 예외가 발생한다"
     )
-    void refreshToken_fail_invalidToken() {
+    void reissueToken_fail_invalidToken() {
 
         // given
         when(tokenProvider.validateToken(
@@ -476,7 +494,7 @@ class TokenServiceTest {
                 assertThrows(
                         BusinessException.class,
                         () ->
-                                tokenService.refreshToken(
+                                tokenService.reissueToken(
                                         REFRESH_TOKEN
                                 )
                 );
@@ -503,7 +521,7 @@ class TokenServiceTest {
     @DisplayName(
             "DB에 Refresh Token이 없으면 REFRESH_TOKEN_NOT_FOUND 예외가 발생한다"
     )
-    void refreshToken_fail_storedTokenNotFound() {
+    void reissueToken_fail_storedTokenNotFound() {
 
         // given
         when(tokenProvider.validateToken(
@@ -529,7 +547,7 @@ class TokenServiceTest {
                 assertThrows(
                         BusinessException.class,
                         () ->
-                                tokenService.refreshToken(
+                                tokenService.reissueToken(
                                         REFRESH_TOKEN
                                 )
                 );
@@ -552,7 +570,7 @@ class TokenServiceTest {
     @DisplayName(
             "요청 Refresh Token과 DB의 Refresh Token이 일치하지 않으면 REFRESH_TOKEN_MISMATCH 예외가 발생한다"
     )
-    void refreshToken_fail_tokenMismatch() {
+    void reissueToken_fail_tokenMismatch() {
 
         // given
         RefreshToken storedToken =
@@ -584,8 +602,8 @@ class TokenServiceTest {
                 );
 
         when(refreshTokenHasher.matches(
-                STORED_HASH,
-                REFRESH_TOKEN
+                REFRESH_TOKEN,
+                STORED_HASH
         )).thenReturn(false);
 
 
@@ -594,7 +612,7 @@ class TokenServiceTest {
                 assertThrows(
                         BusinessException.class,
                         () ->
-                                tokenService.refreshToken(
+                                tokenService.reissueToken(
                                         REFRESH_TOKEN
                                 )
                 );
@@ -617,7 +635,7 @@ class TokenServiceTest {
     @DisplayName(
             "Refresh Token의 사용자가 존재하지 않으면 USER_NOT_FOUND 예외가 발생한다"
     )
-    void refreshToken_fail_userNotFound() {
+    void reissueToken_fail_userNotFound() {
 
         // given
         RefreshToken storedToken =
@@ -649,8 +667,8 @@ class TokenServiceTest {
                 );
 
         when(refreshTokenHasher.matches(
-                STORED_HASH,
-                REFRESH_TOKEN
+                REFRESH_TOKEN,
+                STORED_HASH
         )).thenReturn(true);
 
         when(userRepository.findById(USER_ID))
@@ -664,7 +682,7 @@ class TokenServiceTest {
                 assertThrows(
                         BusinessException.class,
                         () ->
-                                tokenService.refreshToken(
+                                tokenService.reissueToken(
                                         REFRESH_TOKEN
                                 )
                 );
