@@ -2,6 +2,8 @@ package com.team3.gudit.purchase.service;
 
 import com.team3.gudit.global.exception.BusinessException;
 import com.team3.gudit.goods.domain.entity.Goods;
+import com.team3.gudit.payment.entity.Payment;
+import com.team3.gudit.payment.service.PaymentService;
 import com.team3.gudit.purchase.dto.PurchaseCancelResponse;
 import com.team3.gudit.purchase.dto.PurchaseCreateResponse;
 import com.team3.gudit.purchase.entity.Purchase;
@@ -21,7 +23,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -46,6 +47,9 @@ class PurchaseServiceTest {
     @Mock
     private InventoryService inventoryService;
 
+    @Mock
+    private PaymentService paymentService;
+
     @InjectMocks
     private PurchaseService purchaseService;
 
@@ -64,36 +68,54 @@ class PurchaseServiceTest {
     @DisplayName("이미 구매한 판매 상품을 다시 구매하면 예외가 발생한다")
     void purchaseDuplicate() {
         // given
-        given(purchaseRepository.existsByUserIdAndSaleId(userId, saleId))
+        given(purchaseRepository.existsByUserIdAndSaleIdAndStatusNot(
+                userId,
+                saleId,
+                PurchaseStatus.CANCELED
+        ))
                 .willReturn(true);
 
         // when & then
         assertThatThrownBy(() -> purchaseService.purchase(userId, saleId))
                 .isInstanceOf(BusinessException.class)
                 .satisfies(exception -> {
-                    BusinessException businessException = (BusinessException) exception;
+                    BusinessException businessException =
+                            (BusinessException) exception;
+
                     assertThat(businessException.getErrorCode())
                             .isEqualTo(PurchaseErrorCode.DUPLICATE_PURCHASE);
                 });
 
         verify(purchaseRepository)
-                .existsByUserIdAndSaleId(userId, saleId);
+                .existsByUserIdAndSaleIdAndStatusNot(
+                        userId,
+                        saleId,
+                        PurchaseStatus.CANCELED
+                );
     }
 
     @Test
     @DisplayName("존재하지 않는 구매 내역을 조회하면 예외가 발생한다")
     void getPurchaseNotFound() {
         // given
-        given(purchaseRepository.findByIdAndUserId(purchaseId, userId))
+        given(purchaseRepository.findByIdAndUserId(
+                purchaseId,
+                userId
+        ))
                 .willReturn(Optional.empty());
 
         // when & then
         assertThatThrownBy(
-                () -> purchaseService.getPurchase(userId, purchaseId)
+                () -> purchaseService.getPurchase(
+                        userId,
+                        purchaseId
+                )
         )
                 .isInstanceOf(BusinessException.class)
                 .satisfies(exception -> {
-                    BusinessException businessException = (BusinessException) exception;
+                    BusinessException businessException =
+                            (BusinessException) exception;
+
                     assertThat(businessException.getErrorCode())
                             .isEqualTo(PurchaseErrorCode.PURCHASE_NOT_FOUND);
                 });
@@ -105,7 +127,10 @@ class PurchaseServiceTest {
         // given
         Purchase purchase = mock(Purchase.class);
 
-        given(purchaseRepository.findByIdAndUserId(purchaseId, userId))
+        given(purchaseRepository.findByIdAndUserId(
+                purchaseId,
+                userId
+        ))
                 .willReturn(Optional.of(purchase));
 
         given(purchase.getStatus())
@@ -113,25 +138,37 @@ class PurchaseServiceTest {
 
         // when & then
         assertThatThrownBy(
-                () -> purchaseService.cancel(userId, purchaseId)
+                () -> purchaseService.cancel(
+                        userId,
+                        purchaseId
+                )
         )
                 .isInstanceOf(BusinessException.class)
                 .satisfies(exception -> {
-                    BusinessException businessException = (BusinessException) exception;
+                    BusinessException businessException =
+                            (BusinessException) exception;
+
                     assertThat(businessException.getErrorCode())
-                            .isEqualTo(PurchaseErrorCode.PURCHASE_ALREADY_CANCELED);
+                            .isEqualTo(
+                                    PurchaseErrorCode.PURCHASE_ALREADY_CANCELED
+                            );
                 });
     }
 
     @Test
-    @DisplayName("판매 상품을 구매하면 재고를 차감하고 구매 내역을 저장한다")
+    @DisplayName("판매 상품 구매를 요청하면 재고를 차감하고 결제 대기 상태의 구매와 결제를 생성한다")
     void purchaseSuccess() {
         // given
         User user = mock(User.class);
         Sale sale = mock(Sale.class);
         Goods goods = mock(Goods.class);
+        Payment payment = mock(Payment.class);
 
-        given(purchaseRepository.existsByUserIdAndSaleId(userId, saleId))
+        given(purchaseRepository.existsByUserIdAndSaleIdAndStatusNot(
+                userId,
+                saleId,
+                PurchaseStatus.CANCELED
+        ))
                 .willReturn(false);
 
         given(userRepository.findById(userId))
@@ -152,23 +189,42 @@ class PurchaseServiceTest {
         given(purchaseRepository.save(any(Purchase.class)))
                 .willAnswer(invocation -> invocation.getArgument(0));
 
+        given(paymentService.createPayment(any(Purchase.class)))
+                .willReturn(payment);
+
+        given(payment.getOrderId())
+                .willReturn("GUDIT_test-order-id");
+
         // when
         PurchaseCreateResponse response =
-                purchaseService.purchase(userId, saleId);
+                purchaseService.purchase(
+                        userId,
+                        saleId
+                );
 
         // then
         assertThat(response.saleId()).isEqualTo(saleId);
         assertThat(response.quantity()).isEqualTo(1);
         assertThat(response.purchasePrice()).isEqualTo(15000);
-        assertThat(response.status()).isEqualTo(PurchaseStatus.PURCHASED);
+        assertThat(response.status())
+                .isEqualTo(PurchaseStatus.PENDING_PAYMENT);
+        assertThat(response.purchasedAt()).isNull();
+        assertThat(response.orderId())
+                .isEqualTo("GUDIT_test-order-id");
 
-        verify(inventoryService).decreaseStock(saleId, 1);
-        verify(purchaseRepository).save(any(Purchase.class));
+        verify(inventoryService)
+                .decreaseStock(saleId, userId, 1);
+
+        verify(purchaseRepository)
+                .save(any(Purchase.class));
+
+        verify(paymentService)
+                .createPayment(any(Purchase.class));
     }
 
     @Test
-    @DisplayName("구매를 취소하면 구매 상태를 변경하고 재고를 복구한다")
-    void cancelPurchaseSuccess() {
+    @DisplayName("결제 대기 중인 구매를 취소하면 재고를 복구하고 구매를 취소한다")
+    void cancelPendingPaymentSuccess() {
         // given
         User user = mock(User.class);
         Sale sale = mock(Sale.class);
@@ -183,30 +239,46 @@ class PurchaseServiceTest {
                 15000
         );
 
-        given(purchaseRepository.findByIdAndUserId(purchaseId, userId))
+        given(purchaseRepository.findByIdAndUserId(
+                purchaseId,
+                userId
+        ))
                 .willReturn(Optional.of(purchase));
 
         // when
         PurchaseCancelResponse response =
-                purchaseService.cancel(userId, purchaseId);
+                purchaseService.cancel(
+                        userId,
+                        purchaseId
+                );
 
         // then
-        assertThat(response.status()).isEqualTo(PurchaseStatus.CANCELED);
-        assertThat(response.canceledAt()).isNotNull();
+        assertThat(response.status())
+                .isEqualTo(PurchaseStatus.CANCELED);
+
+        assertThat(response.canceledAt())
+                .isNotNull();
 
         verify(inventoryService)
-                .restoreStock(saleId, 1);
+                .restoreStock(saleId, userId, 1);
     }
 
     @Test
-    @DisplayName("판매가 종료된 후에도 구매를 취소할 수 있다")
-    void cancelAfterSaleEnd() {
+    @DisplayName("결제 완료된 구매를 취소하면 결제를 취소하고 재고를 복구한다")
+    void cancelCompletedPurchaseSuccess() {
         // given
         Purchase purchase = mock(Purchase.class);
+        Payment payment = mock(Payment.class);
         Sale sale = mock(Sale.class);
 
-        given(purchaseRepository.findByIdAndUserId(purchaseId, userId))
+        given(purchaseRepository.findByIdAndUserId(
+                purchaseId,
+                userId
+        ))
                 .willReturn(Optional.of(purchase));
+
+        given(purchase.getId())
+                .willReturn(purchaseId);
 
         given(purchase.getStatus())
                 .willReturn(PurchaseStatus.PURCHASED);
@@ -220,11 +292,29 @@ class PurchaseServiceTest {
         given(sale.getId())
                 .willReturn(saleId);
 
+        given(paymentService.getPaymentByPurchaseId(purchaseId))
+                .willReturn(payment);
+
+        given(payment.getPaymentKey())
+                .willReturn("payment-key");
+
         // when
-        purchaseService.cancel(userId, purchaseId);
+        purchaseService.cancel(
+                userId,
+                purchaseId
+        );
 
         // then
-        verify(inventoryService).restoreStock(saleId, 1);
-        verify(purchase).cancel();
+        verify(paymentService)
+                .getPaymentByPurchaseId(purchaseId);
+
+        verify(paymentService)
+                .cancelCompletedPayment("payment-key");
+
+        verify(inventoryService)
+                .restoreStock(saleId, userId, 1);
+
+        verify(purchase)
+                .cancel();
     }
 }

@@ -24,7 +24,10 @@ public class SecurityConfig {
     private final CustomAuthenticationEntryPoint authenticationEntryPoint;
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, CustomOAuth2UserService customOAuth2UserService) throws Exception {
+    public SecurityFilterChain securityFilterChain(
+            HttpSecurity http,
+            CustomOAuth2UserService customOAuth2UserService
+    ) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
@@ -34,7 +37,9 @@ public class SecurityConfig {
                                 "/login-failure.html",
                                 "/oauth2/**",
                                 "/login/**",
-                                "/api/auth/reissue"
+                                "/api/auth/reissue",
+                                "/payments/test",
+                                "/payments/test/**"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
@@ -60,6 +65,7 @@ public class SecurityConfig {
                         tokenAuthenticationFilter,
                         UsernamePasswordAuthenticationFilter.class
                 );
+
         return http.build();
     }
 }
