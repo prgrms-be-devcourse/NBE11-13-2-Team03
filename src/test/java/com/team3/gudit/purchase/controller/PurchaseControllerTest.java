@@ -41,7 +41,7 @@ public class PurchaseControllerTest {
     private TokenProvider tokenProvider;
 
     @Test
-    @DisplayName("로그인 사용자가 판매 상품을 구매한다")
+    @DisplayName("로그인 사용자가 판매 상품 구매를 요청한다")
     void purchase() throws Exception {
         // given
         Long userId = 1L;
@@ -55,8 +55,9 @@ public class PurchaseControllerTest {
                 saleId,
                 1,
                 15000,
-                PurchaseStatus.PURCHASED,
-                LocalDateTime.now()
+                PurchaseStatus.PENDING_PAYMENT,
+                null,
+                "GUDIT_test-order-id"
         );
 
         given(purchaseService.purchase(userId, saleId))
@@ -69,7 +70,9 @@ public class PurchaseControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.saleId").value(saleId))
                 .andExpect(jsonPath("$.quantity").value(1))
-                .andExpect(jsonPath("$.purchasePrice").value(15000));
+                .andExpect(jsonPath("$.purchasePrice").value(15000))
+                .andExpect(jsonPath("$.status").value("PENDING_PAYMENT"))
+                .andExpect(jsonPath("$.orderId").value("GUDIT_test-order-id"));
 
         verify(purchaseService).purchase(userId, saleId);
     }

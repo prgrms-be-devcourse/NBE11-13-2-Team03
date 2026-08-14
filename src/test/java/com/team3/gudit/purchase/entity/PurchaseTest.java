@@ -11,7 +11,7 @@ import static org.mockito.Mockito.mock;
 class PurchaseTest {
 
     @Test
-    @DisplayName("구매 정보를 생성한다")
+    @DisplayName("구매 정보를 생성하면 결제 대기 상태로 생성된다")
     void createPurchase() {
         // given
         User user = mock(User.class);
@@ -30,9 +30,33 @@ class PurchaseTest {
         assertThat(purchase.getSale()).isEqualTo(sale);
         assertThat(purchase.getQuantity()).isEqualTo(1);
         assertThat(purchase.getPurchasePrice()).isEqualTo(15000);
-        assertThat(purchase.getStatus()).isEqualTo(PurchaseStatus.PURCHASED);
-        assertThat(purchase.getPurchasedAt()).isNotNull();
+        assertThat(purchase.getStatus())
+                .isEqualTo(PurchaseStatus.PENDING_PAYMENT);
+        assertThat(purchase.getPurchasedAt()).isNull();
         assertThat(purchase.getCanceledAt()).isNull();
+    }
+
+    @Test
+    @DisplayName("결제를 완료하면 구매 상태와 구매 완료 시간이 변경된다")
+    void completePurchase() {
+        // given
+        User user = mock(User.class);
+        Sale sale = mock(Sale.class);
+
+        Purchase purchase = Purchase.create(
+                user,
+                sale,
+                1,
+                15000
+        );
+
+        // when
+        purchase.complete();
+
+        // then
+        assertThat(purchase.getStatus())
+                .isEqualTo(PurchaseStatus.PURCHASED);
+        assertThat(purchase.getPurchasedAt()).isNotNull();
     }
 
     @Test
@@ -53,7 +77,8 @@ class PurchaseTest {
         purchase.cancel();
 
         // then
-        assertThat(purchase.getStatus()).isEqualTo(PurchaseStatus.CANCELED);
+        assertThat(purchase.getStatus())
+                .isEqualTo(PurchaseStatus.CANCELED);
         assertThat(purchase.getCanceledAt()).isNotNull();
     }
 }

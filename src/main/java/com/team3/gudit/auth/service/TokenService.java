@@ -79,9 +79,12 @@ public class TokenService {
                                 )
                         );
 
-        if (tokenProvider.getTokenType(refreshToken) != TokenType.REFRESH) {
+        if (!refreshTokenHasher.matches(
+                storedToken.getTokenHash(),
+                refreshToken
+        )) {
             throw new BusinessException(
-                    AuthErrorCode.INVALID_TOKEN_TYPE
+                    AuthErrorCode.REFRESH_TOKEN_MISMATCH
             );
         }
 
@@ -106,7 +109,7 @@ public class TokenService {
         );
 
 
-        return issueToken(user);
+        return newTokenPair;
     }
 
     public TokenPair generateTokenPair(User user) {

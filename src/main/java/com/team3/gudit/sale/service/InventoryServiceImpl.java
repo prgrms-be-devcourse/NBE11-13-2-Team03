@@ -19,7 +19,7 @@ public class InventoryServiceImpl implements InventoryService {
 
     @Override
     @Transactional
-    public void decreaseStock(Long saleId, int quantity) {
+    public void decreaseStock(Long saleId, Long userId, int quantity) {
         Sale sale = saleRepository.findByIdWithLock(saleId)
                 .orElseThrow(() -> new BusinessException(SaleErrorCode.SALE_NOT_FOUND));
         sale.validateSalePeriod();
@@ -29,7 +29,7 @@ public class InventoryServiceImpl implements InventoryService {
 
     @Override
     @Transactional
-    public void restoreStock(Long saleId, int quantity) {
+    public void restoreStock(Long saleId, Long userId, int quantity) {
         Sale sale = saleRepository.findByIdWithLock(saleId)
                 .orElseThrow(() -> new BusinessException(SaleErrorCode.SALE_NOT_FOUND));
 

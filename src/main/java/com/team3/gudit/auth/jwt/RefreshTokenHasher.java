@@ -25,10 +25,14 @@ public class RefreshTokenHasher {
         }
     }
 
-    public boolean matches(String refreshToken, String rawToken) {
+    public boolean matches(
+            String storedHash,
+            String rawToken
+    ) {
         String requestHash = hash(rawToken);
+
         return MessageDigest.isEqual(
-                refreshToken.getBytes(StandardCharsets.UTF_8),
+                storedHash.getBytes(StandardCharsets.UTF_8),
                 requestHash.getBytes(StandardCharsets.UTF_8)
         );
     }

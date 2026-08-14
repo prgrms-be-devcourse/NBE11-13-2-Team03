@@ -13,15 +13,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(
-        name = "purchases",
-        uniqueConstraints = {
-                @UniqueConstraint(
-                        name = "uk_purchase_user_sale",
-                        columnNames = {"user_id", "sale_id"}
-                )
-        }
-)
+@Table(name = "purchases")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
@@ -49,7 +41,7 @@ public class Purchase {
     @Column(nullable = false)
     private PurchaseStatus status;
 
-    @Column(name = "purchased_at", nullable = false)
+    @Column(name = "purchased_at")
     private LocalDateTime purchasedAt;
 
     @Column(name = "canceled_at")
@@ -68,8 +60,7 @@ public class Purchase {
         this.sale = sale;
         this.quantity = quantity;
         this.purchasePrice = purchasePrice;
-        this.status = PurchaseStatus.PURCHASED;
-        this.purchasedAt = LocalDateTime.now();
+        this.status = PurchaseStatus.PENDING_PAYMENT;
     }
 
     public static Purchase create(
@@ -79,6 +70,11 @@ public class Purchase {
             int purchasePrice
     ) {
         return new Purchase(user, sale, quantity, purchasePrice);
+    }
+
+    public void complete() {
+        this.status = PurchaseStatus.PURCHASED;
+        this.purchasedAt = LocalDateTime.now();
     }
 
     public void cancel() {
