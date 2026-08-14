@@ -139,14 +139,22 @@ public class Sale {
     }
 
     public void updateSaleStatus(SaleStatus status) {
+        if (this.status == status) {
+            return;
+        }
+        validateStatusTransition(status);
+
         this.status = status;
     }
 
-    public void deleteSale() {
+    public void validateDeletable() {
         if (this.status == SaleStatus.ON_SALE) {
-            throw new IllegalStateException("진행 중인 판매 상품은 삭제할 수 없습니다. 먼저 중단 처리하세요.");
+            throw new BusinessException(SaleErrorCode.CANNOT_DELETE_ONGOING_SALE);
         }
+    }
 
+    public void deleteSale() {
+        validateDeletable();
         this.status = SaleStatus.DELETED;
     }
 
@@ -157,7 +165,13 @@ public class Sale {
 
     private void validateModifiable() {
         if (this.status != SaleStatus.READY) {
-            throw new IllegalStateException("판매 대기(READY) 상태에서만 정보를 수정할 수 있습니다.");
+            throw new BusinessException(SaleErrorCode.CANNOT_UPDATE_ONGOING_SALE);
+        }
+    }
+
+    private void validateStatusTransition(SaleStatus status) {
+        if (this.status == SaleStatus.DELETED || this.status == SaleStatus.CLOSED) {
+            throw new BusinessException(SaleErrorCode.INVALID_STATUS_TRANSITION);
         }
     }
 

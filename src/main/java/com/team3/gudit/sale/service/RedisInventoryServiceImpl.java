@@ -1,0 +1,90 @@
+package com.team3.gudit.sale.service;
+
+import com.team3.gudit.global.exception.BusinessException;
+import com.team3.gudit.global.exception.GlobalErrorCode;
+import com.team3.gudit.sale.domain.entity.Sale;
+import com.team3.gudit.sale.domain.repository.SaleRepository;
+import com.team3.gudit.sale.dto.SaleRedisDto;
+import com.team3.gudit.sale.exception.SaleErrorCode;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.script.DefaultRedisScript;
+import org.springframework.stereotype.Service;
+
+import java.time.Instant;
+import java.util.List;
+
+@Service
+@RequiredArgsConstructor
+public class RedisInventoryServiceImpl implements InventoryService {
+
+    private final StringRedisTemplate redisTemplate;
+    private final DefaultRedisScript<Long> stockDecrementScript;
+    private final SaleRepository saleRepository;
+
+    /**
+     * 판매 시작 전 Warm-up (Redis 캐싱)
+     * <p>
+     * * @param sale RDB에서 조회한 판매 엔티티
+     *  * - Cached Keys:
+     *  *   1) sale:{id}:stock -> 남아있는 재고 수량 (String)
+     *  *   2) sale:{id}:info  -> 판매 정책 정보 (Hash: startAt, endAt, maxPurchaseQuantity)
+     *  */
+
+
+    @Override
+    public void decreaseStock(Long saleId, Long userId, int quantity) {
+        String stockKey = "sale:" + saleId + ":stock";
+        String infoKey = "sale:" + saleId + ":info";
+        String userKey = "sale:" + saleId + ":user:" + userId;
+
+        long nowMilli = Instant.now().toEpochMilli();
+
+        Long result = redisTemplate.execute(
+                stockDecrementScript,
+                List.of(stockKey, infoKey, userKey),
+                String.valueOf(quantity),
+                String.valueOf(nowMilli)
+        );
+
+        if (result == null) {
+            throw new BusinessException(GlobalErrorCode.INTERNAL_SERVER_ERROR);
+        }
+
+        if (result < 0) {
+            handleScriptError(result);
+        }
+    }
+
+    @Override
+    public void restoreStock(Long saleId, Long userId, int quantity) {
+        String stockKey = "sale:" + saleId + ":stock";
+        String userKey = "sale:" + saleId + ":user:" + userId;
+
+        // 1. 전체 재고 복원 (+quantity)
+        redisTemplate.opsForValue().increment(stockKey, quantity);
+
+        // 2. 유저별 구매 수량 차감 (-quantity)
+        Long current = redisTemplate.opsForValue().decrement(userKey, quantity);
+
+        // 3. 차감 후 수량이 0 이하이면 유저 Key 삭제 (메모리 정리 & nil 상태 복원)
+        if (current != null && current <= 0) {
+            redisTemplate.delete(userKey);
+        }
+    }
+
+    // 비즈니스 에러 처리 (-1: 재고부족, -2: 기간아님, -3: 수량초과, -4: 종료)
+    private void handleScriptError(long errorCode) {
+        if (errorCode == -1) {
+            throw new BusinessException(SaleErrorCode.NOT_ENOUGH_STOCK);
+        } else if (errorCode == -2) {
+            throw new BusinessException(SaleErrorCode.INVALID_SALE_PERIOD);
+        } else if (errorCode == -3) {
+            throw new BusinessException(SaleErrorCode.EXCEEDED_PURCHASE_QUANTITY);
+        } else if (errorCode == -4) {
+            throw new BusinessException(SaleErrorCode.SALE_CLOSED);
+        } else {
+            throw new BusinessException(SaleErrorCode.NOT_ENOUGH_STOCK);
+        }
+    }
+}

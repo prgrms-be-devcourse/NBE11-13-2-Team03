@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 
 public record SaleUpdateRequestDto(
         Integer initialStock,
+
         Integer maxPurchaseQuantity,
 
         @JsonFormat(pattern = DateformatConstant.DATE_FORMAT)

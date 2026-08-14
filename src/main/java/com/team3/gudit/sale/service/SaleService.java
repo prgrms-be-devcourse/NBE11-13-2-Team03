@@ -1,5 +1,6 @@
 package com.team3.gudit.sale.service;
 
+import com.team3.gudit.sale.domain.entity.Sale;
 import com.team3.gudit.sale.dto.reqeust.SaleCreateRequestDto;
 import com.team3.gudit.sale.dto.reqeust.SaleStatusUpdateRequestDto;
 import com.team3.gudit.sale.dto.reqeust.SaleUpdateRequestDto;
@@ -24,4 +25,5 @@ public interface SaleService {
 
     void deleteSale(Long id);
 
+    void warmupSaleInfo(Long id);
 }
