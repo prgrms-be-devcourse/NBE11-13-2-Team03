@@ -3,11 +3,15 @@ package com.team3.gudit.payment.client;
 import com.team3.gudit.payment.config.TossPaymentProperties;
 import com.team3.gudit.payment.dto.TossPaymentCancelRequest;
 import com.team3.gudit.payment.dto.TossPaymentConfirmRequest;
+import com.team3.gudit.payment.dto.TossPaymentErrorResponse;
 import com.team3.gudit.payment.dto.TossPaymentResponse;
+import com.team3.gudit.payment.exception.TossPaymentException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientResponseException;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
@@ -43,19 +47,61 @@ public class TossPaymentClient {
             TossPaymentConfirmRequest request,
             String idempotencyKey
     ) {
-        return restClient.post()
-                .uri("/v1/payments/confirm")
-                .header("Idempotency-Key", idempotencyKey)
-                .body(request)
-                .retrieve()
-                .body(TossPaymentResponse.class);
+        try {
+            return restClient.post()
+                    .uri("/v1/payments/confirm")
+                    .header("Idempotency-Key", idempotencyKey)
+                    .body(request)
+                    .retrieve()
+                    .body(TossPaymentResponse.class);
+
+        } catch (RestClientResponseException e) {
+            TossPaymentErrorResponse error =
+                    e.getResponseBodyAs(TossPaymentErrorResponse.class);
+
+            if (error == null) {
+                throw e;
+            }
+
+            throw new TossPaymentException(
+                    error.code(),
+                    error.message()
+            );
+
+        } catch (ResourceAccessException e) {
+            throw new TossPaymentException(
+                    "NETWORK_ERROR",
+                    "결제 승인 요청 중 네트워크 오류가 발생했습니다."
+            );
+        }
     }
 
     public TossPaymentResponse getPayment(String paymentKey) {
-        return restClient.get()
-                .uri("/v1/payments/{paymentKey}", paymentKey)
-                .retrieve()
-                .body(TossPaymentResponse.class);
+        try {
+            return restClient.get()
+                    .uri("/v1/payments/{paymentKey}", paymentKey)
+                    .retrieve()
+                    .body(TossPaymentResponse.class);
+
+        } catch (RestClientResponseException e) {
+            TossPaymentErrorResponse error =
+                    e.getResponseBodyAs(TossPaymentErrorResponse.class);
+
+            if (error == null) {
+                throw e;
+            }
+
+            throw new TossPaymentException(
+                    error.code(),
+                    error.message()
+            );
+
+        } catch (ResourceAccessException e) {
+            throw new TossPaymentException(
+                    "NETWORK_ERROR",
+                    "결제 조회 중 네트워크 오류가 발생했습니다."
+            );
+        }
     }
 
     public TossPaymentResponse cancel(

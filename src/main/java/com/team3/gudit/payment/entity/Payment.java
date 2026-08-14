@@ -1,5 +1,7 @@
 package com.team3.gudit.payment.entity;
 
+import com.team3.gudit.global.exception.BusinessException;
+import com.team3.gudit.payment.exception.PaymentErrorCode;
 import com.team3.gudit.purchase.entity.Purchase;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -79,5 +81,51 @@ public class Payment {
 
     public static Payment create(Purchase purchase, int amount) {
         return new Payment(purchase, amount);
+    }
+
+    public void start(String paymentKey) {
+        validateStatus(PaymentStatus.READY);
+
+        this.paymentKey = paymentKey;
+        this.status = PaymentStatus.IN_PROGRESS;
+    }
+
+    public void complete(LocalDateTime approvedAt) {
+        validateStatus(PaymentStatus.IN_PROGRESS);
+
+        this.status = PaymentStatus.DONE;
+        this.approvedAt = approvedAt;
+    }
+
+    public void fail() {
+        validateStatus(PaymentStatus.IN_PROGRESS);
+
+        this.status = PaymentStatus.FAILED;
+    }
+
+    public void cancel() {
+        validateStatus(PaymentStatus.DONE);
+
+        this.status = PaymentStatus.CANCELED;
+        this.canceledAt = LocalDateTime.now();
+    }
+
+    public void cancelAfterApprovalFailure() {
+        validateStatus(PaymentStatus.IN_PROGRESS);
+
+        this.status = PaymentStatus.CANCELED;
+        this.canceledAt = LocalDateTime.now();
+    }
+
+    private void validateStatus(PaymentStatus expectedStatus) {
+        if (this.status != expectedStatus) {
+            throw new BusinessException(
+                    PaymentErrorCode.INVALID_PAYMENT_STATUS,
+                    "Invalid payment status transition. current="
+                            + this.status
+                            + ", expected="
+                            + expectedStatus
+            );
+        }
     }
 }

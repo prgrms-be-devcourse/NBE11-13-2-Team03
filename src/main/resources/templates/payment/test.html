@@ -10,11 +10,13 @@
 <h1>Gudit 결제 테스트</h1>
 
 <button id="payment-button" type="button">
-    1,000원 결제하기
+    결제하기
 </button>
 
 <script th:inline="javascript">
     const clientKey = /*[[${clientKey}]]*/ "";
+    const orderId = /*[[${orderId}]]*/ "";
+    const amount = /*[[${amount}]]*/ 0;
 
     const tossPayments = TossPayments(clientKey);
     const payment = tossPayments.payment({
@@ -25,13 +27,11 @@
         .getElementById("payment-button")
         .addEventListener("click", async () => {
 
-            const orderId = "GUDIT_" + crypto.randomUUID();
-
             await payment.requestPayment({
                 method: "CARD",
                 amount: {
                     currency: "KRW",
-                    value: 1000
+                    value: amount
                 },
                 orderId: orderId,
                 orderName: "Gudit 테스트 굿즈",

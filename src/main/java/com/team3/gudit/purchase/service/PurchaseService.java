@@ -1,6 +1,8 @@
 package com.team3.gudit.purchase.service;
 
 import com.team3.gudit.global.exception.BusinessException;
+import com.team3.gudit.payment.entity.Payment;
+import com.team3.gudit.payment.service.PaymentService;
 import com.team3.gudit.purchase.dto.PurchaseCancelResponse;
 import com.team3.gudit.purchase.dto.PurchaseCreateResponse;
 import com.team3.gudit.purchase.dto.PurchaseDetailResponse;
@@ -21,7 +23,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -33,11 +34,16 @@ public class PurchaseService {
     private final UserRepository userRepository;
     private final SaleRepository saleRepository;
     private final InventoryService inventoryService;
+    private final PaymentService paymentService;
 
     @Transactional
     public PurchaseCreateResponse purchase(Long userId, Long saleId) {
 
-        if (purchaseRepository.existsByUserIdAndSaleId(userId, saleId)) {
+        if (purchaseRepository.existsByUserIdAndSaleIdAndStatusNot(
+                userId,
+                saleId,
+                PurchaseStatus.CANCELED
+        )) {
             throw new BusinessException(PurchaseErrorCode.DUPLICATE_PURCHASE);
         }
 
@@ -66,13 +72,16 @@ public class PurchaseService {
 
         Purchase savedPurchase = purchaseRepository.save(purchase);
 
+        Payment payment = paymentService.createPayment(savedPurchase);
+
         return new PurchaseCreateResponse(
                 savedPurchase.getId(),
                 savedPurchase.getSale().getId(),
                 savedPurchase.getQuantity(),
                 savedPurchase.getPurchasePrice(),
                 savedPurchase.getStatus(),
-                savedPurchase.getPurchasedAt()
+                savedPurchase.getPurchasedAt(),
+                payment.getOrderId()
         );
     }
 
@@ -108,23 +117,50 @@ public class PurchaseService {
                 ));
 
         if (purchase.getStatus() == PurchaseStatus.CANCELED) {
-            throw new BusinessException(PurchaseErrorCode.PURCHASE_ALREADY_CANCELED);
+            throw new BusinessException(
+                    PurchaseErrorCode.PURCHASE_ALREADY_CANCELED
+            );
         }
 
-        Sale sale = purchase.getSale();
-
-        inventoryService.restoreStock(
-                sale.getId(),
-                purchase.getQuantity()
-        );
-
-        purchase.cancel();
+        if (purchase.getStatus() == PurchaseStatus.PENDING_PAYMENT) {
+            cancelPendingPayment(purchase);
+        } else if (purchase.getStatus() == PurchaseStatus.PURCHASED) {
+            cancelCompletedPayment(purchase);
+        }
 
         return new PurchaseCancelResponse(
                 purchase.getId(),
                 purchase.getStatus(),
                 purchase.getCanceledAt()
         );
+    }
+
+    private void cancelPendingPayment(Purchase purchase) {
+
+        inventoryService.restoreStock(
+                purchase.getSale().getId(),
+                purchase.getQuantity()
+        );
+
+        purchase.cancel();
+    }
+
+    private void cancelCompletedPayment(Purchase purchase) {
+
+        Payment payment = paymentService.getPaymentByPurchaseId(
+                purchase.getId()
+        );
+
+        paymentService.cancelCompletedPayment(
+                payment.getPaymentKey()
+        );
+
+        inventoryService.restoreStock(
+                purchase.getSale().getId(),
+                purchase.getQuantity()
+        );
+
+        purchase.cancel();
     }
 
     private PurchaseSummaryResponse toSummaryResponse(Purchase purchase) {
