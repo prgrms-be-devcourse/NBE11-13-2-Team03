@@ -56,6 +56,7 @@ public class PaymentTransactionService {
 
         inventoryService.restoreStock(
                 purchase.getSale().getId(),
+                purchase.getUser().getId(),
                 purchase.getQuantity()
         );
 
@@ -71,6 +72,7 @@ public class PaymentTransactionService {
 
         inventoryService.restoreStock(
                 purchase.getSale().getId(),
+                purchase.getUser().getId(),
                 purchase.getQuantity()
         );
 

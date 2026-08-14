@@ -213,7 +213,7 @@ class PurchaseServiceTest {
                 .isEqualTo("GUDIT_test-order-id");
 
         verify(inventoryService)
-                .decreaseStock(saleId, 1);
+                .decreaseStock(saleId, userId, 1);
 
         verify(purchaseRepository)
                 .save(any(Purchase.class));
@@ -260,7 +260,7 @@ class PurchaseServiceTest {
                 .isNotNull();
 
         verify(inventoryService)
-                .restoreStock(saleId, 1);
+                .restoreStock(saleId, userId, 1);
     }
 
     @Test
@@ -312,7 +312,7 @@ class PurchaseServiceTest {
                 .cancelCompletedPayment("payment-key");
 
         verify(inventoryService)
-                .restoreStock(saleId, 1);
+                .restoreStock(saleId, userId, 1);
 
         verify(purchase)
                 .cancel();

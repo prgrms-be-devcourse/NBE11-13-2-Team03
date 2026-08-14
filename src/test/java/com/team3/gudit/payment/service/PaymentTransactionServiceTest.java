@@ -10,6 +10,7 @@ import com.team3.gudit.purchase.entity.Purchase;
 import com.team3.gudit.purchase.entity.PurchaseStatus;
 import com.team3.gudit.sale.domain.entity.Sale;
 import com.team3.gudit.sale.service.InventoryService;
+import com.team3.gudit.user.domain.entity.User;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -293,6 +294,7 @@ class PaymentTransactionServiceTest {
         // given
         Purchase purchase = mock(Purchase.class);
         Sale sale = mock(Sale.class);
+        User user = mock(User.class);
 
         Payment payment = Payment.create(
                 purchase,
@@ -304,11 +306,17 @@ class PaymentTransactionServiceTest {
         given(purchase.getSale())
                 .willReturn(sale);
 
+        given(purchase.getUser())
+                .willReturn(user);
+
         given(purchase.getQuantity())
                 .willReturn(1);
 
         given(sale.getId())
                 .willReturn(10L);
+
+        given(user.getId())
+                .willReturn(1L);
 
         given(paymentRepository.findByOrderId(
                 payment.getOrderId()
@@ -325,7 +333,7 @@ class PaymentTransactionServiceTest {
                 .isEqualTo(PaymentStatus.FAILED);
 
         verify(inventoryService)
-                .restoreStock(10L, 1);
+                .restoreStock(10L, 1L, 1);
 
         verify(purchase)
                 .cancel();
@@ -337,6 +345,7 @@ class PaymentTransactionServiceTest {
         // given
         Purchase purchase = mock(Purchase.class);
         Sale sale = mock(Sale.class);
+        User user = mock(User.class);
 
         Payment payment = Payment.create(
                 purchase,
@@ -348,11 +357,17 @@ class PaymentTransactionServiceTest {
         given(purchase.getSale())
                 .willReturn(sale);
 
+        given(purchase.getUser())
+                .willReturn(user);
+
         given(purchase.getQuantity())
                 .willReturn(1);
 
         given(sale.getId())
                 .willReturn(10L);
+
+        given(user.getId())
+                .willReturn(1L);
 
         given(paymentRepository.findByPaymentKey("payment-key"))
                 .willReturn(Optional.of(payment));
@@ -370,7 +385,7 @@ class PaymentTransactionServiceTest {
                 .isNotNull();
 
         verify(inventoryService)
-                .restoreStock(10L, 1);
+                .restoreStock(10L, 1L, 1);
 
         verify(purchase)
                 .cancel();

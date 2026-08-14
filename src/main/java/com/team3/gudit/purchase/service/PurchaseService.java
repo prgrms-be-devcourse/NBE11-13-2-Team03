@@ -59,7 +59,11 @@ public class PurchaseService {
                         "Sale not found. saleId=" + saleId
                 ));
 
-        inventoryService.decreaseStock(saleId, 1);
+        inventoryService.decreaseStock(
+                saleId,
+                userId,
+                1
+        );
 
         int purchasePrice = sale.getGoods().getPrice();
 
@@ -123,9 +127,9 @@ public class PurchaseService {
         }
 
         if (purchase.getStatus() == PurchaseStatus.PENDING_PAYMENT) {
-            cancelPendingPayment(purchase);
+            cancelPendingPayment(purchase, userId);
         } else if (purchase.getStatus() == PurchaseStatus.PURCHASED) {
-            cancelCompletedPayment(purchase);
+            cancelCompletedPayment(purchase, userId);
         }
 
         return new PurchaseCancelResponse(
@@ -135,17 +139,18 @@ public class PurchaseService {
         );
     }
 
-    private void cancelPendingPayment(Purchase purchase) {
+    private void cancelPendingPayment(Purchase purchase, Long userId) {
 
         inventoryService.restoreStock(
                 purchase.getSale().getId(),
+                userId,
                 purchase.getQuantity()
         );
 
         purchase.cancel();
     }
 
-    private void cancelCompletedPayment(Purchase purchase) {
+    private void cancelCompletedPayment(Purchase purchase, Long userId) {
 
         Payment payment = paymentService.getPaymentByPurchaseId(
                 purchase.getId()
@@ -157,6 +162,7 @@ public class PurchaseService {
 
         inventoryService.restoreStock(
                 purchase.getSale().getId(),
+                userId,
                 purchase.getQuantity()
         );
 
