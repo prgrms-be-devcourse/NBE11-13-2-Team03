@@ -5,7 +5,6 @@ import com.team3.gudit.auth.security.CustomUserDetails;
 import com.team3.gudit.auth.service.AuthService;
 import com.team3.gudit.auth.service.TokenService;
 import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -46,7 +45,7 @@ public class AuthController {
     ) {
 
         TokenService.TokenPair tokenPair =
-                tokenService.refreshToken(refreshToken);
+                tokenService.reissueToken(refreshToken);
 
         addTokenCookie(
                 response,

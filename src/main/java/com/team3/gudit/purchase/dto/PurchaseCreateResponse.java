@@ -10,6 +10,7 @@ public record PurchaseCreateResponse(
         int quantity,
         int purchasePrice,
         PurchaseStatus status,
-        LocalDateTime purchasedAt
+        LocalDateTime purchasedAt,
+        String orderId
 ) {
 }

@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>내 구매 내역 | Gudit</title>
+
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<header th:replace="~{fragments/header :: header}"></header>
+
+<main class="main purchase-list-page">
+
+    <section class="page-header">
+        <span class="page-eyebrow">MY PURCHASE</span>
+        <h1>내 구매 내역</h1>
+        <p>구매한 굿즈와 현재 구매 상태를 확인할 수 있습니다.</p>
+    </section>
+
+    <section class="purchase-filter" aria-label="구매 상태 필터">
+        <button type="button" class="filter-button active">전체</button>
+        <button type="button" class="filter-button">구매 완료</button>
+        <button type="button" class="filter-button">취소</button>
+    </section>
+
+    <section class="purchase-list">
+
+        <!-- PURCHASED -->
+        <article class="purchase-item">
+            <div class="purchase-thumbnail">
+                <div class="purchase-mock purchase-mock-keyring">
+                    GUDIT
+                </div>
+            </div>
+
+            <div class="purchase-item-content">
+                <div class="purchase-item-main">
+                    <div>
+                        <span class="purchase-status status-purchased">
+                            PURCHASED
+                        </span>
+
+                        <h2>개발자 키링</h2>
+
+                        <p class="purchase-item-price">
+                            15,000원
+                        </p>
+                    </div>
+
+                    <a href="/mypage/purchases/1"
+                       class="detail-link-button">
+                        상세 보기
+                    </a>
+                </div>
+
+                <div class="purchase-item-meta">
+                    <div>
+                        <span>수량</span>
+                        <strong>1개</strong>
+                    </div>
+
+                    <div>
+                        <span>구매일</span>
+                        <strong>2026.08.10 18:02</strong>
+                    </div>
+                </div>
+            </div>
+        </article>
+
+        <!-- CANCELED -->
+        <article class="purchase-item">
+            <div class="purchase-thumbnail">
+                <div class="purchase-mock purchase-mock-mug">
+                    GUDIT
+                </div>
+            </div>
+
+            <div class="purchase-item-content">
+                <div class="purchase-item-main">
+                    <div>
+                        <span class="purchase-status status-canceled">
+                            CANCELED
+                        </span>
+
+                        <h2>한정 머그컵</h2>
+
+                        <p class="purchase-item-price">
+                            18,000원
+                        </p>
+                    </div>
+
+                    <a href="/mypage/purchases/2"
+                       class="detail-link-button">
+                        상세 보기
+                    </a>
+                </div>
+
+                <div class="purchase-item-meta">
+                    <div>
+                        <span>수량</span>
+                        <strong>1개</strong>
+                    </div>
+
+                    <div>
+                        <span>구매일</span>
+                        <strong>2026.08.09 19:30</strong>
+                    </div>
+                </div>
+            </div>
+        </article>
+
+        <!-- PURCHASED -->
+        <article class="purchase-item">
+            <div class="purchase-thumbnail">
+                <div class="purchase-mock purchase-mock-shirt">
+                    G
+                </div>
+            </div>
+
+            <div class="purchase-item-content">
+                <div class="purchase-item-main">
+                    <div>
+                        <span class="purchase-status status-purchased">
+                            PURCHASED
+                        </span>
+
+                        <h2>Gudit 티셔츠</h2>
+
+                        <p class="purchase-item-price">
+                            29,000원
+                        </p>
+                    </div>
+
+                    <a href="/mypage/purchases/3"
+                       class="detail-link-button">
+                        상세 보기
+                    </a>
+                </div>
+
+                <div class="purchase-item-meta">
+                    <div>
+                        <span>수량</span>
+                        <strong>1개</strong>
+                    </div>
+
+                    <div>
+                        <span>구매일</span>
+                        <strong>2026.08.08 17:10</strong>
+                    </div>
+                </div>
+            </div>
+        </article>
+
+    </section>
+
+</main>
+
+</body>
+</html>
