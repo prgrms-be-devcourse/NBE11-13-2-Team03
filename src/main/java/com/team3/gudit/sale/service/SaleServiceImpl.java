@@ -40,10 +40,6 @@ public class SaleServiceImpl implements SaleService {
         Sale sale = request.toEntity(goods);
         Sale savedSale = saleRepository.save(sale);
 
-        //redis에 초기 재고 세팅
-        String stockKey = "sale:" + savedSale.getId() + ":stock";
-        redisTemplate.opsForValue().set(stockKey, String.valueOf(savedSale.getInitialStock()));
-
         return SaleCreateResponseDto.from(savedSale);
     }
 
@@ -125,6 +121,23 @@ public class SaleServiceImpl implements SaleService {
 
         return SaleStatusUpdateResponseDto.from(sale);
     }
+
+    // 비상 시 판매 중지로 상태 값 변경하는 메서드
+    @Transactional
+    public void closeSale(Long saleId) {
+        // 1. DB 조회 및 상태 검증
+        Sale sale = saleRepository.findById(saleId)
+                .orElseThrow(() -> new BusinessException(SaleErrorCode.SALE_NOT_FOUND));
+
+        // 2. DB 상태를 CLOSED로 변경
+        sale.updateSaleStatus(SaleStatus.CLOSED);
+
+        // 3. Redis status 즉시 동기화 (Fast-Fail 차단용)
+        String infoKey = "sale:" + saleId + ":info";
+        redisTemplate.opsForHash().put(infoKey, "status", SaleStatus.CLOSED.name());
+
+    }
+
 
     /**
      * 판매 상품을 삭제(Soft Delete) 처리하고 연동된 Redis 재고 키를 삭제합니다.

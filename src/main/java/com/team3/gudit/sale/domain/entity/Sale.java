@@ -173,6 +173,11 @@ public class Sale {
         if (this.status == SaleStatus.DELETED || this.status == SaleStatus.CLOSED) {
             throw new BusinessException(SaleErrorCode.INVALID_STATUS_TRANSITION);
         }
+
+        // 판매중 > 판매 대기로 변경 불가
+        if (this.status == SaleStatus.ON_SALE && status == SaleStatus.READY) {
+            throw new BusinessException(SaleErrorCode.INVALID_STATUS_TRANSITION);
+        }
     }
 
 }

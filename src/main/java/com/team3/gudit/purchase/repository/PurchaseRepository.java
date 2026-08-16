@@ -4,6 +4,7 @@ import com.team3.gudit.purchase.entity.Purchase;
 import com.team3.gudit.purchase.entity.PurchaseStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -18,4 +19,10 @@ public interface PurchaseRepository extends JpaRepository<Purchase, Long> {
     List<Purchase> findAllByUserId(Long userId);
 
     Optional<Purchase> findByIdAndUserId(Long purchaseId, Long userId);
+
+
+    List<Purchase> findAllByStatusAndCreatedAtBefore(
+            PurchaseStatus status,
+            LocalDateTime createdAt
+    );
 }
