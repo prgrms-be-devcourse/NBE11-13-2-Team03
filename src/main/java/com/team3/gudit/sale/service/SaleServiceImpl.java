@@ -52,6 +52,23 @@ public class SaleServiceImpl implements SaleService {
         Sale sale = saleRepository.findById(id)
                 .orElseThrow(() -> new BusinessException(SaleErrorCode.SALE_NOT_FOUND));
 
+        // 판매 중일 때만 Redis 실시간 재고 사용
+        if (sale.getStatus() == SaleStatus.ON_SALE) {
+
+            Integer redisStock = getRedisStock(id);
+
+            if (redisStock != null) {
+                SaleStatus displayStatus = resolveDisplayStatus(sale, redisStock);
+
+                return SaleDetailResponseDto.from(
+                        sale,
+                        redisStock,
+                        displayStatus
+                );
+            }
+        }
+
+        // READY / CLOSED 또는 Redis Key가 없는 경우 RDB 값 사용
         return SaleDetailResponseDto.from(sale);
     }
 
@@ -59,7 +76,27 @@ public class SaleServiceImpl implements SaleService {
     @Transactional(readOnly = true)
     public List<SaleListResponseDto> saleList() {
         return saleRepository.findAll().stream()
-                .map(SaleListResponseDto::from)
+                .map(sale -> {
+
+                    if (sale.getStatus() == SaleStatus.ON_SALE) {
+
+                        Integer redisStock = getRedisStock(sale.getId());
+
+                        if (redisStock != null) {
+                            return SaleListResponseDto.from(
+                                    sale,
+                                    redisStock,
+                                    resolveDisplayStatus(sale, redisStock)
+                            );
+                        }
+                    }
+
+                    return SaleListResponseDto.from(
+                            sale,
+                            sale.getRemainingStock(),
+                            sale.getStatus()
+                    );
+                })
                 .toList();
     }
 
@@ -229,5 +266,35 @@ public class SaleServiceImpl implements SaleService {
 
         // 4. DB 판매 종료
         sale.updateSaleStatus(SaleStatus.CLOSED);
+    }
+
+    private Integer getRedisStock(Long saleId) {
+        String stockKey = "sale:" + saleId + ":stock";
+        String value = redisTemplate.opsForValue().get(stockKey);
+
+        if (value == null) {
+            return null;
+        }
+
+        try {
+            return Integer.parseInt(value);
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
+    //응답용 status
+    private SaleStatus resolveDisplayStatus(
+            Sale sale,
+            Integer currentStock
+    ) {
+        // SOLD_OUT은 RDB 상태값이 아니라 Redis 실시간 재고 기반으로 계산
+        if (sale.getStatus() == SaleStatus.ON_SALE
+                && currentStock != null
+                && currentStock <= 0) {
+            return SaleStatus.SOLD_OUT;
+        }
+
+        return sale.getStatus();
     }
 }

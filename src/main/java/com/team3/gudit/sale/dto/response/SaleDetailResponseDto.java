@@ -37,4 +37,24 @@ public record SaleDetailResponseDto(
                 .build();
     }
 
+    public static SaleDetailResponseDto from(
+            Sale sale,
+            int remainingStock,
+            SaleStatus status
+    ) {
+        return SaleDetailResponseDto.builder()
+                .id(sale.getId())
+                .goodsId(sale.getGoods().getId())
+                .goodsName(sale.getGoods().getName())
+                .price(sale.getGoods().getPrice())
+                .initialStock(sale.getInitialStock())
+                .remainingStock(remainingStock)
+                .maxPurchaseQuantity(sale.getMaxPurchaseQuantity())
+                .status(status)
+                .startAt(sale.getStartAt())
+                .endAt(sale.getEndAt())
+                .createdAt(sale.getCreatedAt())
+                .build();
+    }
+
 }
