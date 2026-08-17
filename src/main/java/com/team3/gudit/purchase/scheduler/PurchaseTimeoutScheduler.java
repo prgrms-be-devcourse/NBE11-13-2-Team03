@@ -40,14 +40,29 @@ public class PurchaseTimeoutScheduler {
 
         for (Purchase purchase : expiredPurchases) {
             try {
-                // 1. Redis/DB 재고 및 중복 구매 제한 복원
+                //목록 조회 시점과 실제 처리 시점 사이에 사용자가 취소할 수 있으므로, 반복문 안에서 Purchase를 잠금 조회
+                Purchase lockedPurchase = purchaseRepository
+                        .findByIdWithLock(purchase.getId())
+                        .orElse(null);
+
+                if (lockedPurchase == null) {
+                    continue;
+                }
+
+                // 잠금을 얻기 전에 다른 요청이 처리했을 수 있으므로 재확인
+                if (lockedPurchase.getStatus()
+                        != PurchaseStatus.PENDING_PAYMENT) {
+                    continue;
+                }
+
+                // Redis/DB 재고 및 중복 구매 제한 복원
                 inventoryService.restoreStock(
                         purchase.getSale().getId(),
                         purchase.getUser().getId(),
                         purchase.getQuantity()
                 );
 
-                // 2. Purchase 상태 변경 (PENDING_PAYMENT -> CANCELED)
+                // Purchase 상태 변경 (PENDING_PAYMENT -> CANCELED)
                 purchase.cancel();
 
                 log.info("미결제 타임아웃 처리 완료: purchaseId={}", purchase.getId());

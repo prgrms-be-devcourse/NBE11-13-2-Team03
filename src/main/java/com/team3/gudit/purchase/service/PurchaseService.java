@@ -122,7 +122,13 @@ public class PurchaseService {
     @Transactional
     public PurchaseCancelResponse cancel(Long userId, Long purchaseId) {
 
-        Purchase purchase = purchaseRepository.findByIdAndUserId(purchaseId, userId)
+/*        Purchase purchase = purchaseRepository.findByIdAndUserId(purchaseId, userId)
+                .orElseThrow(() -> new BusinessException(
+                        PurchaseErrorCode.PURCHASE_NOT_FOUND,
+                        "Purchase not found. purchaseId=" + purchaseId
+                ));*/
+
+        Purchase purchase = purchaseRepository.findByIdAndUserIdWithLock(purchaseId, userId)
                 .orElseThrow(() -> new BusinessException(
                         PurchaseErrorCode.PURCHASE_NOT_FOUND,
                         "Purchase not found. purchaseId=" + purchaseId

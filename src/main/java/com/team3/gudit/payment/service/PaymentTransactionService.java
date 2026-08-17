@@ -6,6 +6,9 @@ import com.team3.gudit.payment.entity.Payment;
 import com.team3.gudit.payment.exception.PaymentErrorCode;
 import com.team3.gudit.payment.repository.PaymentRepository;
 import com.team3.gudit.purchase.entity.Purchase;
+import com.team3.gudit.purchase.entity.PurchaseStatus;
+import com.team3.gudit.purchase.exception.PurchaseErrorCode;
+import com.team3.gudit.purchase.repository.PurchaseRepository;
 import com.team3.gudit.sale.service.InventoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -17,6 +20,7 @@ public class PaymentTransactionService {
 
     private final PaymentRepository paymentRepository;
     private final InventoryService inventoryService;
+    private final PurchaseRepository purchaseRepository;
 
     @Transactional
     public void startPayment(
@@ -50,9 +54,15 @@ public class PaymentTransactionService {
     @Transactional
     public void failPayment(String orderId) {
         Payment payment = getPaymentByOrderId(orderId);
-        Purchase purchase = payment.getPurchase();
+        Purchase purchase = getLockedPurchase(payment);
+//        Purchase purchase = payment.getPurchase();
 
         payment.fail();
+
+        // 사용자 취소나 타임아웃이 이미 처리한 구매인지 체크
+        if (purchase.getStatus() != PurchaseStatus.PENDING_PAYMENT) {
+            return;
+        }
 
         inventoryService.restoreStock(
                 purchase.getSale().getId(),
@@ -66,9 +76,14 @@ public class PaymentTransactionService {
     @Transactional
     public void compensateApprovalFailure(String paymentKey) {
         Payment payment = getPaymentByPaymentKey(paymentKey);
-        Purchase purchase = payment.getPurchase();
+        Purchase purchase = getLockedPurchase(payment);
+//        Purchase purchase = payment.getPurchase();
 
         payment.cancelAfterApprovalFailure();
+
+        if (purchase.getStatus() != PurchaseStatus.PENDING_PAYMENT) {
+            return;
+        }
 
         inventoryService.restoreStock(
                 purchase.getSale().getId(),
@@ -137,5 +152,17 @@ public class PaymentTransactionService {
                     PaymentErrorCode.PAYMENT_AMOUNT_MISMATCH
             );
         }
+    }
+
+    private Purchase getLockedPurchase(Payment payment) {
+        return purchaseRepository
+                .findByIdWithLock(
+                        payment.getPurchase().getId()
+                )
+                .orElseThrow(() ->
+                        new BusinessException(
+                                PurchaseErrorCode.PURCHASE_NOT_FOUND
+                        )
+                );
     }
 }
