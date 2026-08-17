@@ -55,8 +55,8 @@ end
 redis.call('DECRBY', stockKey, quantity)
 redis.call('INCRBY', userKey, quantity)
 
--- 유저 Key 자동 삭제를 위한 TTL 부여 (24시간 = 86400초)
-redis.call('EXPIRE', userKey, 86400)
+-- 유저 Key 자동 삭제를 위한 TTL 부여 (판매 종료 시점)
+redis.call('PEXPIREAT', userKey, endAt)
 
 -- 성공 시 1 반환 (Java 단에서 성공 판별용)
 return 1
