@@ -29,6 +29,7 @@ public class SaleRedisDto {
                 .startAtMilli(sale.getStartAt().atZone(zoneId).toInstant().toEpochMilli())
                 .endAtMilli(sale.getEndAt().atZone(zoneId).toInstant().toEpochMilli())
                 .maxPurchaseQuantity(sale.getMaxPurchaseQuantity())
+                .status(sale.getStatus())
                 .build();
     }
 

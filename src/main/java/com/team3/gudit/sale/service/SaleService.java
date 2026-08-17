@@ -26,4 +26,8 @@ public interface SaleService {
     void deleteSale(Long id);
 
     void warmupSaleInfo(Long id);
+
+    void startSale(Long id);
+
+    void endSale(Long id);
 }

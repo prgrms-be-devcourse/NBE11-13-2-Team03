@@ -23,4 +23,14 @@ public interface SaleRepository extends JpaRepository<Sale, Long> {
             LocalDateTime startAtAfter,
             LocalDateTime startAtBefore
     );
+
+    List<Sale> findByStatusAndStartAtLessThanEqual(
+            SaleStatus status,
+            LocalDateTime startAt
+    );
+
+    List<Sale> findByStatusAndEndAtLessThanEqual(
+            SaleStatus status,
+            LocalDateTime endAt
+    );
 }

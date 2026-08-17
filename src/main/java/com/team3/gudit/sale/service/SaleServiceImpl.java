@@ -188,8 +188,45 @@ public class SaleServiceImpl implements SaleService {
         // long ttlSeconds = calculateTtlSeconds(sale.getEndAt());
         // redisTemplate.expire(stockKey, Duration.ofSeconds(ttlSeconds));
         // redisTemplate.expire(infoKey, Duration.ofSeconds(ttlSeconds));
+    }
 
-        // DB 상태 변경 (READY -> ON_SALE)
+    @Override
+    @Transactional
+    public void startSale(Long id) {
+        Sale sale = saleRepository.findById(id)
+                .orElseThrow(() ->
+                        new BusinessException(SaleErrorCode.SALE_NOT_FOUND)
+                );
+
+        // DB: READY -> ON_SALE
         sale.updateSaleStatus(SaleStatus.ON_SALE);
+
+        // Redis에서도 구매 가능 상태로 전환
+        String infoKey = "sale:" + id + ":info";
+        redisTemplate.opsForHash().put(
+                infoKey,
+                "status",
+                SaleStatus.ON_SALE.name()
+        );
+    }
+
+    @Override
+    @Transactional
+    public void endSale(Long id) {
+        Sale sale = saleRepository.findById(id)
+                .orElseThrow(() ->
+                        new BusinessException(SaleErrorCode.SALE_NOT_FOUND)
+                );
+
+        // DB: ON_SALE -> CLOSED
+        sale.updateSaleStatus(SaleStatus.CLOSED);
+
+        // Redis에서 즉시 구매 차단
+        String infoKey = "sale:" + id + ":info";
+        redisTemplate.opsForHash().put(
+                infoKey,
+                "status",
+                SaleStatus.CLOSED.name()
+        );
     }
 }

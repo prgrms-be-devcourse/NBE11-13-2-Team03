@@ -39,16 +39,72 @@ public class SaleWarmupScheduler {
 
         for (Sale sale : upcomingSales) {
             try {
-                // 2. Redis 웜업 수행 (RedisInventoryServiceImpl.warmupSaleInfo 호출)
                 saleService.warmupSaleInfo(sale.getId());
-
-                // 3. DB 상태 업데이트 (READY -> ON_SALE)
-                // Sale 엔티티의 도메인 메서드 사용
-                sale.updateSaleStatus(SaleStatus.ON_SALE);
 
                 log.info("[자동 Warm-up 완료] saleId: {}, startAt: {}", sale.getId(), sale.getStartAt());
             } catch (Exception e) {
                 log.error("[자동 Warm-up 실패] saleId: {}", sale.getId(), e);
+            }
+        }
+    }
+
+    @Scheduled(fixedDelay = 60000)
+    public void startSales() {
+        LocalDateTime now = LocalDateTime.now();
+
+        List<Sale> sales = saleRepository
+                .findByStatusAndStartAtLessThanEqual(
+                        SaleStatus.READY,
+                        now
+                );
+
+        for (Sale sale : sales) {
+            try {
+                // 웜업 스케줄을 놓친 경우도 대비
+                saleService.warmupSaleInfo(sale.getId());
+
+                saleService.startSale(sale.getId());
+
+                log.info(
+                        "[자동 판매 시작 완료] saleId: {}, startAt: {}",
+                        sale.getId(),
+                        sale.getStartAt()
+                );
+            } catch (Exception e) {
+                log.error(
+                        "[자동 판매 시작 실패] saleId: {}",
+                        sale.getId(),
+                        e
+                );
+            }
+        }
+    }
+
+    @Scheduled(fixedDelay = 60000)
+    public void endSales() {
+        LocalDateTime now = LocalDateTime.now();
+
+        List<Sale> sales = saleRepository
+                .findByStatusAndEndAtLessThanEqual(
+                        SaleStatus.ON_SALE,
+                        now
+                );
+
+        for (Sale sale : sales) {
+            try {
+                saleService.endSale(sale.getId());
+
+                log.info(
+                        "[자동 판매 종료 완료] saleId: {}, endAt: {}",
+                        sale.getId(),
+                        sale.getEndAt()
+                );
+            } catch (Exception e) {
+                log.error(
+                        "[자동 판매 종료 실패] saleId: {}",
+                        sale.getId(),
+                        e
+                );
             }
         }
     }
