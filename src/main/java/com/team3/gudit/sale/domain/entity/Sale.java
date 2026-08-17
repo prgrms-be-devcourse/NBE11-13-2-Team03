@@ -82,23 +82,12 @@ public class Sale {
         if (this.remainingStock - count < 0) {
             throw new BusinessException(SaleErrorCode.NOT_ENOUGH_STOCK);
         }
-        this.remainingStock -= count;
 
-        if (this.remainingStock == 0) {
-            this.status = SaleStatus.SOLD_OUT;
-        }
+        this.remainingStock -= count;
     }
 
     public void restoreStock(int count) {
         this.remainingStock += count;
-
-        if (this.status == SaleStatus.CLOSED || this.status == SaleStatus.DELETED) {
-           return;
-        }
-
-        if (this.status == SaleStatus.SOLD_OUT && isWithinSalePeriod() && remainingStock > 0) {
-            this.status = SaleStatus.ON_SALE;
-        }
     }
 
     public void syncRemainingStock(int remainingStock) {
@@ -180,13 +169,26 @@ public class Sale {
     }
 
     private void validateStatusTransition(SaleStatus status) {
-        if (this.status == SaleStatus.DELETED || this.status == SaleStatus.CLOSED) {
-            throw new BusinessException(SaleErrorCode.INVALID_STATUS_TRANSITION);
+        if (status == SaleStatus.SOLD_OUT) {
+            throw new BusinessException(
+                    SaleErrorCode.INVALID_STATUS_TRANSITION
+            );
         }
 
-        // 판매중 > 판매 대기로 변경 불가
-        if (this.status == SaleStatus.ON_SALE && status == SaleStatus.READY) {
-            throw new BusinessException(SaleErrorCode.INVALID_STATUS_TRANSITION);
+        if (this.status == SaleStatus.DELETED
+                || this.status == SaleStatus.CLOSED) {
+
+            throw new BusinessException(
+                    SaleErrorCode.INVALID_STATUS_TRANSITION
+            );
+        }
+
+        if (this.status == SaleStatus.ON_SALE
+                && status == SaleStatus.READY) {
+
+            throw new BusinessException(
+                    SaleErrorCode.INVALID_STATUS_TRANSITION
+            );
         }
     }
 
