@@ -55,6 +55,7 @@ public class SaleWarmupScheduler {
         List<Sale> sales = saleRepository
                 .findByStatusAndStartAtLessThanEqual(
                         SaleStatus.READY,
+                        now,
                         now
                 );
 

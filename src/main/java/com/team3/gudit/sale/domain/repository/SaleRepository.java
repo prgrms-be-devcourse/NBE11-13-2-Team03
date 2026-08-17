@@ -26,7 +26,8 @@ public interface SaleRepository extends JpaRepository<Sale, Long> {
 
     List<Sale> findByStatusAndStartAtLessThanEqual(
             SaleStatus status,
-            LocalDateTime startAt
+            LocalDateTime startAt,
+            LocalDateTime endAt
     );
 
     List<Sale> findByStatusAndEndAtLessThanEqual(

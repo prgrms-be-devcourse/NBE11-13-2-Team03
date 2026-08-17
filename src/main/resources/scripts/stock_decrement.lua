@@ -55,8 +55,11 @@ end
 redis.call('DECRBY', stockKey, quantity)
 redis.call('INCRBY', userKey, quantity)
 
--- 유저 Key 자동 삭제를 위한 TTL 부여 (판매 종료 시점)
-redis.call('PEXPIREAT', userKey, endAt)
+-- 유저 Key 자동 삭제를 위한 TTL 부여 (판매 종료 시점 + 1일)
+-- 판매 종료 후에도 결제 실패/타임아웃 복구가 가능하도록 판매 종료 시점 + 1일까지 사용자 구매 기록 유지
+local USER_KEY_BUFFER_MILLIS = 86400000
+local userKeyExpireAt = endAt + USER_KEY_BUFFER_MILLIS
+redis.call('PEXPIREAT', userKey, userKeyExpireAt)
 
 -- 성공 시 1 반환 (Java 단에서 성공 판별용)
 return 1
