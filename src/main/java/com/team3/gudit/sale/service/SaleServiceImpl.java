@@ -21,6 +21,8 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -89,9 +91,8 @@ public class SaleServiceImpl implements SaleService {
                 request.endAt()
         );
 
-        // 판매 시작 전 수량이 변경될 수 있으므로 Redis 초기 재고 키도 함께 동기화
-        String stockKey = "sale:" + saleId + ":stock";
-        redisTemplate.opsForValue().set(stockKey, String.valueOf(request.initialStock()));
+        // 변경된 stock/info를 다시 적재하고 TTL도 다시 설정
+        warmupSaleInfo(saleId);
 
         return SaleDetailResponseDto.from(sale);
     }
@@ -181,17 +182,30 @@ public class SaleServiceImpl implements SaleService {
         String stockKey = "sale:" + id + ":stock";
         String infoKey = "sale:" + id + ":info";
 
-        // 1. Redis에 실시간 재고 수량 캐싱 (Key: sale:{id}:stock)
+        // 재고 캐싱
         redisTemplate.opsForValue().set(stockKey, String.valueOf(sale.getRemainingStock()));
 
-        // 2. Redis에 판매 정책 정보(시작/종료 시간, 1인당 최대 수량) Hash 세팅 (Key: sale:{id}:info)
+        // 판매 정보 캐싱
         SaleRedisDto dto = SaleRedisDto.from(sale);
         redisTemplate.opsForHash().putAll(infoKey, dto.toHashFields());
 
-        // 3. 판매 종료 후 메모리 자동 정리를 위한 TTL 설정 (예: endAt + 2일)
-        // long ttlSeconds = calculateTtlSeconds(sale.getEndAt());
-        // redisTemplate.expire(stockKey, Duration.ofSeconds(ttlSeconds));
-        // redisTemplate.expire(infoKey, Duration.ofSeconds(ttlSeconds));
+        // 판매 종료 후 2일까지 유지
+        LocalDateTime expireAt = sale.getEndAt().plusDays(2);
+
+        Duration ttl = Duration.between(
+                LocalDateTime.now(),
+                expireAt
+        );
+
+        if (ttl.isNegative() || ttl.isZero()) {
+            redisTemplate.delete(
+                    List.of(stockKey, infoKey)
+            );
+            return;
+        }
+
+        redisTemplate.expire(stockKey, ttl);
+        redisTemplate.expire(infoKey, ttl);
     }
 
     @Override
