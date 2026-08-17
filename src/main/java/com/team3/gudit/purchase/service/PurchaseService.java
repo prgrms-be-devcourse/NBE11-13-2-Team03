@@ -22,6 +22,8 @@ import com.team3.gudit.user.exception.UserErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.List;
 
@@ -60,6 +62,12 @@ public class PurchaseService {
                 ));
 
         inventoryService.decreaseStock(
+                saleId,
+                userId,
+                1
+        );
+
+        registerStockRollback(
                 saleId,
                 userId,
                 1
@@ -195,6 +203,33 @@ public class PurchaseService {
                 purchase.getStatus(),
                 purchase.getPurchasedAt(),
                 purchase.getCanceledAt()
+        );
+    }
+
+    private void registerStockRollback(
+            Long saleId,
+            Long userId,
+            int quantity
+    ) {
+        if (!TransactionSynchronizationManager
+                .isSynchronizationActive()) {
+            return;
+        }
+
+        TransactionSynchronizationManager.registerSynchronization(
+                new TransactionSynchronization() {
+
+                    @Override
+                    public void afterCompletion(int status) {
+                        if (status != STATUS_COMMITTED) {
+                            inventoryService.restoreStock(
+                                    saleId,
+                                    userId,
+                                    quantity
+                            );
+                        }
+                    }
+                }
         );
     }
 }
