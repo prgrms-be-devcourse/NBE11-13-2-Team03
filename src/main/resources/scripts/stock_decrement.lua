@@ -23,7 +23,7 @@ end
 startAt = tonumber(startAt)
 endAt = tonumber(endAt)
 
-if nowMilli < startAt or nowMilli > endAt then
+if nowMilli < startAt or nowMilli >= endAt then
     return -2 -- INVALID_SALE_PERIOD
 end
 
