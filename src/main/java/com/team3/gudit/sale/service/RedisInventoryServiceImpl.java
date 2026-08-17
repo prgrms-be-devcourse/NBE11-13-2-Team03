@@ -20,6 +20,7 @@ public class RedisInventoryServiceImpl implements InventoryService {
 
     private final StringRedisTemplate redisTemplate;
     private final DefaultRedisScript<Long> stockDecrementScript;
+    private final DefaultRedisScript<Long> stockRestoreScript;
     private final SaleRepository saleRepository;
 
     /**
@@ -61,15 +62,16 @@ public class RedisInventoryServiceImpl implements InventoryService {
         String stockKey = "sale:" + saleId + ":stock";
         String userKey = "sale:" + saleId + ":user:" + userId;
 
-        // 1. 전체 재고 복원 (+quantity)
-        redisTemplate.opsForValue().increment(stockKey, quantity);
+        Long result = redisTemplate.execute(
+                stockRestoreScript,
+                List.of(stockKey, userKey),
+                String.valueOf(quantity)
+        );
 
-        // 2. 유저별 구매 수량 차감 (-quantity)
-        Long current = redisTemplate.opsForValue().decrement(userKey, quantity);
-
-        // 3. 차감 후 수량이 0 이하이면 유저 Key 삭제 (메모리 정리 & nil 상태 복원)
-        if (current != null && current <= 0) {
-            redisTemplate.delete(userKey);
+        if (result == null) {
+            throw new BusinessException(
+                    GlobalErrorCode.INTERNAL_SERVER_ERROR
+            );
         }
     }
 

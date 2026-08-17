@@ -12,8 +12,33 @@ public class RedisScriptConfig {
     @Bean
     public DefaultRedisScript<Long> stockDecrementScript() {
         DefaultRedisScript<Long> redisScript = new DefaultRedisScript<>();
-        redisScript.setScriptSource(new ResourceScriptSource(new ClassPathResource("scripts/stock_decrement.lua")));
+        redisScript.setScriptSource(
+                new ResourceScriptSource(
+                        new ClassPathResource(
+                                "scripts/stock_decrement.lua"
+                        )
+                )
+        );
         redisScript.setResultType(Long.class);
+
+        return redisScript;
+    }
+
+    @Bean
+    public DefaultRedisScript<Long> stockRestoreScript() {
+        DefaultRedisScript<Long> redisScript =
+                new DefaultRedisScript<>();
+
+        redisScript.setScriptSource(
+                new ResourceScriptSource(
+                        new ClassPathResource(
+                                "scripts/stock_restore.lua"
+                        )
+                )
+        );
+
+        redisScript.setResultType(Long.class);
+
         return redisScript;
     }
 }
