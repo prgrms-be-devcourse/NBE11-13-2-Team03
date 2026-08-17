@@ -165,7 +165,11 @@ public class SaleServiceImpl implements SaleService {
 
         // Redis: 삭제된 상품의 재고 Key가 메모리를 차지하지 않도록 즉시 삭제
         String stockKey = "sale:" + id + ":stock";
-        redisTemplate.delete(stockKey);
+        String infoKey = "sale:" + id + ":info";
+
+        redisTemplate.delete(
+                List.of(stockKey, infoKey)
+        );
     }
 
     @Override
