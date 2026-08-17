@@ -1,6 +1,7 @@
 package com.team3.gudit.sale.service;
 
 import com.team3.gudit.global.exception.BusinessException;
+import com.team3.gudit.global.exception.GlobalErrorCode;
 import com.team3.gudit.goods.domain.entity.Goods;
 import com.team3.gudit.goods.domain.repository.GoodsRepository;
 import com.team3.gudit.goods.exception.GoodsErrorCode;
@@ -62,21 +63,6 @@ public class SaleServiceImpl implements SaleService {
                 .toList();
     }
 
-    /**
-     * 판매 정보 및 초기 재고를 수정합니다.
-     * <p>
-     * - 판매 시작 전인 <b>READY(판매 대기)</b> 상태에서만 정보 수정이 가능합니다.<br>
-     * - RDB의 Entity 수정과 함께 Redis 메모리의 초기 재고 키(sale:{id}:stock)도 동기화합니다.
-     * </p>
-
-     * @param saleId  수정할 판매 상품의 PK
-     * @param request 수정할 초기 재고, 1인당 최대 구매 수량, 판매 시작/종료 일시
-     * @return 수정 처리된 판매 상세 응답 DTO
-     * @throws BusinessException <ul>
-     * <li>{@link SaleErrorCode#SALE_NOT_FOUND}: 해당 ID의 판매 상품이 없는 경우</li>
-     * <li>{@link SaleErrorCode#CANNOT_UPDATE_ONGOING_SALE}: READY 상태가 아닌 경우</li>
-     * </ul>
-     */
     @Override
     @Transactional
     public SaleDetailResponseDto updateSale(Long saleId, SaleUpdateRequestDto request) {
@@ -97,20 +83,7 @@ public class SaleServiceImpl implements SaleService {
         return SaleDetailResponseDto.from(sale);
     }
 
-    /**
-     * 판매 상품의 상태(SaleStatus)를 변경합니다.
-     * <p>
-     * - READY, ON_SALE, SOLD_OUT, CLOSED 등 상품의 진행 상태를 전환할 때 사용합니다.<br>
-     * - 상태 변경에 따른 추가적인 비즈니스 검증은 {@link Sale#updateSaleStatus(SaleStatus)} 엔티티 내부에서 수행됩니다.
-     * </p>
-     *
-     * @param saleId  상태를 변경할 판매 상품의 PK
-     * @param request 변경하고자 하는 목표 판매 상태(status)
-     * @return 변경 완료된 판매 상태 응답 DTO
-     * @throws BusinessException <ul>
-     * <li>{@link SaleErrorCode#SALE_NOT_FOUND}: 해당 ID의 판매 상품이 없는 경우</li>
-     * </ul>
-     */
+
     @Override
     @Transactional
     public SaleStatusUpdateResponseDto updateSaleStatus(Long saleId, SaleStatusUpdateRequestDto request) {
@@ -139,20 +112,6 @@ public class SaleServiceImpl implements SaleService {
 
     }
 
-
-    /**
-     * 판매 상품을 삭제(Soft Delete) 처리하고 연동된 Redis 재고 키를 삭제합니다.
-     * <p>
-     * - 진행 중(<b>ON_SALE</b>) 상태인 판매 상품은 삭제할 수 없으며 예외가 발생합니다.<br>
-     * - RDB 데이터는 감사/이력 관리를 위해 Soft Delete 처리하고, Redis 메모리의 재고 Key는 즉시 Cleanup 합니다.
-     * </p>
-     *
-     * @param id 삭제할 판매 상품의 PK
-     * @throws BusinessException <ul>
-     * <li>{@link SaleErrorCode#SALE_NOT_FOUND}: 해당 ID의 판매 상품이 없는 경우</li>
-     * <li>{@link SaleErrorCode#CANNOT_DELETE_ONGOING_SALE}: 진행 중(ON_SALE) 상태인 상품을 삭제하려는 경우</li>
-     * </ul>
-     */
     @Override
     @Transactional
     public void deleteSale(Long id) {
@@ -236,15 +195,39 @@ public class SaleServiceImpl implements SaleService {
                         new BusinessException(SaleErrorCode.SALE_NOT_FOUND)
                 );
 
-        // DB: ON_SALE -> CLOSED
-        sale.updateSaleStatus(SaleStatus.CLOSED);
-
-        // Redis에서 즉시 구매 차단
+        String stockKey = "sale:" + id + ":stock";
         String infoKey = "sale:" + id + ":info";
+
+        // 1. Redis에서 먼저 신규 구매 차단
         redisTemplate.opsForHash().put(
                 infoKey,
                 "status",
                 SaleStatus.CLOSED.name()
         );
+
+        // 2. 구매 차단 후 최종 재고 조회
+        String redisStock = redisTemplate.opsForValue().get(stockKey);
+
+        if (redisStock == null) {
+            throw new BusinessException(
+                    GlobalErrorCode.INTERNAL_SERVER_ERROR
+            );
+        }
+
+        int finalRemainingStock;
+
+        try {
+            finalRemainingStock = Integer.parseInt(redisStock);
+        } catch (NumberFormatException e) {
+            throw new BusinessException(
+                    GlobalErrorCode.INTERNAL_SERVER_ERROR
+            );
+        }
+
+        // 3. 최종 재고 RDB 동기화
+        sale.syncRemainingStock(finalRemainingStock);
+
+        // 4. DB 판매 종료
+        sale.updateSaleStatus(SaleStatus.CLOSED);
     }
 }
