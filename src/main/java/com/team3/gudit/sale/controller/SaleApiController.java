@@ -47,7 +47,7 @@ public class SaleApiController {
         return ResponseEntity.ok().body(response);
     }
 
-    @PatchMapping("/{saleId}")
+    @PutMapping("/{saleId}")
     public ResponseEntity<SaleDetailResponseDto> updateSale(
             @PathVariable Long saleId,
             @Valid @RequestBody SaleUpdateRequestDto request) {
@@ -58,7 +58,7 @@ public class SaleApiController {
     @PatchMapping("/{saleId}/status")
     public ResponseEntity<SaleStatusUpdateResponseDto> updateSaleStatus(
             @PathVariable Long saleId,
-            @RequestBody SaleStatusUpdateRequestDto request) {
+            @Valid @RequestBody SaleStatusUpdateRequestDto request) {
         SaleStatusUpdateResponseDto response = saleService.updateSaleStatus(saleId, request);
         return ResponseEntity.ok(response);
     }
