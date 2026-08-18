@@ -55,6 +55,24 @@ public enum SaleErrorCode implements ErrorCode {
             HttpStatus.BAD_REQUEST,
             "SALE_008",
             "올바르지 않은 판매 상태 변경 요청입니다."
+    ),
+
+    INVALID_INITIAL_STOCK(
+            HttpStatus.BAD_REQUEST,
+        "SALE_009",
+                "초기 재고는 1개 이상이어야 합니다."
+    ),
+
+    INVALID_MAX_PURCHASE_QUANTITY(
+            HttpStatus.BAD_REQUEST,
+        "SALE_010",
+                "최대 구매 가능 수량은 1개 이상이어야 합니다."
+    ),
+
+    INVALID_PURCHASE_QUANTITY(
+            HttpStatus.BAD_REQUEST,
+        "SALE_011",
+                "구매 수량은 1개 이상이어야 합니다."
     );
 
     private final HttpStatus status;

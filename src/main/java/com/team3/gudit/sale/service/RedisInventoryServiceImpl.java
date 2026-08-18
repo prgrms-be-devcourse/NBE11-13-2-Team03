@@ -23,18 +23,10 @@ public class RedisInventoryServiceImpl implements InventoryService {
     private final DefaultRedisScript<Long> stockRestoreScript;
     private final SaleRepository saleRepository;
 
-    /**
-     * 판매 시작 전 Warm-up (Redis 캐싱)
-     * <p>
-     * * @param sale RDB에서 조회한 판매 엔티티
-     *  * - Cached Keys:
-     *  *   1) sale:{id}:stock -> 남아있는 재고 수량 (String)
-     *  *   2) sale:{id}:info  -> 판매 정책 정보 (Hash: startAt, endAt, maxPurchaseQuantity)
-     *  */
-
-
     @Override
     public void decreaseStock(Long saleId, Long userId, int quantity) {
+        validateQuantity(quantity);
+
         String stockKey = "sale:" + saleId + ":stock";
         String infoKey = "sale:" + saleId + ":info";
         String userKey = "sale:" + saleId + ":user:" + userId;
@@ -59,6 +51,8 @@ public class RedisInventoryServiceImpl implements InventoryService {
 
     @Override
     public void restoreStock(Long saleId, Long userId, int quantity) {
+        validateQuantity(quantity);
+
         String stockKey = "sale:" + saleId + ":stock";
         String userKey = "sale:" + saleId + ":user:" + userId;
 
@@ -87,6 +81,14 @@ public class RedisInventoryServiceImpl implements InventoryService {
             throw new BusinessException(SaleErrorCode.SALE_CLOSED);
         } else {
             throw new BusinessException(SaleErrorCode.NOT_ENOUGH_STOCK);
+        }
+    }
+
+    private void validateQuantity(int quantity) {
+        if (quantity <= 0) {
+            throw new BusinessException(
+                    SaleErrorCode.INVALID_PURCHASE_QUANTITY
+            );
         }
     }
 }

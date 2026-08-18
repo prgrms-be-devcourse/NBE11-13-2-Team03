@@ -12,6 +12,7 @@ import com.team3.gudit.sale.dto.response.SaleListResponseDto;
 import com.team3.gudit.sale.dto.response.SaleStatusUpdateResponseDto;
 import com.team3.gudit.sale.exception.SaleErrorCode;
 import com.team3.gudit.sale.service.SaleService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,7 +29,8 @@ public class SaleApiController {
     private final SaleService saleService;
 
     @PostMapping
-    public ResponseEntity<SaleCreateResponseDto> createSale(@RequestBody SaleCreateRequestDto request) {
+    public ResponseEntity<SaleCreateResponseDto> createSale(
+            @Valid @RequestBody SaleCreateRequestDto request) {
         SaleCreateResponseDto response = saleService.createSale(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -48,7 +50,7 @@ public class SaleApiController {
     @PatchMapping("/{saleId}")
     public ResponseEntity<SaleDetailResponseDto> updateSale(
             @PathVariable Long saleId,
-            @RequestBody SaleUpdateRequestDto request) {
+            @Valid @RequestBody SaleUpdateRequestDto request) {
         SaleDetailResponseDto response = saleService.updateSale(saleId, request);
         return ResponseEntity.ok(response);
     }

@@ -67,6 +67,14 @@ public class Sale {
     @Builder
     private Sale(Long id, Goods goods, Long createdBy, Integer initialStock, Integer remainingStock,
                  Integer maxPurchaseQuantity, SaleStatus status, LocalDateTime startAt, LocalDateTime endAt) {
+
+        validateSaleInput(
+                initialStock,
+                maxPurchaseQuantity,
+                startAt,
+                endAt
+        );
+
         this.id = id;
         this.goods = goods;
         this.createdBy = createdBy;
@@ -130,6 +138,13 @@ public class Sale {
     ) {
         validateModifiable();
 
+        validateSaleInput(
+                initialStock,
+                maxPurchaseQuantity,
+                startAt,
+                endAt
+        );
+
         this.initialStock = initialStock;
         this.remainingStock = initialStock;
         this.maxPurchaseQuantity = maxPurchaseQuantity;
@@ -189,6 +204,27 @@ public class Sale {
             throw new BusinessException(
                     SaleErrorCode.INVALID_STATUS_TRANSITION
             );
+        }
+    }
+
+    private static void validateSaleInput(
+            Integer initialStock,
+            Integer maxPurchaseQuantity,
+            LocalDateTime startAt,
+            LocalDateTime endAt
+    ) {
+        if (initialStock == null || initialStock <= 0) {
+            throw new BusinessException(SaleErrorCode.INVALID_INITIAL_STOCK);
+        }
+
+        if (maxPurchaseQuantity == null || maxPurchaseQuantity <= 0) {
+            throw new BusinessException(
+                    SaleErrorCode.INVALID_MAX_PURCHASE_QUANTITY
+            );
+        }
+
+        if (startAt == null || endAt == null || !startAt.isBefore(endAt)) {
+            throw new BusinessException(SaleErrorCode.INVALID_SALE_PERIOD);
         }
     }
 
