@@ -129,8 +129,53 @@ a {
     top: 2px;
 }
 
+.kakao-header-login[hidden],
+.user-area[hidden] {
+    display: none !important;
+}
+
 .kakao-header-login img {
     display: block;
+}
+
+.user-area {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.user-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-main);
+    white-space: nowrap;
+}
+
+.logout-button {
+    height: 32px;
+    padding: 0 12px;
+
+    border: 1px solid var(--border);
+    border-radius: 8px;
+
+    font-size: 12px;
+    font-weight: 600;
+
+    color: var(--text-sub);
+    background: #ffffff;
+
+    cursor: pointer;
+}
+
+.logout-button:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+    background: var(--primary-soft);
+}
+
+.logout-button:disabled {
+    cursor: default;
+    opacity: 0.6;
 }
 
 
@@ -415,6 +460,18 @@ a {
 
     box-shadow:
             0 12px 32px rgba(31, 41, 55, 0.07);
+}
+
+.sale-empty-message {
+    grid-column: 1 / -1;
+
+    padding: 80px 20px;
+
+    text-align: center;
+
+    font-size: 14px;
+
+    color: var(--text-muted);
 }
 
 /* Sale Image */
@@ -937,6 +994,20 @@ a {
             0 10px 28px rgba(31, 41, 55, 0.06);
 }
 
+.purchase-empty-message {
+    padding: 80px 20px;
+    text-align: center;
+    font-size: 14px;
+    color: var(--text-muted);
+}
+
+.purchase-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
 /* Thumbnail */
 
 .purchase-thumbnail {
@@ -1026,6 +1097,11 @@ a {
     font-size: 10px;
     font-weight: 700;
     letter-spacing: 0.3px;
+}
+
+.purchase-status.status-pending {
+    color: #b7791f;
+    background: #fff7df;
 }
 
 .status-purchased {
@@ -1159,6 +1235,35 @@ a {
     font-weight: 800;
 }
 
+.purchase-detail-real-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.purchase-cancel-button {
+    width: 100%;
+    min-height: 50px;
+    margin-top: 24px;
+    border: 1px solid #f3c9c9;
+    border-radius: 10px;
+    background: #fff;
+    font-size: 14px;
+    font-weight: 700;
+    color: #e05b5b;
+    cursor: pointer;
+}
+
+.purchase-cancel-button:hover {
+    background: #fff5f5;
+}
+
+.purchase-cancel-button:disabled {
+    cursor: default;
+    opacity: 0.6;
+}
+
 /* Detail Information */
 
 .purchase-detail-info {
@@ -1216,47 +1321,6 @@ a {
     background: var(--primary-soft);
 }
 
-/* Cancel */
-
-.cancel-purchase-button {
-    width: 100%;
-    height: 52px;
-
-    margin-top: 14px;
-
-    border: 1px solid #ef8b88;
-    border-radius: 11px;
-
-    font: inherit;
-    font-size: 14px;
-    font-weight: 700;
-
-    color: #df5c58;
-    background: #ffffff;
-
-    cursor: pointer;
-
-    transition:
-            color 0.2s ease,
-            background 0.2s ease,
-            border-color 0.2s ease;
-}
-
-.cancel-purchase-button:hover {
-    border-color: #df6965;
-
-    color: #c84945;
-    background: #fff7f7;
-}
-
-.cancel-purchase-button:disabled {
-    border-color: var(--border);
-
-    color: var(--text-muted);
-    background: #f3f5f7;
-
-    cursor: default;
-}
 
 /* =========================
    11. Payment
@@ -1504,6 +1568,7 @@ a {
 
     font-size: 28px;
     font-weight: 800;
+    line-height: 1;
 }
 
 .payment-result-icon.success {
@@ -1578,12 +1643,35 @@ a {
 }
 
 .payment-result-icon.fail {
-    color: #ffffff;
+    position: relative;
     background: #df6965;
 }
 
+.payment-result-icon.fail::before,
+.payment-result-icon.fail::after {
+    content: "";
+
+    position: absolute;
+    top: 50%;
+    left: 50%;
+
+    width: 18px;
+    height: 4px;
+
+    border-radius: 2px;
+    background: #ffffff;
+}
+
+.payment-result-icon.fail::before {
+    transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.payment-result-icon.fail::after {
+    transform: translate(-50%, -50%) rotate(-45deg);
+}
+
 .payment-fail-eyebrow {
-    color: #df6965;
+    color: #df6965 !important;
 }
 
 .payment-fail-text {
@@ -1593,6 +1681,10 @@ a {
 /* =========================
    13. Admin Common
 ========================= */
+
+body:has(.admin-page) {
+    background: #e9edf2;
+}
 
 .admin-page {
     padding-top: 64px;
@@ -1762,6 +1854,19 @@ a {
     font-weight: 800;
 
     color: #ffffff;
+}
+
+.admin-product-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.admin-empty-message {
+    padding: 60px 20px;
+    text-align: center;
+    color: var(--text-muted);
 }
 
 .mock-admin-keyring {
@@ -1940,6 +2045,32 @@ a {
     padding: 0 14px;
 }
 
+.form-group input[type="file"] {
+    display: flex;
+    align-items: center;
+
+    height: 46px;
+    padding: 8px 12px;
+
+    line-height: 1.4;
+}
+
+.form-group input[type="file"]::file-selector-button {
+    margin-right: 10px;
+    padding: 6px 10px;
+
+    border: 1px solid var(--border);
+    border-radius: 6px;
+
+    font: inherit;
+    font-size: 12px;
+
+    color: var(--text-main);
+    background: var(--bg-soft);
+
+    cursor: pointer;
+}
+
 .form-group textarea {
     padding: 13px 14px;
 
@@ -2047,14 +2178,37 @@ a {
    <section class="admin-summary admin-sale-summary">
 */
 
+.admin-sale-header h1 {
+    color: #1f5f8b;
+}
+
 .admin-sale-summary {
     grid-template-columns: repeat(4, 1fr);
+}
+
+.admin-sale-summary .admin-summary-card {
+    border: 1px solid var(--border);
+    background: #ffffff;
+}
+
+.admin-sale-summary .admin-summary-card span {
+    color: #1f5f8b;
+    font-weight: 600;
+}
+
+.admin-sale-summary .admin-summary-card strong {
+    color: var(--text-main);
 }
 
 .admin-sale-table {
     width: 100%;
 
     table-layout: auto;
+}
+
+.admin-sale-table th {
+    color: #1f5f8b;
+    background: #f5f7fa;
 }
 
 .admin-sale-table th,
@@ -2170,10 +2324,6 @@ a {
 
     .payment-layout {
         grid-template-columns: 1fr;
-    }
-
-    .payment-summary-card {
-        position: static;
     }
 
     .admin-sale-summary {

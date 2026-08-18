@@ -18,9 +18,9 @@
         ← 내 구매 내역으로 돌아가기
     </a>
 
-    <section class="purchase-detail">
+    <section id="purchase-detail" class="purchase-detail">
 
-        <div class="purchase-detail-image">
+        <div id="purchase-detail-image" class="purchase-detail-image">
             <div class="detail-mock-keyring">
                 GUDIT
             </div>
@@ -30,12 +30,18 @@
 
             <div class="purchase-detail-header">
                 <div>
-                    <span class="purchase-status status-purchased">
-                        PURCHASED
+                    <span
+                            id="purchase-status-badge"
+                            class="purchase-status">
                     </span>
 
-                    <h1>개발자 키링</h1>
-                    <p class="purchase-detail-price">15,000원</p>
+                    <h1 id="purchase-goods-name">-</h1>
+
+                    <p
+                            id="purchase-price"
+                            class="purchase-detail-price">
+                        -
+                    </p>
                 </div>
             </div>
 
@@ -43,34 +49,40 @@
 
                 <div class="purchase-detail-row">
                     <span>수량</span>
-                    <strong>1개</strong>
+                    <strong id="purchase-quantity">-</strong>
                 </div>
 
                 <div class="purchase-detail-row">
                     <span>구매 금액</span>
-                    <strong>15,000원</strong>
+                    <strong id="purchase-total-price">-</strong>
                 </div>
 
                 <div class="purchase-detail-row">
                     <span>구매 상태</span>
-                    <strong class="purchase-state-text">PURCHASED</strong>
+                    <strong
+                            id="purchase-status-text"
+                            class="purchase-state-text">
+                        -
+                    </strong>
                 </div>
 
                 <div class="purchase-detail-row">
                     <span>구매 일시</span>
-                    <strong>2026.08.10 15:40</strong>
+                    <strong id="purchase-date">-</strong>
                 </div>
 
             </div>
 
-            <div class="purchase-detail-message">
-                구매가 완료되었습니다.<br>
-                구매 취소가 가능한 경우 아래 버튼을 통해 취소할 수 있습니다.
+            <div
+                    id="purchase-detail-message"
+                    class="purchase-detail-message">
             </div>
 
             <button
+                    id="purchase-cancel-button"
                     type="button"
-                    class="cancel-purchase-button">
+                    class="cancel-purchase-button"
+                    hidden>
                 구매 취소
             </button>
 
@@ -79,6 +91,8 @@
     </section>
 
 </main>
+
+<script src="/js/purchase/detail.js"></script>
 
 </body>
 </html>

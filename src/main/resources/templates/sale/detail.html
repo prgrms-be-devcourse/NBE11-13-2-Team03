@@ -4,10 +4,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>개발자 키링 | Gudit</title>
+    <title>굿즈 상세 | Gudit</title>
 
     <link rel="stylesheet" href="/css/style.css">
 </head>
+
 <body>
 
 <header th:replace="~{fragments/header :: header}"></header>
@@ -18,11 +19,12 @@
         ← 판매 목록으로 돌아가기
     </a>
 
-    <section class="sale-detail">
+    <section id="sale-detail" class="sale-detail">
 
         <div class="sale-detail-left">
 
             <div class="detail-image-wrap">
+                <!-- TODO: 상세 응답에 imageUrl 추가 후 실제 이미지로 교체 -->
                 <div class="detail-mock-keyring">
                     GUDIT
                 </div>
@@ -32,90 +34,109 @@
 
         <div class="sale-detail-right">
 
-            <span class="status-badge detail-status status-on-sale">
-                판매 중
+            <span
+                    id="sale-status-badge"
+                    class="status-badge detail-status">
             </span>
 
-            <h1 class="detail-product-name">
-                개발자 키링
+            <h1
+                    id="sale-name"
+                    class="detail-product-name">
             </h1>
 
-            <p class="detail-price">
-                15,000원
+            <p
+                    id="sale-price"
+                    class="detail-price">
             </p>
 
+            <!-- TODO: 상세 응답에 description 추가 후 실제 설명으로 교체 -->
             <p class="detail-description">
-                Gudit 로고가 담긴 심플한 디자인의 한정 아크릴 키링입니다.
+                Gudit 한정 굿즈입니다.
             </p>
 
             <div class="detail-info-card">
 
                 <div class="detail-info-row">
                     <span>판매 상태</span>
-                    <strong class="on-sale-text">판매 중</strong>
+
+                    <strong id="sale-status-text"></strong>
                 </div>
 
                 <div class="detail-info-row">
                     <span>남은 수량</span>
-                    <strong class="stock-emphasis">17 / 100</strong>
+
+                    <strong
+                            id="sale-stock"
+                            class="stock-emphasis">
+                    </strong>
                 </div>
 
                 <div class="detail-stock-bar">
-                    <div class="detail-stock-bar-fill"
-                         style="width: 17%;">
+                    <div
+                            id="sale-stock-bar"
+                            class="detail-stock-bar-fill">
                     </div>
                 </div>
 
                 <div class="detail-info-row">
                     <span>판매 기간</span>
-                    <strong>
-                        2026.08.10 18:00 ~ 20:00
-                    </strong>
+
+                    <strong id="sale-period"></strong>
                 </div>
 
                 <div class="detail-info-row">
                     <span>구매 가능 수량</span>
-                    <strong>1개</strong>
+
+                    <strong id="sale-max-purchase"></strong>
                 </div>
 
             </div>
 
-            <div class="countdown-card">
-                <span class="countdown-label">
+            <div
+                    id="countdown-card"
+                    class="countdown-card">
+
+                <span
+                        id="countdown-label"
+                        class="countdown-label">
                     판매 종료까지 남은 시간
                 </span>
 
                 <div class="countdown">
+
                     <div>
-                        <strong>00</strong>
+                        <strong id="countdown-hours">00</strong>
                         <span>시간</span>
                     </div>
 
                     <span class="countdown-colon">:</span>
 
                     <div>
-                        <strong>14</strong>
+                        <strong id="countdown-minutes">00</strong>
                         <span>분</span>
                     </div>
 
                     <span class="countdown-colon">:</span>
 
                     <div>
-                        <strong>38</strong>
+                        <strong id="countdown-seconds">00</strong>
                         <span>초</span>
                     </div>
+
                 </div>
+
             </div>
 
             <button
+                    id="purchase-button"
                     type="button"
                     class="purchase-button">
                 구매하기
             </button>
 
-            <p class="purchase-notice">
-                판매가 시작되면 선착순으로 구매가 진행됩니다.
-                한 계정당 1개만 구매할 수 있습니다.
+            <p
+                    id="purchase-notice"
+                    class="purchase-notice">
             </p>
 
         </div>
@@ -123,6 +144,8 @@
     </section>
 
 </main>
+
+<script src="/js/sale/detail.js"></script>
 
 </body>
 </html>

@@ -1,11 +1,14 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>결제 | GUDIT</title>
 
-    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" href="/css/style.css">
+
+    <script src="https://js.tosspayments.com/v2/standard"></script>
 </head>
 
 <body>
@@ -14,19 +17,23 @@
 
 <main class="main payment-page">
 
-    <a href="/sales/1" class="back-link">
+    <a id="payment-back-link"
+       href="/sales"
+       class="back-link">
         ← 상품 상세로 돌아가기
     </a>
 
     <section class="payment-layout">
 
-        <!-- 상품 정보 -->
         <div class="payment-product-card">
 
             <div class="payment-product-image">
+
+                <!-- TODO: Sale 응답에 imageUrl 추가 후 실제 이미지로 교체 -->
                 <div class="detail-mock-keyring">
                     GUDIT
                 </div>
+
             </div>
 
             <div class="payment-product-content">
@@ -47,17 +54,17 @@
 
                     <div class="payment-info-row">
                         <span>상품명</span>
-                        <strong>개발자 키링</strong>
+                        <strong id="payment-goods-name">-</strong>
                     </div>
 
                     <div class="payment-info-row">
                         <span>구매 수량</span>
-                        <strong>1개</strong>
+                        <strong id="payment-quantity">-</strong>
                     </div>
 
                     <div class="payment-info-row">
                         <span>상품 금액</span>
-                        <strong>15,000원</strong>
+                        <strong id="payment-product-price">-</strong>
                     </div>
 
                 </div>
@@ -66,8 +73,6 @@
 
         </div>
 
-
-        <!-- 결제 정보 -->
         <aside class="payment-summary-card">
 
             <h2>
@@ -78,12 +83,12 @@
 
                 <div class="payment-summary-row">
                     <span>상품 금액</span>
-                    <strong>15,000원</strong>
+                    <strong id="payment-summary-price">-</strong>
                 </div>
 
                 <div class="payment-summary-row">
                     <span>구매 수량</span>
-                    <strong>1개</strong>
+                    <strong id="payment-summary-quantity">-</strong>
                 </div>
 
             </div>
@@ -94,8 +99,8 @@
                     최종 결제 금액
                 </span>
 
-                <strong>
-                    15,000원
+                <strong id="payment-total-price">
+                    -
                 </strong>
 
             </div>
@@ -104,7 +109,7 @@
                     id="payment-button"
                     type="button"
                     class="payment-submit-button">
-                15,000원 결제하기
+                결제하기
             </button>
 
             <p class="payment-notice">
@@ -116,6 +121,11 @@
     </section>
 
 </main>
+
+<script th:inline="javascript">
+    window.TOSS_CLIENT_KEY = /*[[${clientKey}]]*/ "";
+</script>
+<script src="/js/payment/payment.js"></script>
 
 </body>
 </html>

@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>판매 등록 | Gudit</title>
+    <title>판매 관리 | Gudit</title>
 
     <link rel="stylesheet" href="/css/style.css">
 </head>
@@ -20,65 +20,63 @@
 
     <section class="admin-form-header">
         <span class="page-eyebrow">ADMIN</span>
-        <h1>판매 등록</h1>
-        <p>판매할 굿즈와 수량, 판매 기간을 설정합니다.</p>
+
+        <h1 id="sale-form-title">
+            판매 등록
+        </h1>
+
+        <p id="sale-form-description">
+            판매할 굿즈와 수량, 판매 기간을 설정합니다.
+        </p>
     </section>
 
     <section class="admin-form-card">
 
-        <form class="admin-form">
+        <form id="sale-form" class="admin-form">
 
             <div class="form-group">
-                <label for="goodsId">
+                <label for="goods-id">
                     판매 상품
                     <span class="required">*</span>
                 </label>
 
-                <select id="goodsId"
-                        name="goodsId"
+                <select
+                        id="goods-id"
                         required>
                     <option value="" selected disabled>
                         판매할 상품을 선택하세요
                     </option>
-                    <option value="1">
-                        개발자 키링
-                    </option>
-                    <option value="2">
-                        Gudit 티셔츠
-                    </option>
-                    <option value="3">
-                        한정 머그컵
-                    </option>
                 </select>
 
-                <p class="form-help">
+                <p id="goods-help" class="form-help">
                     판매 가능한 상태의 상품만 선택할 수 있습니다.
                 </p>
             </div>
 
             <div class="form-group">
-                <label for="price">
-                    판매 가격
-                    <span class="required">*</span>
+                <label for="goods-price">
+                    상품 가격
                 </label>
 
                 <div class="input-with-unit">
                     <input
-                            type="number"
-                            id="price"
-                            name="price"
-                            min="0"
-                            placeholder="15000"
-                            required>
+                            type="text"
+                            id="goods-price"
+                            value="-"
+                            readonly>
 
                     <span>원</span>
                 </div>
+
+                <p class="form-help">
+                    선택한 상품에 등록된 가격이 적용됩니다.
+                </p>
             </div>
 
             <div class="form-row">
 
                 <div class="form-group">
-                    <label for="initialQuantity">
+                    <label for="initial-stock">
                         초기 수량
                         <span class="required">*</span>
                     </label>
@@ -86,8 +84,7 @@
                     <div class="input-with-unit">
                         <input
                                 type="number"
-                                id="initialQuantity"
-                                name="initialQuantity"
+                                id="initial-stock"
                                 min="1"
                                 placeholder="100"
                                 required>
@@ -97,7 +94,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="maxQuantityPerUser">
+                    <label for="max-purchase-quantity">
                         1인 최대 구매 수량
                         <span class="required">*</span>
                     </label>
@@ -105,8 +102,7 @@
                     <div class="input-with-unit">
                         <input
                                 type="number"
-                                id="maxQuantityPerUser"
-                                name="maxQuantityPerUser"
+                                id="max-purchase-quantity"
                                 min="1"
                                 value="1"
                                 required>
@@ -120,28 +116,26 @@
             <div class="form-row">
 
                 <div class="form-group">
-                    <label for="startAt">
+                    <label for="start-at">
                         판매 시작 일시
                         <span class="required">*</span>
                     </label>
 
                     <input
                             type="datetime-local"
-                            id="startAt"
-                            name="startAt"
+                            id="start-at"
                             required>
                 </div>
 
                 <div class="form-group">
-                    <label for="endAt">
+                    <label for="end-at">
                         판매 종료 일시
                         <span class="required">*</span>
                     </label>
 
                     <input
                             type="datetime-local"
-                            id="endAt"
-                            name="endAt"
+                            id="end-at"
                             required>
                 </div>
 
@@ -153,16 +147,26 @@
                 설정한 수량이 모두 소진되면 <strong>품절</strong> 상태가 됩니다.
             </div>
 
+            <p
+                    id="sale-form-message"
+                    class="form-help">
+            </p>
+
             <div class="admin-form-actions">
-                <a href="/admin/sales"
-                   class="secondary-button">
+
+                <a
+                        href="/admin/sales"
+                        class="secondary-button">
                     취소
                 </a>
 
-                <button type="submit"
+                <button
+                        id="sale-submit-button"
+                        type="submit"
                         class="primary-button form-submit-button">
                     판매 등록
                 </button>
+
             </div>
 
         </form>
@@ -170,6 +174,8 @@
     </section>
 
 </main>
+
+<script src="/js/admin/sale-form.js"></script>
 
 </body>
 </html>
