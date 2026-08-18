@@ -99,8 +99,8 @@ public class Sale {
 
     public void syncRemainingStock(int remainingStock) {
         if (remainingStock < 0) {
-            throw new IllegalArgumentException(
-                    "재고는 0미만 일 수 없습니다."
+            throw new BusinessException(
+                    SaleErrorCode.INVALID_REMAINING_STOCK
             );
         }
 
