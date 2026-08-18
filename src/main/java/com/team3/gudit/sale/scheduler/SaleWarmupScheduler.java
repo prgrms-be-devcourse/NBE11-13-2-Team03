@@ -53,7 +53,7 @@ public class SaleWarmupScheduler {
         LocalDateTime now = LocalDateTime.now();
 
         List<Sale> sales = saleRepository
-                .findByStatusAndStartAtLessThanEqual(
+                .findByStatusAndStartAtLessThanEqualAndEndAtGreaterThan(
                         SaleStatus.READY,
                         now,
                         now
