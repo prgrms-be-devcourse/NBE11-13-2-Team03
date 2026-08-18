@@ -27,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -144,6 +145,8 @@ public class PurchaseService {
             );
         }
 
+        validateCancellationPeriod(purchase);
+
         if (purchase.getStatus() == PurchaseStatus.PENDING_PAYMENT) {
             cancelPendingPayment(purchase, userId);
         } else if (purchase.getStatus() == PurchaseStatus.PURCHASED) {
@@ -248,5 +251,19 @@ public class PurchaseService {
                     }
                 }
         );
+    }
+
+    private void validateCancellationPeriod(Purchase purchase) {
+        LocalDateTime cancellationDeadline =
+                purchase.getSale()
+                        .getEndAt()
+                        .plusDays(1);
+
+        if (!LocalDateTime.now().isBefore(cancellationDeadline)) {
+            throw new BusinessException(
+                    PurchaseErrorCode
+                            .PURCHASE_CANCELLATION_PERIOD_EXPIRED
+            );
+        }
     }
 }

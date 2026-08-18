@@ -63,6 +63,9 @@ public class Sale {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
+    @Column(name = "final_stock_synced_at")
+    private LocalDateTime finalStockSyncedAt;
+
     @Builder
     private Sale(Long id, Goods goods, Long createdBy, Integer initialStock, Integer remainingStock,
                  Integer maxPurchaseQuantity, SaleStatus status, LocalDateTime startAt, LocalDateTime endAt) {
@@ -105,6 +108,10 @@ public class Sale {
         }
 
         this.remainingStock = remainingStock;
+    }
+
+    public void completeFinalStockSync() {
+        this.finalStockSyncedAt = LocalDateTime.now();
     }
 
     public void validateSalePeriod() {

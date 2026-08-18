@@ -34,4 +34,10 @@ public interface SaleRepository extends JpaRepository<Sale, Long> {
             SaleStatus status,
             LocalDateTime endAt
     );
+
+    List<Sale>
+    findByStatusAndFinalStockSyncedAtIsNullAndEndAtLessThanEqual(
+            SaleStatus status,
+            LocalDateTime endAt
+    );
 }

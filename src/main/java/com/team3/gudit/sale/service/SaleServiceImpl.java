@@ -5,6 +5,8 @@ import com.team3.gudit.global.exception.GlobalErrorCode;
 import com.team3.gudit.goods.domain.entity.Goods;
 import com.team3.gudit.goods.domain.repository.GoodsRepository;
 import com.team3.gudit.goods.exception.GoodsErrorCode;
+import com.team3.gudit.purchase.entity.PurchaseStatus;
+import com.team3.gudit.purchase.repository.PurchaseRepository;
 import com.team3.gudit.sale.domain.entity.Sale;
 import com.team3.gudit.sale.domain.repository.SaleRepository;
 import com.team3.gudit.sale.dto.SaleRedisDto;
@@ -33,6 +35,7 @@ public class SaleServiceImpl implements SaleService {
     private final SaleRepository saleRepository;
     private final GoodsRepository goodsRepository;
     private final StringRedisTemplate redisTemplate;
+    private final PurchaseRepository purchaseRepository;
 
     @Override
     @Transactional
@@ -266,6 +269,73 @@ public class SaleServiceImpl implements SaleService {
 
         // 4. DB 판매 종료
         sale.updateSaleStatus(SaleStatus.CLOSED);
+    }
+
+    @Override
+    @Transactional
+    public boolean syncFinalRemainingStock(Long saleId) {
+        Sale sale = saleRepository.findByIdWithLock(saleId)
+                .orElseThrow(() ->
+                        new BusinessException(
+                                SaleErrorCode.SALE_NOT_FOUND
+                        )
+                );
+
+        // 종료된 판매만 처리
+        if (sale.getStatus() != SaleStatus.CLOSED) {
+            return false;
+        }
+
+        // 이미 최종 동기화한 판매는 처리하지 않음
+        if (sale.getFinalStockSyncedAt() != null) {
+            return false;
+        }
+
+        LocalDateTime cancellationDeadline =
+                sale.getEndAt().plusDays(1);
+
+        // Redis user key가 살아 있고 취소 가능한 기간이면 보류
+        if (LocalDateTime.now().isBefore(
+                cancellationDeadline
+        )) {
+            return false;
+        }
+
+        // 결제 실패나 timeout으로 복구될 구매가 남아 있으면 보류
+        boolean hasPendingPurchase =
+                purchaseRepository.existsBySaleIdAndStatus(
+                        saleId,
+                        PurchaseStatus.PENDING_PAYMENT
+                );
+
+        if (hasPendingPurchase) {
+            return false;
+        }
+
+        String stockKey = "sale:" + saleId + ":stock";
+        String redisStock =
+                redisTemplate.opsForValue().get(stockKey);
+
+        // Redis stock은 endAt + 2일까지 존재해야 함
+        if (redisStock == null) {
+            return false;
+        }
+
+        int finalRemainingStock;
+
+        try {
+            finalRemainingStock =
+                    Integer.parseInt(redisStock);
+        } catch (NumberFormatException e) {
+            throw new BusinessException(
+                    GlobalErrorCode.INTERNAL_SERVER_ERROR
+            );
+        }
+
+        sale.syncRemainingStock(finalRemainingStock);
+        sale.completeFinalStockSync();
+
+        return true;
     }
 
     private Integer getRedisStock(Long saleId) {
