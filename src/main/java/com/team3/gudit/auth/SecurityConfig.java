@@ -61,7 +61,12 @@ public class SecurityConfig {
                                 "/payments/test/**",
 
                                 // 인증
-                                "/api/auth/reissue"
+                                "/api/auth/reissue",
+
+                                // Swagger
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**",
+                                "/swagger-ui.html"
                         ).permitAll()
 
                         .anyRequest().authenticated()

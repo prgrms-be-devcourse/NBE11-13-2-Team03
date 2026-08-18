@@ -8,6 +8,12 @@ spring:
     username: postgres
     password: 1234
 
+  
+  data:
+    redis:
+      repositories:
+        enabled: false
+
   servlet:
     multipart:
       max-file-size: 10MB
