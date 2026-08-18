@@ -43,6 +43,7 @@ public class SecurityConfig {
                                 "/css/**",
                                 "/js/**",
                                 "/images/**",
+                                "/swagger-ui",
 
                                 // OAuth2
                                 "/login-success.html",
