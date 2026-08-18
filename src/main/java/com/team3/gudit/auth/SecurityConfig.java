@@ -1,6 +1,7 @@
 package com.team3.gudit.auth;
 
 import com.team3.gudit.auth.filter.TokenAuthenticationFilter;
+import com.team3.gudit.auth.oauth2.CustomAuthorizationRequestResolver;
 import com.team3.gudit.auth.oauth2.OAuth2FailureHandler;
 import com.team3.gudit.auth.oauth2.OAuth2SuccessHandler;
 import com.team3.gudit.auth.security.CustomAuthenticationEntryPoint;
@@ -25,6 +26,7 @@ public class SecurityConfig {
     private final OAuth2FailureHandler oAuth2FailureHandler;
     private final TokenAuthenticationFilter tokenAuthenticationFilter;
     private final CustomAuthenticationEntryPoint authenticationEntryPoint;
+    private final CustomAuthorizationRequestResolver customAuthorizationRequestResolver;
 
     @Bean
     public SecurityFilterChain securityFilterChain(
@@ -106,6 +108,11 @@ public class SecurityConfig {
 
                 // 소셜 로그인
                 .oauth2Login(oauth -> oauth
+                        .authorizationEndpoint(endpoint -> endpoint
+                                .authorizationRequestResolver(
+                                        customAuthorizationRequestResolver
+                                )
+                        )
                         .userInfoEndpoint(
                                 userInfo ->
                                         userInfo.userService(customOAuth2UserService)
