@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-@Primary
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)

@@ -7,6 +7,7 @@ import com.team3.gudit.sale.domain.repository.SaleRepository;
 import com.team3.gudit.sale.dto.SaleRedisDto;
 import com.team3.gudit.sale.exception.SaleErrorCode;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Primary;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Service;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.util.List;
 
+@Primary
 @Service
 @RequiredArgsConstructor
 public class RedisInventoryServiceImpl implements InventoryService {

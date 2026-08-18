@@ -23,8 +23,8 @@ public class SaleWarmupScheduler {
     private final InventoryService inventoryService;
     private final SaleService saleService;
 
-    // 5분마다 실행 (300,000 ms)
-    @Scheduled(fixedDelay = 300000)
+    // 30초 마다 실행 (30,000 ms)
+    @Scheduled(fixedDelay = 30000)
     @Transactional
     public void autoWarmupSales() {
         LocalDateTime now = LocalDateTime.now();
