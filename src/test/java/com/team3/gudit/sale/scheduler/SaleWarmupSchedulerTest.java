@@ -103,7 +103,7 @@ class SaleWarmupSchedulerTest {
 
         given(sale.getId()).willReturn(1L);
 
-        given(saleRepository.findByStatusAndStartAtLessThanEqual(
+        given(saleRepository.findByStatusAndStartAtLessThanEqualAndEndAtGreaterThan(
                 eq(SaleStatus.READY),
                 any(LocalDateTime.class),
                 any(LocalDateTime.class)
@@ -131,7 +131,7 @@ class SaleWarmupSchedulerTest {
         given(firstSale.getId()).willReturn(1L);
         given(secondSale.getId()).willReturn(2L);
 
-        given(saleRepository.findByStatusAndStartAtLessThanEqual(
+        given(saleRepository.findByStatusAndStartAtLessThanEqualAndEndAtGreaterThan(
                 eq(SaleStatus.READY),
                 any(LocalDateTime.class),
                 any(LocalDateTime.class)
