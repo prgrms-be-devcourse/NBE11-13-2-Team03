@@ -20,7 +20,6 @@ import static lombok.AccessLevel.PROTECTED;
 @Entity
 @Table(name = "GOODS_SALES")
 @Getter
-@Builder
 @NoArgsConstructor(access = PROTECTED)
 @AllArgsConstructor(access = PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
@@ -199,7 +198,7 @@ public class Sale {
         }
 
         if (this.status == SaleStatus.ON_SALE
-                && status == SaleStatus.READY) {
+                && status != SaleStatus.CLOSED) {
 
             throw new BusinessException(
                     SaleErrorCode.INVALID_STATUS_TRANSITION
