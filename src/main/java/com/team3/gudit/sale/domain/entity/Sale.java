@@ -20,7 +20,6 @@ import static lombok.AccessLevel.PROTECTED;
 @Entity
 @Table(name = "GOODS_SALES")
 @Getter
-@Builder
 @NoArgsConstructor(access = PROTECTED)
 @AllArgsConstructor(access = PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
@@ -67,6 +66,14 @@ public class Sale {
     @Builder
     private Sale(Long id, Goods goods, Long createdBy, Integer initialStock, Integer remainingStock,
                  Integer maxPurchaseQuantity, SaleStatus status, LocalDateTime startAt, LocalDateTime endAt) {
+
+        validateSaleInput(
+                initialStock,
+                maxPurchaseQuantity,
+                startAt,
+                endAt
+        );
+
         this.id = id;
         this.goods = goods;
         this.createdBy = createdBy;
@@ -82,23 +89,22 @@ public class Sale {
         if (this.remainingStock - count < 0) {
             throw new BusinessException(SaleErrorCode.NOT_ENOUGH_STOCK);
         }
-        this.remainingStock -= count;
 
-        if (this.remainingStock == 0) {
-            this.status = SaleStatus.SOLD_OUT;
-        }
+        this.remainingStock -= count;
     }
 
     public void restoreStock(int count) {
         this.remainingStock += count;
+    }
 
-        if (this.status == SaleStatus.CLOSED || this.status == SaleStatus.DELETED) {
-           return;
+    public void syncRemainingStock(int remainingStock) {
+        if (remainingStock < 0) {
+            throw new BusinessException(
+                    SaleErrorCode.INVALID_REMAINING_STOCK
+            );
         }
 
-        if (this.status == SaleStatus.SOLD_OUT && isWithinSalePeriod() && remainingStock > 0) {
-            this.status = SaleStatus.ON_SALE;
-        }
+        this.remainingStock = remainingStock;
     }
 
     public void validateSalePeriod() {
@@ -131,6 +137,13 @@ public class Sale {
     ) {
         validateModifiable();
 
+        validateSaleInput(
+                initialStock,
+                maxPurchaseQuantity,
+                startAt,
+                endAt
+        );
+
         this.initialStock = initialStock;
         this.remainingStock = initialStock;
         this.maxPurchaseQuantity = maxPurchaseQuantity;
@@ -139,14 +152,22 @@ public class Sale {
     }
 
     public void updateSaleStatus(SaleStatus status) {
+        if (this.status == status) {
+            return;
+        }
+        validateStatusTransition(status);
+
         this.status = status;
     }
 
-    public void deleteSale() {
+    public void validateDeletable() {
         if (this.status == SaleStatus.ON_SALE) {
-            throw new IllegalStateException("진행 중인 판매 상품은 삭제할 수 없습니다. 먼저 중단 처리하세요.");
+            throw new BusinessException(SaleErrorCode.CANNOT_DELETE_ONGOING_SALE);
         }
+    }
 
+    public void deleteSale() {
+        validateDeletable();
         this.status = SaleStatus.DELETED;
     }
 
@@ -157,7 +178,52 @@ public class Sale {
 
     private void validateModifiable() {
         if (this.status != SaleStatus.READY) {
-            throw new IllegalStateException("판매 대기(READY) 상태에서만 정보를 수정할 수 있습니다.");
+            throw new BusinessException(SaleErrorCode.CANNOT_UPDATE_ONGOING_SALE);
+        }
+    }
+
+    private void validateStatusTransition(SaleStatus status) {
+        if (status == SaleStatus.SOLD_OUT) {
+            throw new BusinessException(
+                    SaleErrorCode.INVALID_STATUS_TRANSITION
+            );
+        }
+
+        if (this.status == SaleStatus.DELETED
+                || this.status == SaleStatus.CLOSED) {
+
+            throw new BusinessException(
+                    SaleErrorCode.INVALID_STATUS_TRANSITION
+            );
+        }
+
+        if (this.status == SaleStatus.ON_SALE
+                && status != SaleStatus.CLOSED) {
+
+            throw new BusinessException(
+                    SaleErrorCode.INVALID_STATUS_TRANSITION
+            );
+        }
+    }
+
+    private static void validateSaleInput(
+            Integer initialStock,
+            Integer maxPurchaseQuantity,
+            LocalDateTime startAt,
+            LocalDateTime endAt
+    ) {
+        if (initialStock == null || initialStock <= 0) {
+            throw new BusinessException(SaleErrorCode.INVALID_INITIAL_STOCK);
+        }
+
+        if (maxPurchaseQuantity == null || maxPurchaseQuantity <= 0) {
+            throw new BusinessException(
+                    SaleErrorCode.INVALID_MAX_PURCHASE_QUANTITY
+            );
+        }
+
+        if (startAt == null || endAt == null || !startAt.isBefore(endAt)) {
+            throw new BusinessException(SaleErrorCode.INVALID_SALE_PERIOD);
         }
     }
 

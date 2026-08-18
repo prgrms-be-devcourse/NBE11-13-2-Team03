@@ -51,7 +51,6 @@ class PurchaseTest {
         );
 
         // when
-        purchase.complete();
 
         // then
         assertThat(purchase.getStatus())

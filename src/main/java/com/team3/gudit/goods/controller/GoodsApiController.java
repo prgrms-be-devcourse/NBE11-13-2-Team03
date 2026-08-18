@@ -8,6 +8,7 @@ import com.team3.gudit.goods.service.GoodsService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -20,9 +21,9 @@ import java.util.List;
 public class GoodsApiController {
     private final GoodsService goodsService;
 
-    @PostMapping
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<GoodsCreateResponse> createGoods(
-            @RequestBody GoodsCreateRequest request,
+            @Valid @RequestPart GoodsCreateRequest request,
             @RequestPart(value = "fileImage", required = false) MultipartFile fileImage
 
     ) {
@@ -46,10 +47,13 @@ public class GoodsApiController {
         return ResponseEntity.ok(response);
     }
 
-    @PatchMapping("/{goodsId}")
+    @PutMapping(
+            value = "/{goodsId}",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+    )
     public ResponseEntity<GoodsUpdateResponse> updateGoods(
             @PathVariable Long goodsId,
-            @RequestBody GoodsUpdateRequest request,
+            @Valid @RequestPart GoodsUpdateRequest request,
             @RequestPart(value = "fileImage", required = false) MultipartFile fileImage
     ) {
         GoodsUpdateResponse response = goodsService.updateGoods(goodsId, request, fileImage);

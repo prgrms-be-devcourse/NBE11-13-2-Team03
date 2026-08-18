@@ -2,6 +2,8 @@ package com.team3.gudit.purchase.service;
 
 import com.team3.gudit.global.exception.BusinessException;
 import com.team3.gudit.payment.entity.Payment;
+import com.team3.gudit.payment.entity.PaymentStatus;
+import com.team3.gudit.payment.exception.PaymentErrorCode;
 import com.team3.gudit.payment.service.PaymentService;
 import com.team3.gudit.purchase.dto.PurchaseCancelResponse;
 import com.team3.gudit.purchase.dto.PurchaseCreateResponse;
@@ -22,6 +24,8 @@ import com.team3.gudit.user.exception.UserErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.List;
 
@@ -38,6 +42,8 @@ public class PurchaseService {
 
     @Transactional
     public PurchaseCreateResponse purchase(Long userId, Long saleId) {
+
+
 
         if (purchaseRepository.existsByUserIdAndSaleIdAndStatusNot(
                 userId,
@@ -60,6 +66,12 @@ public class PurchaseService {
                 ));
 
         inventoryService.decreaseStock(
+                saleId,
+                userId,
+                1
+        );
+
+        registerStockRollback(
                 saleId,
                 userId,
                 1
@@ -114,7 +126,13 @@ public class PurchaseService {
     @Transactional
     public PurchaseCancelResponse cancel(Long userId, Long purchaseId) {
 
-        Purchase purchase = purchaseRepository.findByIdAndUserId(purchaseId, userId)
+/*        Purchase purchase = purchaseRepository.findByIdAndUserId(purchaseId, userId)
+                .orElseThrow(() -> new BusinessException(
+                        PurchaseErrorCode.PURCHASE_NOT_FOUND,
+                        "Purchase not found. purchaseId=" + purchaseId
+                ));*/
+
+        Purchase purchase = purchaseRepository.findByIdAndUserIdWithLock(purchaseId, userId)
                 .orElseThrow(() -> new BusinessException(
                         PurchaseErrorCode.PURCHASE_NOT_FOUND,
                         "Purchase not found. purchaseId=" + purchaseId
@@ -140,6 +158,13 @@ public class PurchaseService {
     }
 
     private void cancelPendingPayment(Purchase purchase, Long userId) {
+
+        Payment payment = paymentService.getPaymentByPurchaseId(
+                        purchase.getId()
+                );
+
+        // 결제가 시작되지 않은 READY 상태에서만 즉시 취소 가능
+        payment.cancelReady();
 
         inventoryService.restoreStock(
                 purchase.getSale().getId(),
@@ -195,6 +220,33 @@ public class PurchaseService {
                 purchase.getStatus(),
                 purchase.getPurchasedAt(),
                 purchase.getCanceledAt()
+        );
+    }
+
+    private void registerStockRollback(
+            Long saleId,
+            Long userId,
+            int quantity
+    ) {
+        if (!TransactionSynchronizationManager
+                .isSynchronizationActive()) {
+            return;
+        }
+
+        TransactionSynchronizationManager.registerSynchronization(
+                new TransactionSynchronization() {
+
+                    @Override
+                    public void afterCompletion(int status) {
+                        if (status != STATUS_COMMITTED) {
+                            inventoryService.restoreStock(
+                                    saleId,
+                                    userId,
+                                    quantity
+                            );
+                        }
+                    }
+                }
         );
     }
 }
