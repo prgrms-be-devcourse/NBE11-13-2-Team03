@@ -117,6 +117,13 @@ public class Payment {
         this.canceledAt = LocalDateTime.now();
     }
 
+    public void cancelReady() {
+        validateStatus(PaymentStatus.READY);
+
+        this.status = PaymentStatus.CANCELED;
+        this.canceledAt = LocalDateTime.now();
+    }
+
     private void validateStatus(PaymentStatus expectedStatus) {
         if (this.status != expectedStatus) {
             throw new BusinessException(

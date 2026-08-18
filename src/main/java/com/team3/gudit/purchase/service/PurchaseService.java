@@ -164,11 +164,7 @@ public class PurchaseService {
                 );
 
         // 결제가 시작되지 않은 READY 상태에서만 즉시 취소 가능
-        if (payment.getStatus() != PaymentStatus.READY) {
-            throw new BusinessException(
-                    PaymentErrorCode.INVALID_PAYMENT_STATUS
-            );
-        }
+        payment.cancelReady();
 
         inventoryService.restoreStock(
                 purchase.getSale().getId(),

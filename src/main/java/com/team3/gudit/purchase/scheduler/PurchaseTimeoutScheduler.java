@@ -83,6 +83,9 @@ public class PurchaseTimeoutScheduler {
                     continue;
                 }
 
+                // 결제 시작 전 READY 상태의 Payment를 취소 처리
+                payment.cancelReady();
+
                 // Redis/DB 재고 및 중복 구매 제한 복원
                 inventoryService.restoreStock(
                         purchase.getSale().getId(),
