@@ -72,7 +72,6 @@ public class PurchaseTimeoutScheduler {
 
                 // 아직 결제가 시작되지 않은 READY 상태만 timeout 처리
                 if (payment.getStatus() != PaymentStatus.READY) {
-
                     log.info(
                             "결제 진행 중이거나 처리된 구매는 timeout에서 제외: "
                                     + "purchaseId={}, paymentStatus={}",
@@ -88,15 +87,15 @@ public class PurchaseTimeoutScheduler {
 
                 // Redis/DB 재고 및 중복 구매 제한 복원
                 inventoryService.restoreStock(
-                        purchase.getSale().getId(),
-                        purchase.getUser().getId(),
-                        purchase.getQuantity()
+                        lockedPurchase.getSale().getId(),
+                        lockedPurchase.getUser().getId(),
+                        lockedPurchase.getQuantity()
                 );
 
                 // Purchase 상태 변경 (PENDING_PAYMENT -> CANCELED)
-                purchase.cancel();
+                lockedPurchase.cancel();
 
-                log.info("미결제 타임아웃 처리 완료: purchaseId={}", purchase.getId());
+                log.info("미결제 타임아웃 처리 완료: purchaseId={}", lockedPurchase.getId());
             } catch (Exception e) {
                 log.error("미결제 타임아웃 처리 중 예외 발생: purchaseId={}", purchase.getId(), e);
             }
