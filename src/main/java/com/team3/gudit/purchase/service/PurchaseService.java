@@ -2,6 +2,8 @@ package com.team3.gudit.purchase.service;
 
 import com.team3.gudit.global.exception.BusinessException;
 import com.team3.gudit.payment.entity.Payment;
+import com.team3.gudit.payment.entity.PaymentStatus;
+import com.team3.gudit.payment.exception.PaymentErrorCode;
 import com.team3.gudit.payment.service.PaymentService;
 import com.team3.gudit.purchase.dto.PurchaseCancelResponse;
 import com.team3.gudit.purchase.dto.PurchaseCreateResponse;
@@ -40,6 +42,8 @@ public class PurchaseService {
 
     @Transactional
     public PurchaseCreateResponse purchase(Long userId, Long saleId) {
+
+
 
         if (purchaseRepository.existsByUserIdAndSaleIdAndStatusNot(
                 userId,
@@ -154,6 +158,17 @@ public class PurchaseService {
     }
 
     private void cancelPendingPayment(Purchase purchase, Long userId) {
+
+        Payment payment = paymentService.getPaymentByPurchaseId(
+                        purchase.getId()
+                );
+
+        // 결제가 시작되지 않은 READY 상태에서만 즉시 취소 가능
+        if (payment.getStatus() != PaymentStatus.READY) {
+            throw new BusinessException(
+                    PaymentErrorCode.INVALID_PAYMENT_STATUS
+            );
+        }
 
         inventoryService.restoreStock(
                 purchase.getSale().getId(),

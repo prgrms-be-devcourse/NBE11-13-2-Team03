@@ -32,6 +32,10 @@ public class PaymentTransactionService {
 
         validateAmount(payment, amount);
 
+        Purchase purchase = getLockedPurchase(payment);
+
+        validatePendingPurchase(purchase);
+
         payment.start(paymentKey);
     }
 
@@ -44,11 +48,15 @@ public class PaymentTransactionService {
 
         validatePaymentResponse(payment, response);
 
+        Purchase purchase = getLockedPurchase(payment);
+
+        validatePendingPurchase(purchase);
+
         payment.complete(
                 response.approvedAt().toLocalDateTime()
         );
 
-        payment.getPurchase().complete();
+        purchase.complete();
     }
 
     @Transactional
@@ -164,5 +172,17 @@ public class PaymentTransactionService {
                                 PurchaseErrorCode.PURCHASE_NOT_FOUND
                         )
                 );
+    }
+
+    private void validatePendingPurchase(
+            Purchase purchase
+    ) {
+        if (purchase.getStatus()
+                != PurchaseStatus.PENDING_PAYMENT) {
+
+            throw new BusinessException(
+                    PurchaseErrorCode.INVALID_PURCHASE_STATUS
+            );
+        }
     }
 }

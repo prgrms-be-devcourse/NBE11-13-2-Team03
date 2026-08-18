@@ -1,5 +1,8 @@
 package com.team3.gudit.purchase.scheduler;
 
+import com.team3.gudit.payment.entity.Payment;
+import com.team3.gudit.payment.entity.PaymentStatus;
+import com.team3.gudit.payment.repository.PaymentRepository;
 import com.team3.gudit.purchase.entity.Purchase;
 import com.team3.gudit.purchase.entity.PurchaseStatus;
 import com.team3.gudit.purchase.repository.PurchaseRepository;
@@ -20,6 +23,7 @@ public class PurchaseTimeoutScheduler {
 
     private final PurchaseRepository purchaseRepository;
     private final InventoryService inventoryService;
+    private final PaymentRepository paymentRepository;
 
     // 1분마다 실행
     @Scheduled(cron = "0 * * * * *")
@@ -50,8 +54,32 @@ public class PurchaseTimeoutScheduler {
                 }
 
                 // 잠금을 얻기 전에 다른 요청이 처리했을 수 있으므로 재확인
-                if (lockedPurchase.getStatus()
-                        != PurchaseStatus.PENDING_PAYMENT) {
+                if (lockedPurchase.getStatus() != PurchaseStatus.PENDING_PAYMENT) {
+                    continue;
+                }
+
+                Payment payment = paymentRepository
+                                .findByPurchaseId(lockedPurchase.getId())
+                                .orElse(null);
+
+                if (payment == null) {
+                    log.error(
+                            "타임아웃 대상의 결제 정보가 없습니다: purchaseId={}",
+                            lockedPurchase.getId()
+                    );
+                    continue;
+                }
+
+                // 아직 결제가 시작되지 않은 READY 상태만 timeout 처리
+                if (payment.getStatus() != PaymentStatus.READY) {
+
+                    log.info(
+                            "결제 진행 중이거나 처리된 구매는 timeout에서 제외: "
+                                    + "purchaseId={}, paymentStatus={}",
+                            lockedPurchase.getId(),
+                            payment.getStatus()
+                    );
+
                     continue;
                 }
 
