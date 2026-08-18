@@ -16,6 +16,8 @@ public record SaleDetailResponseDto(
     int remainingStock,
     Integer maxPurchaseQuantity,
     SaleStatus status,
+    String description,
+    String imageUrl,
     LocalDateTime startAt,
     LocalDateTime endAt,
     LocalDateTime createdAt
@@ -31,6 +33,8 @@ public record SaleDetailResponseDto(
                 .remainingStock(sale.getRemainingStock())
                 .maxPurchaseQuantity(sale.getMaxPurchaseQuantity())
                 .status(sale.getStatus())
+                .description(sale.getGoods().getDescription())
+                .imageUrl(sale.getGoods().getImageUrl())
                 .startAt(sale.getStartAt())
                 .endAt(sale.getEndAt())
                 .createdAt(sale.getCreatedAt())

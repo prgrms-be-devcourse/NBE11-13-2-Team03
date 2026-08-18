@@ -15,6 +15,9 @@ public record SaleListResponseDto(
         Integer price,
         Integer remainingStock,
         SaleStatus status,
+        String description,
+        String imageUrl,
+        Integer initialStock,
 
         @JsonFormat(pattern = DateformatConstant.DATE_FORMAT)
         LocalDateTime startAt,
@@ -29,6 +32,9 @@ public record SaleListResponseDto(
                 .price(sale.getGoods().getPrice())
                 .remainingStock(sale.getRemainingStock())
                 .status(sale.getStatus())
+                .description(sale.getGoods().getDescription())
+                .imageUrl(sale.getGoods().getImageUrl())
+                .initialStock(sale.getInitialStock())
                 .startAt(sale.getStartAt())
                 .endAt(sale.getEndAt())
                 .build();
@@ -45,6 +51,9 @@ public record SaleListResponseDto(
                 .price(sale.getGoods().getPrice())
                 .remainingStock(remainingStock)
                 .status(status)
+                .description(sale.getGoods().getDescription())
+                .imageUrl(sale.getGoods().getImageUrl())
+                .initialStock(sale.getInitialStock())
                 .startAt(sale.getStartAt())
                 .endAt(sale.getEndAt())
                 .build();
