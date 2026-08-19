@@ -8,6 +8,7 @@ import com.team3.gudit.payment.exception.PaymentErrorCode;
 import com.team3.gudit.payment.repository.PaymentRepository;
 import com.team3.gudit.purchase.entity.Purchase;
 import com.team3.gudit.purchase.entity.PurchaseStatus;
+import com.team3.gudit.purchase.repository.PurchaseRepository;
 import com.team3.gudit.sale.domain.entity.Sale;
 import com.team3.gudit.sale.service.InventoryService;
 import com.team3.gudit.user.domain.entity.User;
@@ -36,16 +37,20 @@ class PaymentTransactionServiceTest {
     @Mock
     private InventoryService inventoryService;
 
+    @Mock
+    private PurchaseRepository purchaseRepository;
+
     @InjectMocks
     private PaymentTransactionService paymentTransactionService;
 
     @Test
-    @DisplayName("결제를 시작하면 금액을 검증하고 IN_PROGRESS 상태로 변경한다")
+    @DisplayName("결제를 시작하면 잠근 구매 상태와 금액을 검증하고 IN_PROGRESS로 변경한다")
     void startPayment() {
         // given
         String orderId = "GUDIT_test-order-id";
         String paymentKey = "payment-key";
-        int amount = 15000;
+        int amount = 15_000;
+        Long purchaseId = 100L;
 
         Purchase purchase = mock(Purchase.class);
         Payment payment = Payment.create(
@@ -53,11 +58,20 @@ class PaymentTransactionServiceTest {
                 amount
         );
 
+        given(purchase.getId())
+                .willReturn(purchaseId);
+
         given(purchase.getPurchasePrice())
                 .willReturn(amount);
 
+        given(purchase.getStatus())
+                .willReturn(PurchaseStatus.PENDING_PAYMENT);
+
         given(paymentRepository.findByOrderId(orderId))
                 .willReturn(Optional.of(payment));
+
+        given(purchaseRepository.findByIdWithLock(purchaseId))
+                .willReturn(Optional.of(purchase));
 
         // when
         paymentTransactionService.startPayment(
@@ -72,6 +86,9 @@ class PaymentTransactionServiceTest {
 
         assertThat(payment.getPaymentKey())
                 .isEqualTo(paymentKey);
+
+        verify(purchaseRepository)
+                .findByIdWithLock(purchaseId);
     }
 
     @Test
@@ -149,25 +166,33 @@ class PaymentTransactionServiceTest {
     }
 
     @Test
-    @DisplayName("결제 승인 응답이 정상이라면 결제와 구매를 완료한다")
+    @DisplayName("결제 승인 응답이 정상이라면 잠근 구매와 결제를 완료한다")
     void completePayment() {
         // given
+        Long purchaseId = 100L;
+
         Purchase purchase = mock(Purchase.class);
 
         Payment payment = Payment.create(
                 purchase,
-                15000
+                15_000
         );
-
         payment.start("payment-key");
 
-        TossPaymentResponse response = mock(TossPaymentResponse.class);
+        TossPaymentResponse response =
+                mock(TossPaymentResponse.class);
+
+        given(purchase.getId())
+                .willReturn(purchaseId);
+
+        given(purchase.getStatus())
+                .willReturn(PurchaseStatus.PENDING_PAYMENT);
 
         given(response.orderId())
                 .willReturn(payment.getOrderId());
 
         given(response.totalAmount())
-                .willReturn(15000);
+                .willReturn(15_000);
 
         given(response.approvedAt())
                 .willReturn(
@@ -180,6 +205,9 @@ class PaymentTransactionServiceTest {
                 payment.getOrderId()
         ))
                 .willReturn(Optional.of(payment));
+
+        given(purchaseRepository.findByIdWithLock(purchaseId))
+                .willReturn(Optional.of(purchase));
 
         // when
         paymentTransactionService.completePayment(
@@ -198,7 +226,11 @@ class PaymentTransactionServiceTest {
                         ).toLocalDateTime()
                 );
 
-        verify(purchase).complete();
+        verify(purchaseRepository)
+                .findByIdWithLock(purchaseId);
+
+        verify(purchase)
+                .complete();
     }
 
     @Test
@@ -289,19 +321,26 @@ class PaymentTransactionServiceTest {
     }
 
     @Test
-    @DisplayName("결제 실패 처리 시 결제와 구매를 취소하고 재고를 복구한다")
+    @DisplayName("결제 실패 시 잠근 구매가 PENDING_PAYMENT이면 재고를 복구하고 취소한다")
     void failPayment() {
         // given
+        Long purchaseId = 100L;
+
         Purchase purchase = mock(Purchase.class);
         Sale sale = mock(Sale.class);
         User user = mock(User.class);
 
         Payment payment = Payment.create(
                 purchase,
-                15000
+                15_000
         );
-
         payment.start("payment-key");
+
+        given(purchase.getId())
+                .willReturn(purchaseId);
+
+        given(purchase.getStatus())
+                .willReturn(PurchaseStatus.PENDING_PAYMENT);
 
         given(purchase.getSale())
                 .willReturn(sale);
@@ -323,6 +362,9 @@ class PaymentTransactionServiceTest {
         ))
                 .willReturn(Optional.of(payment));
 
+        given(purchaseRepository.findByIdWithLock(purchaseId))
+                .willReturn(Optional.of(purchase));
+
         // when
         paymentTransactionService.failPayment(
                 payment.getOrderId()
@@ -332,6 +374,9 @@ class PaymentTransactionServiceTest {
         assertThat(payment.getStatus())
                 .isEqualTo(PaymentStatus.FAILED);
 
+        verify(purchaseRepository)
+                .findByIdWithLock(purchaseId);
+
         verify(inventoryService)
                 .restoreStock(10L, 1L, 1);
 
@@ -340,19 +385,26 @@ class PaymentTransactionServiceTest {
     }
 
     @Test
-    @DisplayName("승인 후 처리 실패를 보상하면 결제를 취소하고 구매와 재고를 복구한다")
+    @DisplayName("승인 후 처리 실패 보상 시 잠근 구매의 재고를 복구하고 취소한다")
     void compensateApprovalFailure() {
         // given
+        Long purchaseId = 100L;
+
         Purchase purchase = mock(Purchase.class);
         Sale sale = mock(Sale.class);
         User user = mock(User.class);
 
         Payment payment = Payment.create(
                 purchase,
-                15000
+                15_000
         );
-
         payment.start("payment-key");
+
+        given(purchase.getId())
+                .willReturn(purchaseId);
+
+        given(purchase.getStatus())
+                .willReturn(PurchaseStatus.PENDING_PAYMENT);
 
         given(purchase.getSale())
                 .willReturn(sale);
@@ -372,6 +424,9 @@ class PaymentTransactionServiceTest {
         given(paymentRepository.findByPaymentKey("payment-key"))
                 .willReturn(Optional.of(payment));
 
+        given(purchaseRepository.findByIdWithLock(purchaseId))
+                .willReturn(Optional.of(purchase));
+
         // when
         paymentTransactionService.compensateApprovalFailure(
                 "payment-key"
@@ -383,6 +438,9 @@ class PaymentTransactionServiceTest {
 
         assertThat(payment.getCanceledAt())
                 .isNotNull();
+
+        verify(purchaseRepository)
+                .findByIdWithLock(purchaseId);
 
         verify(inventoryService)
                 .restoreStock(10L, 1L, 1);
