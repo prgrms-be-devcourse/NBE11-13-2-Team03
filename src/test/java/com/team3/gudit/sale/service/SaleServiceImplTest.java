@@ -22,6 +22,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
+import com.team3.gudit.global.exception.BusinessException;
+import com.team3.gudit.sale.exception.SaleErrorCode;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -30,10 +34,12 @@ import java.util.Map;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
+
 
 @ExtendWith(MockitoExtension.class)
 class SaleServiceImplTest {
@@ -155,11 +161,11 @@ class SaleServiceImplTest {
     }
 
     @Test
-    @DisplayName("endAt + 2일이 지난 판매를 Warm-up하면 Redis 캐시를 즉시 삭제한다")
+    @DisplayName("READY 판매라도 endAt + 2일이 지났으면 Redis 캐시를 즉시 삭제한다")
     void warmupExpiredSaleDeletesCache() {
         // given
         Sale sale = createSale(
-                SaleStatus.CLOSED,
+                SaleStatus.READY,
                 20,
                 LocalDateTime.now().minusDays(3)
         );
@@ -186,6 +192,46 @@ class SaleServiceImplTest {
                 any(String.class),
                 any(Duration.class)
         );
+    }
+
+    @ParameterizedTest
+    @EnumSource(
+            value = SaleStatus.class,
+            names = "READY",
+            mode = EnumSource.Mode.EXCLUDE
+    )
+    @DisplayName("READY가 아닌 판매는 Warm-up할 수 없고 Redis 데이터를 변경하지 않는다")
+    void warmupNonReadySaleIsRejected(
+            SaleStatus status
+    ) {
+        // given
+        Sale sale = createSale(
+                status,
+                100,
+                LocalDateTime.now().plusDays(1)
+        );
+
+        given(saleRepository.findById(1L))
+                .willReturn(Optional.of(sale));
+
+        // when & then
+        assertThatThrownBy(
+                () -> saleService.warmupSaleInfo(1L)
+        )
+                .isInstanceOf(BusinessException.class)
+                .satisfies(exception ->
+                        assertThat(
+                                ((BusinessException) exception)
+                                        .getErrorCode()
+                        ).isEqualTo(
+                                SaleErrorCode
+                                        .CANNOT_WARMUP_NON_READY_SALE
+                        )
+                );
+
+        // 상태 검증에서 차단되므로 Redis stock/info를 조회하거나
+        // 덮어쓰는 동작이 없어야 한다.
+        verifyNoInteractions(redisTemplate);
     }
 
     @Test
