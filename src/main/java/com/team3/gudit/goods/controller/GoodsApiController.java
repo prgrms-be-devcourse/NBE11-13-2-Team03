@@ -47,6 +47,14 @@ public class GoodsApiController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/admin")
+    public ResponseEntity<List<GoodsListResponse>> getAdminGoodsList() {
+        List<GoodsListResponse> response =
+                goodsService.adminGoodsList();
+
+        return ResponseEntity.ok(response);
+    }
+
     @PutMapping(
             value = "/{goodsId}",
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE

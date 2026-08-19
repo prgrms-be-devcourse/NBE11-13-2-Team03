@@ -59,6 +59,15 @@ public class GoodsService {
     }
 
     @Transactional(readOnly = true)
+    public List<GoodsListResponse> adminGoodsList() {
+        return goodsRepository
+                .findAll()
+                .stream()
+                .map(goodsMapper::toListResponse)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
     public GoodsDetailResponse goodsDetail(Long id) {
         Goods goods = goodsRepository.findByIdAndStatus(id,  GoodsStatus.ACTIVE)
                 .orElseThrow(() -> new BusinessException(GoodsErrorCode.GOODS_NOT_FOUND));
