@@ -5,6 +5,11 @@ local stockKey = KEYS[1]
 local userKey = KEYS[2]
 local quantity = tonumber(ARGV[1])
 
+-- stock Key가 유실된 경우 복구 수량만으로 재고 Key를 생성하지 않음
+if redis.call('EXISTS', stockKey) == 0 then
+    return -1
+end
+
 -- 사용자 구매 기록이 없다면 이미 복구됐거나 복구할 수 없는 상태
 local userPurchased = redis.call('GET', userKey)
 

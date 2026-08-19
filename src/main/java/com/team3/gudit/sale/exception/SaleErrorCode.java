@@ -79,6 +79,18 @@ public enum SaleErrorCode implements ErrorCode {
             HttpStatus.BAD_REQUEST,
             "SALE_012",
             "남은 재고는 0개 미만일 수 없습니다."
+    ),
+
+    CANNOT_WARMUP_NON_READY_SALE(
+            HttpStatus.BAD_REQUEST,
+            "SALE_013",
+            "판매 대기 상태에서만 Redis Warm-up을 실행할 수 있습니다."
+    ),
+
+    REDIS_STOCK_NOT_FOUND(
+            HttpStatus.INTERNAL_SERVER_ERROR,
+            "SALE_014",
+            "Redis 판매 재고 정보를 찾을 수 없습니다."
     );
 
     private final HttpStatus status;

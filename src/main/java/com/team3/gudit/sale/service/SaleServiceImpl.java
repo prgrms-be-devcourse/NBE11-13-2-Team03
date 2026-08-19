@@ -190,7 +190,15 @@ public class SaleServiceImpl implements SaleService {
     @Transactional
     public void warmupSaleInfo(Long id) {
         Sale sale = saleRepository.findById(id)
-                .orElseThrow(() -> new BusinessException(SaleErrorCode.SALE_CLOSED));
+                .orElseThrow(() -> new BusinessException(SaleErrorCode.SALE_NOT_FOUND));
+
+        // Warm-up은 판매 시작 전 Redis 데이터를 준비하는 용도이므로
+        // READY 상태에서만 허용한다.
+        if (sale.getStatus() != SaleStatus.READY) {
+            throw new BusinessException(
+                    SaleErrorCode.CANNOT_WARMUP_NON_READY_SALE
+            );
+        }
 
         String stockKey = "sale:" + id + ":stock";
         String infoKey = "sale:" + id + ":info";

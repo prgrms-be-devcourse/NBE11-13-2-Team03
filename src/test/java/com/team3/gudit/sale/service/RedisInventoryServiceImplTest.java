@@ -359,6 +359,43 @@ class RedisInventoryServiceImplTest {
         verifyNoInteractions(redisTemplate);
     }
 
+    @Test
+    @DisplayName("Redis stock Key가 없어 Lua 결과가 -1이면 재고 정보 누락 예외가 발생한다")
+    void restoreStockWithoutStockKey() {
+        // given
+        Long saleId = 1L;
+        Long userId = 10L;
+        int quantity = 1;
+
+        List<String> keys = List.of(
+                "sale:1:stock",
+                "sale:1:user:10"
+        );
+
+        // stock_restore.lua에서 stockKey가 없을 때 -1 반환
+        given(redisTemplate.execute(
+                eq(stockRestoreScript),
+                eq(keys),
+                any(Object[].class)
+        )).willReturn(-1L);
+
+        // when & then
+        assertBusinessError(
+                () -> inventoryService.restoreStock(
+                        saleId,
+                        userId,
+                        quantity
+                ),
+                SaleErrorCode.REDIS_STOCK_NOT_FOUND
+        );
+
+        verify(redisTemplate).execute(
+                eq(stockRestoreScript),
+                eq(keys),
+                any(Object[].class)
+        );
+    }
+
     private void assertBusinessError(
             Runnable action,
             ErrorCode expectedErrorCode

@@ -69,6 +69,10 @@ public class RedisInventoryServiceImpl implements InventoryService {
                     GlobalErrorCode.INTERNAL_SERVER_ERROR
             );
         }
+
+        if (result < 0) {
+            handleRestoreScriptError(result);
+        }
     }
 
     // 비즈니스 에러 처리 (-1: 재고부족, -2: 기간아님, -3: 수량초과, -4: 종료)
@@ -84,6 +88,20 @@ public class RedisInventoryServiceImpl implements InventoryService {
         } else {
             throw new BusinessException(SaleErrorCode.NOT_ENOUGH_STOCK);
         }
+    }
+
+    private void handleRestoreScriptError(
+            long errorCode
+    ) {
+        if (errorCode == -1) {
+            throw new BusinessException(
+                    SaleErrorCode.REDIS_STOCK_NOT_FOUND
+            );
+        }
+
+        throw new BusinessException(
+                GlobalErrorCode.INTERNAL_SERVER_ERROR
+        );
     }
 
     private void validateQuantity(int quantity) {
