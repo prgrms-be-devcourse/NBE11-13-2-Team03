@@ -21,142 +21,46 @@
     </section>
 
     <section class="purchase-filter" aria-label="구매 상태 필터">
-        <button type="button" class="filter-button active">전체</button>
-        <button type="button" class="filter-button">구매 완료</button>
-        <button type="button" class="filter-button">취소</button>
+
+        <button
+                type="button"
+                class="filter-button active"
+                data-status="ALL">
+            전체
+        </button>
+
+        <button
+                type="button"
+                class="filter-button"
+                data-status="PENDING_PAYMENT">
+            결제 대기
+        </button>
+
+        <button
+                type="button"
+                class="filter-button"
+                data-status="PURCHASED">
+            구매 완료
+        </button>
+
+        <button
+                type="button"
+                class="filter-button"
+                data-status="CANCELED">
+            취소
+        </button>
+
     </section>
 
-    <section class="purchase-list">
-
-        <!-- PURCHASED -->
-        <article class="purchase-item">
-            <div class="purchase-thumbnail">
-                <div class="purchase-mock purchase-mock-keyring">
-                    GUDIT
-                </div>
-            </div>
-
-            <div class="purchase-item-content">
-                <div class="purchase-item-main">
-                    <div>
-                        <span class="purchase-status status-purchased">
-                            PURCHASED
-                        </span>
-
-                        <h2>개발자 키링</h2>
-
-                        <p class="purchase-item-price">
-                            15,000원
-                        </p>
-                    </div>
-
-                    <a href="/mypage/purchases/1"
-                       class="detail-link-button">
-                        상세 보기
-                    </a>
-                </div>
-
-                <div class="purchase-item-meta">
-                    <div>
-                        <span>수량</span>
-                        <strong>1개</strong>
-                    </div>
-
-                    <div>
-                        <span>구매일</span>
-                        <strong>2026.08.10 18:02</strong>
-                    </div>
-                </div>
-            </div>
-        </article>
-
-        <!-- CANCELED -->
-        <article class="purchase-item">
-            <div class="purchase-thumbnail">
-                <div class="purchase-mock purchase-mock-mug">
-                    GUDIT
-                </div>
-            </div>
-
-            <div class="purchase-item-content">
-                <div class="purchase-item-main">
-                    <div>
-                        <span class="purchase-status status-canceled">
-                            CANCELED
-                        </span>
-
-                        <h2>한정 머그컵</h2>
-
-                        <p class="purchase-item-price">
-                            18,000원
-                        </p>
-                    </div>
-
-                    <a href="/mypage/purchases/2"
-                       class="detail-link-button">
-                        상세 보기
-                    </a>
-                </div>
-
-                <div class="purchase-item-meta">
-                    <div>
-                        <span>수량</span>
-                        <strong>1개</strong>
-                    </div>
-
-                    <div>
-                        <span>구매일</span>
-                        <strong>2026.08.09 19:30</strong>
-                    </div>
-                </div>
-            </div>
-        </article>
-
-        <!-- PURCHASED -->
-        <article class="purchase-item">
-            <div class="purchase-thumbnail">
-                <div class="purchase-mock purchase-mock-shirt">
-                    G
-                </div>
-            </div>
-
-            <div class="purchase-item-content">
-                <div class="purchase-item-main">
-                    <div>
-                        <span class="purchase-status status-purchased">
-                            PURCHASED
-                        </span>
-
-                        <h2>Gudit 티셔츠</h2>
-
-                        <p class="purchase-item-price">
-                            29,000원
-                        </p>
-                    </div>
-
-                    <a href="/mypage/purchases/3"
-                       class="detail-link-button">
-                        상세 보기
-                    </a>
-                </div>
-
-                <div class="purchase-item-meta">
-                    <div>
-                        <span>수량</span>
-                        <strong>1개</strong>
-                    </div>
-
-                    <div>
-                        <span>구매일</span>
-                        <strong>2026.08.08 17:10</strong>
-                    </div>
-                </div>
-            </div>
-        </article>
-
+    <section
+            id="purchase-list"
+            class="purchase-list">
+        <!-- GET /api/purchases 결과 렌더링 -->
     </section>
 
 </main>
+
+<script src="/js/purchase/list.js"></script>
 
 </body>
 </html>

@@ -16,9 +16,7 @@
 
     <section class="payment-result-card">
 
-        <div class="payment-result-icon fail">
-            ×
-        </div>
+        <div class="payment-result-icon fail"></div>
 
         <span class="page-eyebrow payment-fail-eyebrow">
             PAYMENT FAILED
@@ -28,7 +26,9 @@
             결제에 실패했습니다
         </h1>
 
-        <p class="payment-result-description">
+        <p
+                id="payment-fail-description"
+                class="payment-result-description">
             결제 처리 중 문제가 발생했습니다.<br>
             잠시 후 다시 시도해 주세요.
         </p>
@@ -37,17 +37,23 @@
 
             <div class="payment-result-row">
                 <span>상품명</span>
-                <strong>개발자 키링</strong>
+                <strong id="payment-fail-goods-name">
+                    -
+                </strong>
             </div>
 
             <div class="payment-result-row">
                 <span>구매 수량</span>
-                <strong>1개</strong>
+                <strong id="payment-fail-quantity">
+                    -
+                </strong>
             </div>
 
             <div class="payment-result-row">
                 <span>결제 금액</span>
-                <strong>15,000원</strong>
+                <strong id="payment-fail-amount">
+                    -
+                </strong>
             </div>
 
             <div class="payment-result-row">
@@ -61,13 +67,17 @@
 
         <div class="payment-result-actions">
 
-            <a href="/sales/1"
-               class="secondary-button payment-result-secondary">
+            <a
+                    id="payment-fail-back-link"
+                    href="/sales"
+                    class="secondary-button payment-result-secondary">
                 상품으로 돌아가기
             </a>
 
-            <a href="/payments"
-               class="primary-button payment-result-primary">
+            <a
+                    id="payment-retry-link"
+                    href="/payments"
+                    class="primary-button payment-result-primary">
                 다시 결제하기
             </a>
 
@@ -76,6 +86,8 @@
     </section>
 
 </main>
+
+<script src="/js/payment/fail.js"></script>
 
 </body>
 </html>

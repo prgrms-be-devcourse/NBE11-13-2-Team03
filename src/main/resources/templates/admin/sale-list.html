@@ -14,7 +14,7 @@
 
 <main class="main admin-page">
 
-    <section class="admin-page-header">
+    <section class="admin-page-header admin-sale-header">
         <div>
             <span class="page-eyebrow">ADMIN</span>
             <h1>판매 관리</h1>
@@ -28,38 +28,45 @@
     </section>
 
     <section class="admin-summary admin-sale-summary">
+
         <div class="admin-summary-card">
             <span>전체 판매</span>
-            <strong>4</strong>
+            <strong id="sale-total-count">0</strong>
         </div>
 
         <div class="admin-summary-card">
             <span>판매 중</span>
-            <strong>1</strong>
+            <strong id="sale-on-count">0</strong>
         </div>
 
         <div class="admin-summary-card">
             <span>판매 예정</span>
-            <strong>1</strong>
+            <strong id="sale-ready-count">0</strong>
         </div>
 
         <div class="admin-summary-card">
             <span>품절 · 종료</span>
-            <strong>2</strong>
+            <strong id="sale-finished-count">0</strong>
         </div>
+
     </section>
 
     <section class="admin-table-card">
 
         <div class="admin-table-header">
+
             <h2>판매 목록</h2>
 
-            <span class="admin-table-count">
-                총 4건
+            <span
+                    id="sale-table-count"
+                    class="admin-table-count">
+                총 0건
             </span>
+
         </div>
 
         <div class="admin-table-wrap">
+
             <table class="admin-table admin-sale-table">
 
                 <thead>
@@ -73,193 +80,19 @@
                 </tr>
                 </thead>
 
-                <tbody>
-
-                <!-- ON_SALE -->
-                <tr>
-                    <td>
-                        <div class="admin-product">
-                            <div class="admin-product-thumbnail mock-admin-keyring">
-                                G
-                            </div>
-
-                            <div>
-                                <strong>개발자 키링</strong>
-                                <span>판매 ID 1</span>
-                            </div>
-                        </div>
-                    </td>
-
-                    <td>15,000원</td>
-
-                    <td>
-                        <div class="admin-stock">
-                            <strong>17</strong>
-                            <span>/ 100개</span>
-                        </div>
-                    </td>
-
-                    <td>
-                        <span class="admin-sale-status admin-sale-on">
-                            판매 중
-                        </span>
-                    </td>
-
-                    <td>
-                        <div class="admin-sale-period">
-                            2026.08.10 18:00 ~ 2026.08.10 20:00
-                        </div>
-                    </td>
-                    </td>
-
-                    <td class="admin-action-cell">
-                        <a href="/admin/sales/1/edit"
-                           class="admin-edit-button">
-                            수정
-                        </a>
-                    </td>
-                </tr>
-
-                <!-- READY -->
-                <tr>
-                    <td>
-                        <div class="admin-product">
-                            <div class="admin-product-thumbnail mock-admin-shirt">
-                                G
-                            </div>
-
-                            <div>
-                                <strong>Gudit 티셔츠</strong>
-                                <span>판매 ID 2</span>
-                            </div>
-                        </div>
-                    </td>
-
-                    <td>29,000원</td>
-
-                    <td>
-                        <div class="admin-stock">
-                            <strong>100</strong>
-                            <span>/ 100개</span>
-                        </div>
-                    </td>
-
-                    <td>
-                        <span class="admin-sale-status admin-sale-ready">
-                            판매 예정
-                        </span>
-                    </td>
-
-                    <td>
-                        <div class="admin-sale-period">
-                            2026.08.11 18:00 ~ 2026.08.11 20:00
-                        </div>
-                    </td>
-
-                    <td class="admin-action-cell">
-                        <a href="/admin/sales/2/edit"
-                           class="admin-edit-button">
-                            수정
-                        </a>
-                    </td>
-                </tr>
-
-                <!-- SOLD_OUT -->
-                <tr>
-                    <td>
-                        <div class="admin-product">
-                            <div class="admin-product-thumbnail mock-admin-mug">
-                                G
-                            </div>
-
-                            <div>
-                                <strong>한정 머그컵</strong>
-                                <span>판매 ID 3</span>
-                            </div>
-                        </div>
-                    </td>
-
-                    <td>18,000원</td>
-
-                    <td>
-                        <div class="admin-stock sold-out-stock">
-                            <strong>0</strong>
-                            <span>/ 50개</span>
-                        </div>
-                    </td>
-
-                    <td>
-                        <span class="admin-sale-status admin-sale-sold-out">
-                            품절
-                        </span>
-                    </td>
-
-                    <td>
-                        <div class="admin-sale-period">
-                            2026.08.09 18:00 ~ 2026.08.09 20:00
-                        </div>
-                    </td>
-
-                    <td class="admin-action-cell">
-                        <a href="/admin/sales/3/edit"
-                           class="admin-edit-button">
-                            수정
-                        </a>
-                    </td>
-                </tr>
-
-                <!-- CLOSED -->
-                <tr>
-                    <td>
-                        <div class="admin-product">
-                            <div class="admin-product-thumbnail mock-admin-sticker">
-                                G
-                            </div>
-
-                            <div>
-                                <strong>Gudit 스티커 팩</strong>
-                                <span>판매 ID 4</span>
-                            </div>
-                        </div>
-                    </td>
-
-                    <td>5,000원</td>
-
-                    <td>
-                        <div class="admin-stock">
-                            <strong>24</strong>
-                            <span>/ 100개</span>
-                        </div>
-                    </td>
-
-                    <td>
-                        <span class="admin-sale-status admin-sale-closed">
-                            판매 종료
-                        </span>
-                    </td>
-
-                    <td>
-                        <div class="admin-sale-period">
-                            2026.08.08 18:00 ~ 2026.08.08 20:00
-                        </div>
-                    </td>
-
-                    <td class="admin-action-cell">
-                        <a href="/admin/sales/4/edit"
-                           class="admin-edit-button">
-                            수정
-                        </a>
-                    </td>
-                </tr>
-
+                <tbody id="admin-sale-list">
+                <!-- GET /api/sales 결과 렌더링 -->
                 </tbody>
 
             </table>
+
         </div>
 
     </section>
 
 </main>
+
+<script src="/js/admin/sale-list.js"></script>
 
 </body>
 </html>

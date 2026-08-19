@@ -28,31 +28,39 @@
             결제가 완료되었습니다
         </h1>
 
-        <p class="payment-result-description">
-            개발자 키링 구매가 정상적으로 완료되었습니다.
+        <p
+                id="payment-success-description"
+                class="payment-result-description">
+            구매가 정상적으로 완료되었습니다.
         </p>
 
         <div class="payment-result-info">
 
             <div class="payment-result-row">
                 <span>상품명</span>
-                <strong>개발자 키링</strong>
+                <strong id="payment-success-goods-name">
+                    -
+                </strong>
             </div>
 
             <div class="payment-result-row">
                 <span>구매 수량</span>
-                <strong>1개</strong>
+                <strong id="payment-success-quantity">
+                    -
+                </strong>
             </div>
 
             <div class="payment-result-row">
                 <span>결제 금액</span>
-                <strong>15,000원</strong>
+                <strong id="payment-success-amount">
+                    -
+                </strong>
             </div>
 
             <div class="payment-result-row">
                 <span>결제 상태</span>
-                <strong class="payment-success-text">
-                    결제 완료
+                <strong id="payment-success-status">
+                    결제 처리 중
                 </strong>
             </div>
 
@@ -75,6 +83,8 @@
     </section>
 
 </main>
+
+<script src="/js/payment/success.js"></script>
 
 </body>
 </html>

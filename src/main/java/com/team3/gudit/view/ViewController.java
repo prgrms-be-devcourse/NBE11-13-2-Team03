@@ -1,10 +1,16 @@
 package com.team3.gudit.view;
 
+import com.team3.gudit.payment.config.TossPaymentProperties;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
+@RequiredArgsConstructor
 public class ViewController {
+
+    private final TossPaymentProperties tossPaymentProperties;
 
     @GetMapping("/")
     public String home() {
@@ -62,7 +68,12 @@ public class ViewController {
     }
 
     @GetMapping("/payments")
-    public String payment() {
+    public String payment(Model model) {
+        model.addAttribute(
+                "clientKey",
+                tossPaymentProperties.getClientKey()
+        );
+
         return "payment/payment";
     }
 
