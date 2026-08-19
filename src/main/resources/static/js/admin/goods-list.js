@@ -20,7 +20,7 @@ document.addEventListener("DOMContentLoaded", () => {
 async function loadGoods() {
     try {
         const response = await fetch(
-            "/api/goods",
+            "/api/goods/admin",
             {
                 credentials: "include"
             }
@@ -92,8 +92,6 @@ function renderGoods(goods) {
         goods
             .map(createGoodsRow)
             .join("");
-
-    addDeleteEventListeners();
 }
 
 function createGoodsRow(goods) {
@@ -139,63 +137,10 @@ function createGoodsRow(goods) {
                         class="admin-edit-button">
                     수정
                 </a>
-
-                <button
-                        type="button"
-                        class="admin-delete-button"
-                        data-goods-id="${goods.id}">
-                    삭제
-                </button>
             </td>
 
         </tr>
     `;
-}
-
-function addDeleteEventListeners() {
-    document
-        .querySelectorAll(".admin-delete-button")
-        .forEach(button => {
-            button.addEventListener(
-                "click",
-                () => {
-                    deleteGoods(
-                        button.dataset.goodsId
-                    );
-                }
-            );
-        });
-}
-
-async function deleteGoods(goodsId) {
-    const confirmed =
-        confirm("상품을 삭제하시겠습니까?");
-
-    if (!confirmed) {
-        return;
-    }
-
-    try {
-        const response = await fetch(
-            `/api/goods/${goodsId}`,
-            {
-                method: "DELETE",
-                credentials: "include"
-            }
-        );
-
-        if (!response.ok) {
-            throw new Error(
-                "상품 삭제에 실패했습니다."
-            );
-        }
-
-        await loadGoods();
-
-    } catch (error) {
-        console.error(error);
-        alert("상품 삭제에 실패했습니다.");
-    }
 }
 
 function createGoodsImage(goods) {
