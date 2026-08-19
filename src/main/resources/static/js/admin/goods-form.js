@@ -76,7 +76,7 @@ async function initializeForm() {
 async function loadGoods() {
     try {
         const response = await fetch(
-            `/api/goods/${goodsId}`,
+            `/api/goods/admin/${goodsId}`,
             {
                 credentials: "include"
             }
