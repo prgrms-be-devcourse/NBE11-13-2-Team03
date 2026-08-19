@@ -29,7 +29,13 @@ async function loadPurchases() {
 
         const result = await response.json();
 
-        purchases = result.purchases || [];
+        purchases = (result.purchases || [])
+            .filter(purchase =>
+                !(
+                    purchase.status === "CANCELED"
+                    && !purchase.purchasedAt
+                )
+            );
 
         renderPurchases();
 
