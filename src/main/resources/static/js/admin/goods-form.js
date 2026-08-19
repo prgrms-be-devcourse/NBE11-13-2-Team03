@@ -181,7 +181,7 @@ async function updateGoods() {
     const response = await fetch(
         `/api/goods/${goodsId}`,
         {
-            method: "PATCH",
+            method: "PUT",
             credentials: "include",
             body: formData
         }
