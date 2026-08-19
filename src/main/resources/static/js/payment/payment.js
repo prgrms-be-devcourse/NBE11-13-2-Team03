@@ -10,14 +10,14 @@ const paymentButton = document.getElementById("payment-button");
 const paymentBackLink = document.getElementById("payment-back-link");
 
 let currentPayment = null;
+let payment = null;
 
 document.addEventListener("DOMContentLoaded", () => {
     loadPayment();
 });
 
 function loadPayment() {
-    const storedPayment =
-        sessionStorage.getItem("payment");
+    const storedPayment = sessionStorage.getItem("payment");
 
     if (!storedPayment) {
         handleMissingPayment();
@@ -26,12 +26,15 @@ function loadPayment() {
 
     currentPayment = JSON.parse(storedPayment);
 
+    const tossPayments = TossPayments(window.TOSS_CLIENT_KEY);
+
+    payment = tossPayments.payment({
+        customerKey: TossPayments.ANONYMOUS
+    });
+
     renderPayment(currentPayment);
 
-    paymentButton.addEventListener(
-        "click",
-        requestPayment
-    );
+    paymentButton.addEventListener("click", requestPayment);
 }
 
 function renderPayment(payment) {
@@ -65,6 +68,8 @@ async function requestPayment() {
         return;
     }
 
+    sessionStorage.removeItem("paymentError");
+
     if (!window.TOSS_CLIENT_KEY) {
         alert("결제 설정 정보를 불러오지 못했습니다.");
         return;
@@ -74,55 +79,52 @@ async function requestPayment() {
     paymentButton.textContent = "결제창 여는 중...";
 
     try {
-        const tossPayments =
-            TossPayments(window.TOSS_CLIENT_KEY);
-
-        const payment =
-            tossPayments.payment({
-                customerKey: TossPayments.ANONYMOUS
-            });
-
         await payment.requestPayment({
             method: "CARD",
-
             amount: {
                 currency: "KRW",
                 value: currentPayment.amount
             },
-
             orderId: currentPayment.orderId,
-
             orderName: currentPayment.goodsName,
-
-            successUrl:
-                window.location.origin
-                + "/payments/success",
-
-            failUrl:
-                window.location.origin
-                + "/payments/fail"
+            successUrl: `${window.location.origin}/payments/success`,
+            failUrl: `${window.location.origin}/payments/fail`
         });
-
     } catch (error) {
-        console.error(error);
+        const isUserCanceled =
+            error.code === "PAY_PROCESS_CANCELED"
+            || error.code === "USER_CANCEL"
+            || error.message?.includes("취소")
+            || error.message?.toLowerCase().includes("cancel");
 
-        const errorCode =
-            error.code || "";
-
-        const errorMessage =
-            error.message
-            || "결제가 취소되었거나 실패했습니다.";
+        if (isUserCanceled) {
+            try {
+                await cancelPurchase(currentPayment.purchaseId);
+            } catch (cancelError) {
+                console.error("구매 취소 처리 실패:", cancelError);
+            }
+        }
 
         sessionStorage.setItem(
             "paymentError",
             JSON.stringify({
-                code: errorCode,
-                message: errorMessage
+                code: error.code,
+                message: error.message
             })
         );
 
-        window.location.href =
-            "/payments/fail";
+        window.location.href = "/payments/fail";
+    }
+}
+
+async function cancelPurchase(purchaseId) {
+    const response = await fetch(`/api/purchases/${purchaseId}/cancel`, {
+        method: "POST",
+        credentials: "include"
+    });
+
+    if (!response.ok) {
+        throw new Error("구매 취소 처리에 실패했습니다.");
     }
 }
 
