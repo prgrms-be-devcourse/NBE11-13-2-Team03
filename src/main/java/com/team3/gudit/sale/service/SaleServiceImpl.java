@@ -75,7 +75,14 @@ public class SaleServiceImpl implements SaleService {
         }
 
         // READY / CLOSED 또는 Redis Key가 없는 경우 RDB 값 사용
-        return SaleDetailResponseDto.from(sale);
+        return SaleDetailResponseDto.from(
+                sale,
+                sale.getRemainingStock(),
+                resolveDisplayStatus(
+                        sale,
+                        sale.getRemainingStock()
+                )
+        );
     }
 
     @Override
@@ -101,7 +108,10 @@ public class SaleServiceImpl implements SaleService {
                     return SaleListResponseDto.from(
                             sale,
                             sale.getRemainingStock(),
-                            sale.getStatus()
+                            resolveDisplayStatus(
+                                    sale,
+                                    sale.getRemainingStock()
+                            )
                     );
                 })
                 .toList();
@@ -390,6 +400,12 @@ public class SaleServiceImpl implements SaleService {
             Sale sale,
             Integer currentStock
     ) {
+        // 조회 응답에서는 즉시 CLOSED로 표시
+        if (sale.getStatus() == SaleStatus.ON_SALE
+                && !LocalDateTime.now().isBefore(sale.getEndAt())) {
+            return SaleStatus.CLOSED;
+        }
+
         // SOLD_OUT은 RDB 상태값이 아니라 Redis 실시간 재고 기반으로 계산
         if (sale.getStatus() == SaleStatus.ON_SALE
                 && currentStock != null
