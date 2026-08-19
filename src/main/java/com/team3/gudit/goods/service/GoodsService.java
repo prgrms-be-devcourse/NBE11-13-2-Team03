@@ -59,11 +59,32 @@ public class GoodsService {
     }
 
     @Transactional(readOnly = true)
+    public List<GoodsListResponse> adminGoodsList() {
+        return goodsRepository
+                .findAll()
+                .stream()
+                .map(goodsMapper::toListResponse)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
     public GoodsDetailResponse goodsDetail(Long id) {
-        Goods goods = goodsRepository.findByIdAndStatus(id,  GoodsStatus.ACTIVE)
+        Goods goods = goodsRepository.findByIdAndStatus(id, GoodsStatus.ACTIVE)
                 .orElseThrow(() -> new BusinessException(GoodsErrorCode.GOODS_NOT_FOUND));
 
         return  goodsMapper.toDetailResponse(goods);
+    }
+
+    @Transactional(readOnly = true)
+    public GoodsDetailResponse adminGoodsDetail(Long id) {
+        Goods goods = goodsRepository.findById(id)
+                .orElseThrow(() ->
+                        new BusinessException(
+                                GoodsErrorCode.GOODS_NOT_FOUND
+                        )
+                );
+
+        return goodsMapper.toDetailResponse(goods);
     }
 
     @Transactional
