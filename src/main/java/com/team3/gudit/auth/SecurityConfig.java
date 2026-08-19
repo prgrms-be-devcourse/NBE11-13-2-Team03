@@ -64,6 +64,7 @@ public class SecurityConfig {
 
                                 // 관리자 화면
                                 "/admin/**",
+                                "/api/goods/**",
 
                                 // 기존 결제 테스트 화면
                                 "/payments/test",
