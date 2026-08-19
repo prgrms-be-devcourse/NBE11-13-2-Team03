@@ -1,5 +1,6 @@
 package com.team3.gudit.sale.domain.repository;
 
+import com.team3.gudit.goods.domain.enums.GoodsStatus;
 import com.team3.gudit.sale.domain.entity.Sale;
 import com.team3.gudit.sale.domain.enums.SaleStatus;
 import jakarta.persistence.LockModeType;
@@ -39,5 +40,9 @@ public interface SaleRepository extends JpaRepository<Sale, Long> {
     findByStatusAndFinalStockSyncedAtIsNullAndEndAtLessThanEqual(
             SaleStatus status,
             LocalDateTime endAt
+    );
+
+    List<Sale> findAllByGoods_Status(
+            GoodsStatus goodsStatus
     );
 }

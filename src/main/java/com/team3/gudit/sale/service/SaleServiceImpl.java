@@ -3,6 +3,7 @@ package com.team3.gudit.sale.service;
 import com.team3.gudit.global.exception.BusinessException;
 import com.team3.gudit.global.exception.GlobalErrorCode;
 import com.team3.gudit.goods.domain.entity.Goods;
+import com.team3.gudit.goods.domain.enums.GoodsStatus;
 import com.team3.gudit.goods.domain.repository.GoodsRepository;
 import com.team3.gudit.goods.exception.GoodsErrorCode;
 import com.team3.gudit.purchase.entity.PurchaseStatus;
@@ -80,7 +81,8 @@ public class SaleServiceImpl implements SaleService {
     @Override
     @Transactional(readOnly = true)
     public List<SaleListResponseDto> saleList() {
-        return saleRepository.findAll().stream()
+        return saleRepository.findAllByGoods_Status(GoodsStatus.ACTIVE)
+                .stream()
                 .map(sale -> {
 
                     if (sale.getStatus() == SaleStatus.ON_SALE) {
