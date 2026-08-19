@@ -55,6 +55,16 @@ public class GoodsApiController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/admin/{goodsId}")
+    public ResponseEntity<GoodsDetailResponse> getAdminGoods(
+            @PathVariable Long goodsId
+    ) {
+        GoodsDetailResponse response =
+                goodsService.adminGoodsDetail(goodsId);
+
+        return ResponseEntity.ok(response);
+    }
+
     @PutMapping(
             value = "/{goodsId}",
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE
