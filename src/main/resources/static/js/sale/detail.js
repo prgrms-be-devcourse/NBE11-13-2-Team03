@@ -1,23 +1,55 @@
 const saleId = getSaleId();
 
-const saleStatusBadge = document.getElementById("sale-status-badge");
-const saleName = document.getElementById("sale-name");
-const salePrice = document.getElementById("sale-price");
+const saleDetailImage =
+    document.getElementById("sale-detail-image");
 
-const saleStatusText = document.getElementById("sale-status-text");
-const saleStock = document.getElementById("sale-stock");
-const saleStockBar = document.getElementById("sale-stock-bar");
-const salePeriod = document.getElementById("sale-period");
-const saleMaxPurchase = document.getElementById("sale-max-purchase");
+const saleDescription =
+    document.getElementById("sale-description");
 
-const countdownCard = document.getElementById("countdown-card");
-const countdownLabel = document.getElementById("countdown-label");
-const countdownHours = document.getElementById("countdown-hours");
-const countdownMinutes = document.getElementById("countdown-minutes");
-const countdownSeconds = document.getElementById("countdown-seconds");
+const saleStatusBadge =
+    document.getElementById("sale-status-badge");
 
-const purchaseButton = document.getElementById("purchase-button");
-const purchaseNotice = document.getElementById("purchase-notice");
+const saleName =
+    document.getElementById("sale-name");
+
+const salePrice =
+    document.getElementById("sale-price");
+
+const saleStatusText =
+    document.getElementById("sale-status-text");
+
+const saleStock =
+    document.getElementById("sale-stock");
+
+const saleStockBar =
+    document.getElementById("sale-stock-bar");
+
+const salePeriod =
+    document.getElementById("sale-period");
+
+const saleMaxPurchase =
+    document.getElementById("sale-max-purchase");
+
+const countdownCard =
+    document.getElementById("countdown-card");
+
+const countdownLabel =
+    document.getElementById("countdown-label");
+
+const countdownHours =
+    document.getElementById("countdown-hours");
+
+const countdownMinutes =
+    document.getElementById("countdown-minutes");
+
+const countdownSeconds =
+    document.getElementById("countdown-seconds");
+
+const purchaseButton =
+    document.getElementById("purchase-button");
+
+const purchaseNotice =
+    document.getElementById("purchase-notice");
 
 let countdownTimer = null;
 let currentSale = null;
@@ -25,22 +57,31 @@ let currentSale = null;
 document.addEventListener("DOMContentLoaded", () => {
     loadSaleDetail();
 
-    purchaseButton.addEventListener("click", purchase);
+    purchaseButton.addEventListener(
+        "click",
+        purchase
+    );
 });
 
 async function loadSaleDetail() {
     try {
-        const response = await fetch(`/api/sales/${saleId}`, {
-            credentials: "include"
-        });
+        const response = await fetch(
+            `/api/sales/${saleId}`,
+            {
+                credentials: "include"
+            }
+        );
 
         if (!response.ok) {
-            throw new Error("판매 상세 조회에 실패했습니다.");
+            throw new Error(
+                "판매 상세 조회에 실패했습니다."
+            );
         }
 
         currentSale = await response.json();
 
         renderSaleDetail(currentSale);
+
     } catch (error) {
         console.error(error);
 
@@ -53,19 +94,35 @@ async function loadSaleDetail() {
 }
 
 function renderSaleDetail(sale) {
-    const statusInfo = getStatusInfo(sale.status);
+    const statusInfo =
+        getStatusInfo(sale.status);
 
-    document.title = `${sale.goodsName} | Gudit`;
+    document.title =
+        `${sale.goodsName} | Gudit`;
 
-    saleStatusBadge.textContent = statusInfo.label;
+    renderImage(sale);
+
+    saleDescription.textContent =
+        sale.description
+        || "Gudit 한정 굿즈입니다.";
+
+    saleStatusBadge.textContent =
+        statusInfo.label;
+
     saleStatusBadge.className =
         `status-badge detail-status ${statusInfo.className}`;
 
-    saleName.textContent = sale.goodsName;
-    salePrice.textContent = `${formatPrice(sale.price)}원`;
+    saleName.textContent =
+        sale.goodsName;
 
-    saleStatusText.textContent = statusInfo.label;
-    saleStatusText.className = statusInfo.textClassName;
+    salePrice.textContent =
+        `${formatPrice(sale.price)}원`;
+
+    saleStatusText.textContent =
+        statusInfo.label;
+
+    saleStatusText.className =
+        statusInfo.textClassName;
 
     saleStock.textContent =
         `${sale.remainingStock} / ${sale.initialStock}`;
@@ -85,13 +142,35 @@ function renderSaleDetail(sale) {
     startCountdown(sale);
 }
 
+function renderImage(sale) {
+    if (!sale.imageUrl) {
+        saleDetailImage.innerHTML = `
+            <div class="detail-mock-keyring">
+                GUDIT
+            </div>
+        `;
+
+        return;
+    }
+
+    saleDetailImage.innerHTML = `
+        <img
+            src="${escapeHtml(sale.imageUrl)}"
+            alt="${escapeHtml(sale.goodsName)}"
+            class="sale-detail-real-image"
+        >
+    `;
+}
+
 async function purchase() {
     if (!currentSale) {
         return;
     }
 
     purchaseButton.disabled = true;
-    purchaseButton.textContent = "구매 처리 중...";
+    purchaseButton.textContent =
+        "구매 처리 중...";
+
     purchaseNotice.textContent = "";
 
     try {
@@ -104,14 +183,18 @@ async function purchase() {
         );
 
         if (!response.ok) {
-            const errorBody = await response.json().catch(() => null);
+            const errorBody =
+                await response.json()
+                    .catch(() => null);
 
             throw new Error(
-                errorBody?.message || "구매에 실패했습니다."
+                errorBody?.message
+                || "구매에 실패했습니다."
             );
         }
 
-        const purchase = await response.json();
+        const purchase =
+            await response.json();
 
         sessionStorage.setItem(
             "payment",
@@ -122,23 +205,30 @@ async function purchase() {
                 amount: purchase.purchasePrice,
                 orderId: purchase.orderId,
                 status: purchase.status,
-                goodsName: currentSale.goodsName
+                goodsName: currentSale.goodsName,
+                imageUrl: currentSale.imageUrl
             })
         );
 
-        window.location.href = "/payments";
+        window.location.href =
+            "/payments";
 
     } catch (error) {
         console.error(error);
 
-        purchaseNotice.textContent = error.message;
+        purchaseNotice.textContent =
+            error.message;
 
         purchaseButton.disabled = false;
-        purchaseButton.textContent = "구매하기";
+        purchaseButton.textContent =
+            "구매하기";
     }
 }
 
-function renderStockBar(remainingStock, initialStock) {
+function renderStockBar(
+    remainingStock,
+    initialStock
+) {
     if (!initialStock || initialStock <= 0) {
         saleStockBar.style.width = "0%";
         return;
@@ -152,14 +242,16 @@ function renderStockBar(remainingStock, initialStock) {
         )
     );
 
-    saleStockBar.style.width = `${percentage}%`;
+    saleStockBar.style.width =
+        `${percentage}%`;
 }
 
 function renderPurchaseState(sale) {
     switch (sale.status) {
         case "ON_SALE":
             purchaseButton.disabled = false;
-            purchaseButton.textContent = "구매하기";
+            purchaseButton.textContent =
+                "구매하기";
 
             purchaseNotice.textContent =
                 `현재 구매 가능합니다. 한 계정당 최대 ${sale.maxPurchaseQuantity}개까지 구매할 수 있습니다.`;
@@ -167,7 +259,8 @@ function renderPurchaseState(sale) {
 
         case "READY":
             purchaseButton.disabled = true;
-            purchaseButton.textContent = "판매 예정";
+            purchaseButton.textContent =
+                "판매 예정";
 
             purchaseNotice.textContent =
                 `${formatFullDateTime(sale.startAt)}부터 구매할 수 있습니다.`;
@@ -175,7 +268,8 @@ function renderPurchaseState(sale) {
 
         case "SOLD_OUT":
             purchaseButton.disabled = true;
-            purchaseButton.textContent = "품절";
+            purchaseButton.textContent =
+                "품절";
 
             purchaseNotice.textContent =
                 "준비된 수량이 모두 판매되었습니다.";
@@ -183,7 +277,8 @@ function renderPurchaseState(sale) {
 
         case "CLOSED":
             purchaseButton.disabled = true;
-            purchaseButton.textContent = "판매 종료";
+            purchaseButton.textContent =
+                "판매 종료";
 
             purchaseNotice.textContent =
                 "판매가 종료된 상품입니다.";
@@ -191,7 +286,8 @@ function renderPurchaseState(sale) {
 
         default:
             purchaseButton.disabled = true;
-            purchaseButton.textContent = "구매 불가";
+            purchaseButton.textContent =
+                "구매 불가";
 
             purchaseNotice.textContent =
                 "현재 구매할 수 없는 상품입니다.";
@@ -200,6 +296,7 @@ function renderPurchaseState(sale) {
 
 function startCountdown(sale) {
     clearInterval(countdownTimer);
+
     countdownCard.hidden = false;
 
     if (sale.status === "ON_SALE") {
@@ -208,9 +305,12 @@ function startCountdown(sale) {
 
         updateCountdown(sale.endAt);
 
-        countdownTimer = setInterval(() => {
-            updateCountdown(sale.endAt);
-        }, 1000);
+        countdownTimer = setInterval(
+            () => {
+                updateCountdown(sale.endAt);
+            },
+            1000
+        );
 
         return;
     }
@@ -221,9 +321,12 @@ function startCountdown(sale) {
 
         updateCountdown(sale.startAt);
 
-        countdownTimer = setInterval(() => {
-            updateCountdown(sale.startAt);
-        }, 1000);
+        countdownTimer = setInterval(
+            () => {
+                updateCountdown(sale.startAt);
+            },
+            1000
+        );
 
         return;
     }
@@ -232,10 +335,14 @@ function startCountdown(sale) {
 }
 
 function updateCountdown(targetDateTime) {
-    const target = new Date(targetDateTime).getTime();
-    const now = Date.now();
+    const target =
+        new Date(targetDateTime).getTime();
 
-    const difference = target - now;
+    const now =
+        Date.now();
+
+    const difference =
+        target - now;
 
     if (difference <= 0) {
         clearInterval(countdownTimer);
@@ -248,7 +355,10 @@ function updateCountdown(targetDateTime) {
     }
 
     const hours =
-        Math.floor(difference / (1000 * 60 * 60));
+        Math.floor(
+            difference
+            / (1000 * 60 * 60)
+        );
 
     const minutes =
         Math.floor(
@@ -263,13 +373,16 @@ function updateCountdown(targetDateTime) {
         );
 
     countdownHours.textContent =
-        String(hours).padStart(2, "0");
+        String(hours)
+            .padStart(2, "0");
 
     countdownMinutes.textContent =
-        String(minutes).padStart(2, "0");
+        String(minutes)
+            .padStart(2, "0");
 
     countdownSeconds.textContent =
-        String(seconds).padStart(2, "0");
+        String(seconds)
+            .padStart(2, "0");
 }
 
 function getStatusInfo(status) {
@@ -312,15 +425,19 @@ function getStatusInfo(status) {
 }
 
 function getSaleId() {
-    const segments = window.location.pathname
-        .split("/")
-        .filter(Boolean);
+    const segments =
+        window.location.pathname
+            .split("/")
+            .filter(Boolean);
 
-    return segments[segments.length - 1];
+    return segments[
+    segments.length - 1
+        ];
 }
 
 function formatPrice(price) {
-    return Number(price).toLocaleString("ko-KR");
+    return Number(price)
+        .toLocaleString("ko-KR");
 }
 
 function formatFullDateTime(dateTime) {
@@ -328,17 +445,36 @@ function formatFullDateTime(dateTime) {
         return "-";
     }
 
-    const date = new Date(dateTime);
+    const date =
+        new Date(dateTime);
 
-    const year = date.getFullYear();
+    const year =
+        date.getFullYear();
+
     const month =
-        String(date.getMonth() + 1).padStart(2, "0");
+        String(date.getMonth() + 1)
+            .padStart(2, "0");
+
     const day =
-        String(date.getDate()).padStart(2, "0");
+        String(date.getDate())
+            .padStart(2, "0");
+
     const hour =
-        String(date.getHours()).padStart(2, "0");
+        String(date.getHours())
+            .padStart(2, "0");
+
     const minute =
-        String(date.getMinutes()).padStart(2, "0");
+        String(date.getMinutes())
+            .padStart(2, "0");
 
     return `${year}.${month}.${day} ${hour}:${minute}`;
+}
+
+function escapeHtml(value) {
+    return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
 }

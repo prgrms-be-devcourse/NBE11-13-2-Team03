@@ -488,6 +488,14 @@ a {
     background: #f1f5f9;
 }
 
+.sale-image {
+    width: 100%;
+    height: 100%;
+
+    object-fit: cover;
+    display: block;
+}
+
 /* Sale Status */
 
 .status-badge {
@@ -710,6 +718,13 @@ a {
     border-radius: 20px;
 
     background: #f0f5f9;
+}
+
+.sale-detail-real-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
 }
 
 .detail-mock-keyring {
@@ -1352,7 +1367,7 @@ a {
 
 .payment-product-image {
     width: 100%;
-    min-height: 280px;
+    height: 300px;
 
     display: flex;
     align-items: center;
@@ -1371,6 +1386,14 @@ a {
     margin: 0;
 
     font-size: 20px;
+}
+
+.payment-real-image {
+    width: 100%;
+    height: 100%;
+
+    object-fit: contain;
+    display: block;
 }
 
 .payment-product-content {

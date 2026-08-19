@@ -79,10 +79,19 @@ function createSaleCard(sale) {
                     ${statusInfo.label}
                 </span>
 
-                <!-- TODO: Sale 목록 응답에 imageUrl 추가 후 실제 이미지로 교체 -->
-                <div class="mock-product mock-keyring">
-                    GUDIT
-                </div>
+                ${
+                    sale.imageUrl
+                        ? `<img
+                            src="${escapeHtml(sale.imageUrl)}"
+                            alt="${escapeHtml(sale.goodsName)}"
+                            class="sale-image"
+                       >`
+                        : `
+                        <div class="mock-product mock-keyring">
+                            GUDIT
+                        </div>
+                    `
+                }
             </div>
 
             <div class="sale-card-body">
@@ -95,9 +104,8 @@ function createSaleCard(sale) {
                     </span>
                 </div>
 
-                <!-- TODO: Sale 목록 응답에 description 추가 후 실제 설명으로 교체 -->
                 <p class="sale-description">
-                    Gudit 한정 굿즈입니다.
+                    ${escapeHtml(sale.description || "Gudit 한정 굿즈입니다.")}
                 </p>
 
                 ${createSaleMeta(sale)}

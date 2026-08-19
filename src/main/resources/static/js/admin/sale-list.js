@@ -116,7 +116,15 @@ function createSaleRow(sale) {
                 <div class="admin-product">
 
                     <div class="admin-product-thumbnail">
-                        G
+                        ${
+                            sale.imageUrl
+                                ? `<img
+                                        src="${escapeHtml(sale.imageUrl)}"
+                                        alt="${escapeHtml(sale.goodsName)}"
+                                        class="admin-product-image"
+                                   >`
+                                : "G"
+                        }
                     </div>
 
                     <div>
