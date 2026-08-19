@@ -30,4 +30,6 @@ public interface SaleService {
     void startSale(Long id);
 
     void endSale(Long id);
+
+    boolean syncFinalRemainingStock(Long saleId);
 }

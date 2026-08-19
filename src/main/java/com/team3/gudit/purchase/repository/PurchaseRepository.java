@@ -51,4 +51,9 @@ public interface PurchaseRepository extends JpaRepository<Purchase, Long> {
             @Param("purchaseId") Long purchaseId,
             @Param("userId") Long userId
     );
+
+    boolean existsBySaleIdAndStatus(
+            Long saleId,
+            PurchaseStatus status
+    );
 }

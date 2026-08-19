@@ -55,6 +55,8 @@ public record SaleDetailResponseDto(
                 .remainingStock(remainingStock)
                 .maxPurchaseQuantity(sale.getMaxPurchaseQuantity())
                 .status(status)
+                .description(sale.getGoods().getDescription())
+                .imageUrl(sale.getGoods().getImageUrl())
                 .startAt(sale.getStartAt())
                 .endAt(sale.getEndAt())
                 .createdAt(sale.getCreatedAt())
