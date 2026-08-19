@@ -121,7 +121,9 @@ function createSaleMeta(sale) {
             return `
                 <div class="sale-meta">
                     <span>판매 시작</span>
-                    <strong>${formatDateTime(sale.startAt)}</strong>
+                    <strong class="ready-emphasis">
+                        ${formatDateTime(sale.startAt)}
+                    </strong>
                 </div>
             `;
 
