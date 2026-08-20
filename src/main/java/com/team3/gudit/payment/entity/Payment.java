@@ -135,4 +135,44 @@ public class Payment {
             );
         }
     }
+
+    public void completeByWebhook(
+            String paymentKey,
+            LocalDateTime approvedAt
+    ) {
+        if (this.status != PaymentStatus.READY
+                && this.status != PaymentStatus.IN_PROGRESS) {
+            throw new BusinessException(
+                    PaymentErrorCode.INVALID_PAYMENT_STATUS
+            );
+        }
+
+        this.paymentKey = paymentKey;
+        this.status = PaymentStatus.DONE;
+        this.approvedAt = approvedAt;
+    }
+
+    public void failByWebhook() {
+        if (this.status != PaymentStatus.READY
+                && this.status != PaymentStatus.IN_PROGRESS) {
+            throw new BusinessException(
+                    PaymentErrorCode.INVALID_PAYMENT_STATUS
+            );
+        }
+
+        this.status = PaymentStatus.FAILED;
+    }
+
+    public void cancelByWebhook() {
+        if (this.status != PaymentStatus.READY
+                && this.status != PaymentStatus.IN_PROGRESS
+                && this.status != PaymentStatus.DONE) {
+            throw new BusinessException(
+                    PaymentErrorCode.INVALID_PAYMENT_STATUS
+            );
+        }
+
+        this.status = PaymentStatus.CANCELED;
+        this.canceledAt = LocalDateTime.now();
+    }
 }

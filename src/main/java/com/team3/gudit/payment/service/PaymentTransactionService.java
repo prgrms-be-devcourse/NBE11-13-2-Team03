@@ -3,6 +3,7 @@ package com.team3.gudit.payment.service;
 import com.team3.gudit.global.exception.BusinessException;
 import com.team3.gudit.payment.dto.TossPaymentResponse;
 import com.team3.gudit.payment.entity.Payment;
+import com.team3.gudit.payment.entity.PaymentStatus;
 import com.team3.gudit.payment.exception.PaymentErrorCode;
 import com.team3.gudit.payment.repository.PaymentRepository;
 import com.team3.gudit.purchase.entity.Purchase;
@@ -184,5 +185,124 @@ public class PaymentTransactionService {
                     PurchaseErrorCode.INVALID_PURCHASE_STATUS
             );
         }
+    }
+
+    @Transactional
+    public void reconcileDone(TossPaymentResponse response) {
+        Payment payment = getPaymentByOrderId(response.orderId());
+
+        validatePaymentResponse(payment, response);
+
+        Purchase purchase = getLockedPurchase(payment);
+
+        if (payment.getStatus() == PaymentStatus.DONE) {
+            return;
+        }
+
+        if (payment.getStatus() == PaymentStatus.CANCELED) {
+            throw new BusinessException(
+                    PaymentErrorCode.INVALID_PAYMENT_STATUS,
+                    "Canceled payment received DONE webhook. orderId="
+                            + response.orderId()
+            );
+        }
+
+        validatePendingPurchase(purchase);
+
+        payment.completeByWebhook(
+                response.paymentKey(),
+                response.approvedAt().toLocalDateTime()
+        );
+
+        purchase.complete();
+    }
+
+    @Transactional
+    public void reconcileCanceled(TossPaymentResponse response) {
+        Payment payment = getPaymentByOrderId(response.orderId());
+
+        validatePaymentResponse(payment, response);
+
+        Purchase purchase = getLockedPurchase(payment);
+
+        if (payment.getStatus() == PaymentStatus.CANCELED) {
+            return;
+        }
+
+        if (purchase.getStatus() != PurchaseStatus.PENDING_PAYMENT
+                && purchase.getStatus() != PurchaseStatus.PURCHASED) {
+            return;
+        }
+
+        payment.cancelByWebhook();
+        purchase.cancel();
+
+        inventoryService.restoreStock(
+                purchase.getSale().getId(),
+                purchase.getUser().getId(),
+                purchase.getQuantity()
+        );
+    }
+
+    @Transactional
+    public void reconcileAborted(TossPaymentResponse response) {
+        Payment payment = getPaymentByOrderId(response.orderId());
+
+        validatePaymentResponse(payment, response);
+
+        Purchase purchase = getLockedPurchase(payment);
+
+        if (payment.getStatus() == PaymentStatus.FAILED) {
+            return;
+        }
+
+        if (payment.getStatus() == PaymentStatus.CANCELED
+                || payment.getStatus() == PaymentStatus.DONE) {
+            return;
+        }
+
+        if (purchase.getStatus() != PurchaseStatus.PENDING_PAYMENT) {
+            return;
+        }
+
+        payment.failByWebhook();
+        purchase.cancel();
+
+        inventoryService.restoreStock(
+                purchase.getSale().getId(),
+                purchase.getUser().getId(),
+                purchase.getQuantity()
+        );
+    }
+
+    @Transactional
+    public void reconcileExpired(TossPaymentResponse response) {
+        Payment payment = getPaymentByOrderId(response.orderId());
+
+        validatePaymentResponse(payment, response);
+
+        Purchase purchase = getLockedPurchase(payment);
+
+        if (payment.getStatus() == PaymentStatus.CANCELED) {
+            return;
+        }
+
+        if (payment.getStatus() == PaymentStatus.DONE
+                || payment.getStatus() == PaymentStatus.FAILED) {
+            return;
+        }
+
+        if (purchase.getStatus() != PurchaseStatus.PENDING_PAYMENT) {
+            return;
+        }
+
+        payment.cancelByWebhook();
+        purchase.cancel();
+
+        inventoryService.restoreStock(
+                purchase.getSale().getId(),
+                purchase.getUser().getId(),
+                purchase.getQuantity()
+        );
     }
 }
