@@ -57,6 +57,7 @@ public class PurchaseControllerTest {
                 15000,
                 PurchaseStatus.PENDING_PAYMENT,
                 null,
+                LocalDateTime.now(),
                 "GUDIT_test-order-id"
         );
 
@@ -72,6 +73,7 @@ public class PurchaseControllerTest {
                 .andExpect(jsonPath("$.quantity").value(1))
                 .andExpect(jsonPath("$.purchasePrice").value(15000))
                 .andExpect(jsonPath("$.status").value("PENDING_PAYMENT"))
+                .andExpect(jsonPath("$.createdAt").isNotEmpty())
                 .andExpect(jsonPath("$.orderId").value("GUDIT_test-order-id"));
 
         verify(purchaseService).purchase(userId, saleId);
