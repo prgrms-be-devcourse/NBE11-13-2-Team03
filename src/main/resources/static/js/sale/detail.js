@@ -183,6 +183,15 @@ async function purchase() {
         );
 
         if (!response.ok) {
+            if (response.status === 401) {
+                alert("로그인이 필요한 서비스입니다.");
+
+                window.location.href =
+                    "/oauth2/authorization/kakao";
+
+                return;
+            }
+
             const errorBody =
                 await response.json()
                     .catch(() => null);
