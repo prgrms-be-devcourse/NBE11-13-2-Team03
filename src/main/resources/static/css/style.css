@@ -1023,7 +1023,7 @@ a {
 .purchase-image {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
     display: block;
 }
 
@@ -1956,6 +1956,7 @@ body:has(.admin-page) {
 
 .admin-action-cell {
     text-align: right !important;
+    white-space: nowrap;
 }
 
 .admin-edit-button {
@@ -1976,13 +1977,6 @@ body:has(.admin-page) {
 
     color: var(--text-sub);
     background: #ffffff;
-}
-
-.admin-action-cell {
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    gap: 8px;
 }
 
 .admin-edit-button:hover {
