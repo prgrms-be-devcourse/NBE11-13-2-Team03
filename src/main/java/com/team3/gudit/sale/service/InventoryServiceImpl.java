@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-@Primary
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -20,6 +20,8 @@ public class InventoryServiceImpl implements InventoryService {
     @Override
     @Transactional
     public void decreaseStock(Long saleId, Long userId, int quantity) {
+        validateQuantity(quantity);
+
         Sale sale = saleRepository.findByIdWithLock(saleId)
                 .orElseThrow(() -> new BusinessException(SaleErrorCode.SALE_NOT_FOUND));
         sale.validateSalePeriod();
@@ -30,10 +32,20 @@ public class InventoryServiceImpl implements InventoryService {
     @Override
     @Transactional
     public void restoreStock(Long saleId, Long userId, int quantity) {
+        validateQuantity(quantity);
+
         Sale sale = saleRepository.findByIdWithLock(saleId)
                 .orElseThrow(() -> new BusinessException(SaleErrorCode.SALE_NOT_FOUND));
 
         sale.restoreStock(quantity);
+    }
+
+    private void validateQuantity(int quantity) {
+        if (quantity <= 0) {
+            throw new BusinessException(
+                    SaleErrorCode.INVALID_PURCHASE_QUANTITY
+            );
+        }
     }
 
 }

@@ -21,40 +21,49 @@
             <p>판매에 사용할 굿즈를 등록하고 상품 정보를 관리합니다.</p>
         </div>
 
-        <a href="/admin/goods/new" class="primary-button admin-create-button">
+        <a href="/admin/goods/new"
+           class="primary-button admin-create-button">
             상품 등록
         </a>
     </section>
 
     <section class="admin-summary">
+
         <div class="admin-summary-card">
             <span>전체 상품</span>
-            <strong>4</strong>
+            <strong id="goods-total-count">0</strong>
         </div>
 
         <div class="admin-summary-card">
             <span>판매 가능</span>
-            <strong>3</strong>
+            <strong id="goods-enabled-count">0</strong>
         </div>
 
         <div class="admin-summary-card">
             <span>판매 중지</span>
-            <strong>1</strong>
+            <strong id="goods-disabled-count">0</strong>
         </div>
+
     </section>
 
     <section class="admin-table-card">
 
         <div class="admin-table-header">
+
             <h2>상품 목록</h2>
 
-            <span class="admin-table-count">
-                총 4개
+            <span
+                    id="goods-table-count"
+                    class="admin-table-count">
+                총 0개
             </span>
+
         </div>
 
         <div class="admin-table-wrap">
+
             <table class="admin-table">
+
                 <thead>
                 <tr>
                     <th>상품</th>
@@ -65,143 +74,19 @@
                 </tr>
                 </thead>
 
-                <tbody>
-
-                <tr>
-                    <td>
-                        <div class="admin-product">
-                            <div class="admin-product-thumbnail mock-admin-keyring">
-                                G
-                            </div>
-
-                            <div>
-                                <strong>개발자 키링</strong>
-                                <span>Gudit 한정 아크릴 키링</span>
-                            </div>
-                        </div>
-                    </td>
-
-                    <td>15,000원</td>
-
-                    <td>
-                        <span class="admin-status status-enabled">
-                            판매 가능
-                        </span>
-                    </td>
-
-                    <td>2026.08.10</td>
-
-                    <td class="admin-action-cell">
-                        <a href="/admin/goods/1/edit"
-                           class="admin-edit-button">
-                            수정
-                        </a>
-                    </td>
-                </tr>
-
-                <tr>
-                    <td>
-                        <div class="admin-product">
-                            <div class="admin-product-thumbnail mock-admin-shirt">
-                                G
-                            </div>
-
-                            <div>
-                                <strong>Gudit 티셔츠</strong>
-                                <span>Gudit 로고 티셔츠</span>
-                            </div>
-                        </div>
-                    </td>
-
-                    <td>29,000원</td>
-
-                    <td>
-                        <span class="admin-status status-enabled">
-                            판매 가능
-                        </span>
-                    </td>
-
-                    <td>2026.08.10</td>
-
-                    <td class="admin-action-cell">
-                        <a href="/admin/goods/2/edit"
-                           class="admin-edit-button">
-                            수정
-                        </a>
-                    </td>
-                </tr>
-
-                <tr>
-                    <td>
-                        <div class="admin-product">
-                            <div class="admin-product-thumbnail mock-admin-mug">
-                                G
-                            </div>
-
-                            <div>
-                                <strong>한정 머그컵</strong>
-                                <span>Gudit 시그니처 머그컵</span>
-                            </div>
-                        </div>
-                    </td>
-
-                    <td>18,000원</td>
-
-                    <td>
-                        <span class="admin-status status-enabled">
-                            판매 가능
-                        </span>
-                    </td>
-
-                    <td>2026.08.09</td>
-
-                    <td class="admin-action-cell">
-                        <a href="/admin/goods/3/edit"
-                           class="admin-edit-button">
-                            수정
-                        </a>
-                    </td>
-                </tr>
-
-                <tr>
-                    <td>
-                        <div class="admin-product">
-                            <div class="admin-product-thumbnail mock-admin-sticker">
-                                G
-                            </div>
-
-                            <div>
-                                <strong>Gudit 스티커 팩</strong>
-                                <span>그래픽 스티커 세트</span>
-                            </div>
-                        </div>
-                    </td>
-
-                    <td>5,000원</td>
-
-                    <td>
-                        <span class="admin-status status-disabled">
-                            판매 중지
-                        </span>
-                    </td>
-
-                    <td>2026.08.08</td>
-
-                    <td class="admin-action-cell">
-                        <a href="/admin/goods/4/edit"
-                           class="admin-edit-button">
-                            수정
-                        </a>
-                    </td>
-                </tr>
-
+                <tbody id="admin-goods-list">
+                <!-- GET /api/goods 결과 렌더링 -->
                 </tbody>
+
             </table>
+
         </div>
 
     </section>
 
 </main>
+
+<script src="/js/admin/goods-list.js"></script>
 
 </body>
 </html>

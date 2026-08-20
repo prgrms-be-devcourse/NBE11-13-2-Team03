@@ -61,6 +61,7 @@ public class GoodsMapper {
                 .price(goods.getPrice())
                 .imageUrl(goods.getImageUrl())
                 .status(goods.getStatus())
+                .createdAt(goods.getCreatedAt())
                 .build();
     }
 

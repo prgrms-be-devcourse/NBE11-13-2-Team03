@@ -22,14 +22,14 @@ class PurchaseTest {
                 user,
                 sale,
                 1,
-                15000
+                15_000
         );
 
         // then
         assertThat(purchase.getUser()).isEqualTo(user);
         assertThat(purchase.getSale()).isEqualTo(sale);
         assertThat(purchase.getQuantity()).isEqualTo(1);
-        assertThat(purchase.getPurchasePrice()).isEqualTo(15000);
+        assertThat(purchase.getPurchasePrice()).isEqualTo(15_000);
         assertThat(purchase.getStatus())
                 .isEqualTo(PurchaseStatus.PENDING_PAYMENT);
         assertThat(purchase.getPurchasedAt()).isNull();
@@ -47,7 +47,7 @@ class PurchaseTest {
                 user,
                 sale,
                 1,
-                15000
+                15_000
         );
 
         // when
@@ -70,7 +70,7 @@ class PurchaseTest {
                 user,
                 sale,
                 1,
-                15000
+                15_000
         );
 
         // when

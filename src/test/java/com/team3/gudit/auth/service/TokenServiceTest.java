@@ -288,8 +288,8 @@ class TokenServiceTest {
                 );
 
         when(refreshTokenHasher.matches(
-                REFRESH_TOKEN,
-                STORED_HASH
+                STORED_HASH,
+                REFRESH_TOKEN
                 )).thenReturn(true);
 
         when(userRepository.findById(USER_ID))
@@ -602,8 +602,8 @@ class TokenServiceTest {
                 );
 
         when(refreshTokenHasher.matches(
-                REFRESH_TOKEN,
-                STORED_HASH
+                STORED_HASH,
+                REFRESH_TOKEN
         )).thenReturn(false);
 
 
@@ -667,8 +667,8 @@ class TokenServiceTest {
                 );
 
         when(refreshTokenHasher.matches(
-                REFRESH_TOKEN,
-                STORED_HASH
+                STORED_HASH,
+                REFRESH_TOKEN
         )).thenReturn(true);
 
         when(userRepository.findById(USER_ID))

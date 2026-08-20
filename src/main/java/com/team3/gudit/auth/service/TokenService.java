@@ -176,8 +176,8 @@ public class TokenService {
         // Resis HIT + 일치
         if (cachedTokenHash.isPresent()
                 && refreshTokenHasher.matches(
-                        refreshToken,
-                        cachedTokenHash.get()
+                cachedTokenHash.get(),
+                refreshToken
         )) {
             return;
         }
@@ -203,8 +203,8 @@ public class TokenService {
 
         // 토큰 불일지
         if (!refreshTokenHasher.matches(
-                refreshToken,
-                storedToken.getTokenHash()
+                storedToken.getTokenHash(),
+                refreshToken
         )) {
             throw new BusinessException(
                     AuthErrorCode.REFRESH_TOKEN_MISMATCH

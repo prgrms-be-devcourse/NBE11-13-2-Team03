@@ -21,129 +21,44 @@
     </section>
 
     <section class="sale-filter" aria-label="판매 상태 필터">
-        <button type="button" class="filter-button active">전체</button>
-        <button type="button" class="filter-button">판매 예정</button>
-        <button type="button" class="filter-button">판매 중</button>
-        <button type="button" class="filter-button">품절</button>
-        <button type="button" class="filter-button">종료</button>
+        <button type="button"
+                class="filter-button active"
+                data-status="ALL">
+            전체
+        </button>
+
+        <button type="button"
+                class="filter-button"
+                data-status="READY">
+            판매 예정
+        </button>
+
+        <button type="button"
+                class="filter-button"
+                data-status="ON_SALE">
+            판매 중
+        </button>
+
+        <button type="button"
+                class="filter-button"
+                data-status="SOLD_OUT">
+            품절
+        </button>
+
+        <button type="button"
+                class="filter-button"
+                data-status="CLOSED">
+            종료
+        </button>
     </section>
 
-    <section class="sale-grid">
-
-        <!-- ON_SALE -->
-        <a href="/sales/1" class="sale-card">
-            <div class="sale-image-wrap">
-                <span class="status-badge status-on-sale">판매 중</span>
-
-                <div class="mock-product mock-keyring">
-                    GUDIT
-                </div>
-            </div>
-
-            <div class="sale-card-body">
-                <div class="sale-card-top">
-                    <h2>개발자 키링</h2>
-                    <span class="sale-price">15,000원</span>
-                </div>
-
-                <p class="sale-description">
-                    Gudit 로고가 담긴 한정 아크릴 키링
-                </p>
-
-                <div class="sale-meta">
-                    <span>남은 수량</span>
-                    <strong class="stock-emphasis">17개</strong>
-                </div>
-
-                <div class="stock-bar">
-                    <div class="stock-bar-fill" style="width: 17%;"></div>
-                </div>
-            </div>
-        </a>
-
-        <!-- READY -->
-        <a href="/sales/2" class="sale-card">
-            <div class="sale-image-wrap">
-                <span class="status-badge status-ready">판매 예정</span>
-
-                <div class="mock-product mock-shirt">
-                    GUDIT
-                </div>
-            </div>
-
-            <div class="sale-card-body">
-                <div class="sale-card-top">
-                    <h2>Gudit 티셔츠</h2>
-                    <span class="sale-price">29,000원</span>
-                </div>
-
-                <p class="sale-description">
-                    심플한 로고가 들어간 한정 티셔츠
-                </p>
-
-                <div class="sale-meta">
-                    <span>판매 시작</span>
-                    <strong>08.10 18:00</strong>
-                </div>
-            </div>
-        </a>
-
-        <!-- SOLD_OUT -->
-        <a href="/sales/3" class="sale-card">
-            <div class="sale-image-wrap">
-                <span class="status-badge status-sold-out">품절</span>
-
-                <div class="mock-product mock-mug">
-                    GUDIT
-                </div>
-            </div>
-
-            <div class="sale-card-body">
-                <div class="sale-card-top">
-                    <h2>한정 머그컵</h2>
-                    <span class="sale-price">18,000원</span>
-                </div>
-
-                <p class="sale-description">
-                    Gudit 시그니처 머그컵
-                </p>
-
-                <div class="sale-meta sold-out-text">
-                    <span>남은 수량</span>
-                    <strong>0개</strong>
-                </div>
-            </div>
-        </a>
-
-        <!-- CLOSED -->
-        <a href="/sales/4" class="sale-card">
-            <div class="sale-image-wrap">
-                <span class="status-badge status-closed">판매 종료</span>
-
-                <div class="mock-product mock-sticker">
-                    G
-                </div>
-            </div>
-
-            <div class="sale-card-body">
-                <div class="sale-card-top">
-                    <h2>Gudit 스티커 팩</h2>
-                    <span class="sale-price">5,000원</span>
-                </div>
-
-                <p class="sale-description">
-                    Gudit 그래픽 스티커 세트
-                </p>
-
-                <div class="sale-meta">
-                    <span>판매 상태</span>
-                    <strong>종료</strong>
-                </div>
-            </div>
-        </a>
-
+    <section id="sale-grid" class="sale-grid">
+        <!-- GET /api/sales 결과 렌더링 -->
     </section>
+
 </main>
+
+<script src="/js/sale/list.js"></script>
 
 </body>
 </html>
