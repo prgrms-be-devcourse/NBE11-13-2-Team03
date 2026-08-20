@@ -31,6 +31,6 @@ spring:
 
 jwt:
   issuer: test@naver.com
-  secret_key: dGVzdC1qd3Qtc2VjcmV0LWtleS1mb3ItZ3VkaXQtMzItYnl0ZXMtbG9uZw== # 테스트용
+  secret_key: dGVzdC1qd3Qtc2VjcmV0LWtleS1mb3ItZ3VkaXQtaHM1MTItdGVzdGluZy1vbmx5LTY0LWJ5dGVzLW1pbmltdW0ta2V5LTIwMjY= # 테스트용
   access-token-validity: 2h
   refresh-token-validity: 7d
