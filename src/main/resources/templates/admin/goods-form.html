@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>상품 등록 | Gudit</title>
+    <title>상품 관리 | Gudit</title>
 
     <link rel="stylesheet" href="/css/style.css">
 </head>
@@ -20,106 +20,128 @@
 
     <section class="admin-form-header">
         <span class="page-eyebrow">ADMIN</span>
-        <h1>상품 등록</h1>
-        <p>판매에 사용할 굿즈의 기본 정보를 입력합니다.</p>
+
+        <h1 id="goods-form-title">
+            상품 등록
+        </h1>
+
+        <p id="goods-form-description">
+            판매에 사용할 굿즈의 기본 정보를 입력합니다.
+        </p>
     </section>
 
     <section class="admin-form-card">
 
-        <form class="admin-form">
+        <form id="goods-form" class="admin-form">
 
             <div class="form-group">
-                <label for="goodsName">
+                <label for="goods-name">
                     상품명
                     <span class="required">*</span>
                 </label>
 
                 <input
                         type="text"
-                        id="goodsName"
-                        name="goodsName"
+                        id="goods-name"
+                        maxlength="255"
                         placeholder="예: 개발자 키링"
                         required>
             </div>
 
             <div class="form-group">
-                <label for="price">
+                <label for="goods-price">
                     가격
                     <span class="required">*</span>
                 </label>
 
                 <div class="input-with-unit">
+
                     <input
                             type="number"
-                            id="price"
-                            name="price"
+                            id="goods-price"
                             min="0"
                             placeholder="15000"
                             required>
 
                     <span>원</span>
+
                 </div>
             </div>
 
             <div class="form-group">
-                <label for="description">
+                <label for="goods-description">
                     상품 설명
                 </label>
 
                 <textarea
-                        id="description"
-                        name="description"
+                        id="goods-description"
                         rows="5"
+                        maxlength="100"
                         placeholder="상품에 대한 간단한 설명을 입력하세요."></textarea>
-            </div>
-
-            <div class="form-group">
-                <label for="imageUrl">
-                    이미지 URL
-                </label>
-
-                <input
-                        type="url"
-                        id="imageUrl"
-                        name="imageUrl"
-                        placeholder="https://example.com/image.png">
 
                 <p class="form-help">
-                    이미지가 없으면 기본 상품 이미지가 표시됩니다.
+                    최대 100자까지 입력할 수 있습니다.
                 </p>
             </div>
 
             <div class="form-group">
-                <label for="status">
-                    상품 상태
-                    <span class="required">*</span>
+                <label for="goods-image">
+                    상품 이미지
                 </label>
 
-                <select id="status"
-                        name="status">
-                    <option value="ACTIVE" selected>
+                <input
+                        type="file"
+                        id="goods-image"
+                        accept="image/*">
+
+                <p
+                        id="goods-image-help"
+                        class="form-help">
+                    이미지를 선택하지 않으면 기본 이미지가 사용됩니다.
+                </p>
+            </div>
+
+            <div
+                    id="goods-status-group"
+                    class="form-group"
+                    hidden>
+
+                <label for="goods-status">
+                    상품 상태
+                </label>
+
+                <select id="goods-status">
+                    <option value="ACTIVE">
                         판매 가능
                     </option>
+
                     <option value="INACTIVE">
                         판매 중지
                     </option>
                 </select>
 
-                <p class="form-help">
-                    판매 중지된 상품은 사용자 판매 화면에 노출되지 않습니다.
-                </p>
             </div>
 
+            <p
+                    id="goods-form-message"
+                    class="form-help">
+            </p>
+
             <div class="admin-form-actions">
-                <a href="/admin/goods"
-                   class="secondary-button">
+
+                <a
+                        href="/admin/goods"
+                        class="secondary-button">
                     취소
                 </a>
 
-                <button type="submit"
+                <button
+                        id="goods-submit-button"
+                        type="submit"
                         class="primary-button form-submit-button">
                     상품 등록
                 </button>
+
             </div>
 
         </form>
@@ -127,6 +149,8 @@
     </section>
 
 </main>
+
+<script src="/js/admin/goods-form.js"></script>
 
 </body>
 </html>

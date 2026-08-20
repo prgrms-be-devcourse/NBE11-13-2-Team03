@@ -13,14 +13,15 @@ services:
     restart: always
 
   redis:
-    image: redis:7-alpine
-    container_name: redis
+    image: redis:alpine
+    container_name: redis-event
     ports:
-      - "7001:6379"
+      - "6379:6379"
+    # 데이터 영속화(AOF) 및 비번 없음 설정
+    command: redis-server --appendonly yes --requirepass ""
     volumes:
       - redis_data:/data
     restart: always
-    command: redis-server --appendonly yes
 
 volumes:
   postgres_data:

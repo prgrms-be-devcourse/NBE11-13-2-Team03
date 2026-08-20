@@ -3,6 +3,7 @@ package com.team3.gudit.purchase.service;
 import com.team3.gudit.global.exception.BusinessException;
 import com.team3.gudit.goods.domain.entity.Goods;
 import com.team3.gudit.payment.entity.Payment;
+import com.team3.gudit.payment.entity.PaymentStatus;
 import com.team3.gudit.payment.service.PaymentService;
 import com.team3.gudit.purchase.dto.PurchaseCancelResponse;
 import com.team3.gudit.purchase.dto.PurchaseCreateResponse;
@@ -23,6 +24,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -125,15 +127,15 @@ class PurchaseServiceTest {
     @DisplayName("이미 취소된 구매를 다시 취소하면 예외가 발생한다")
     void cancelAlreadyCanceledPurchase() {
         // given
-        Purchase purchase = mock(Purchase.class);
+        Purchase lockedPurchase = mock(Purchase.class);
 
-        given(purchaseRepository.findByIdAndUserId(
+        given(purchaseRepository.findByIdAndUserIdWithLock(
                 purchaseId,
                 userId
         ))
-                .willReturn(Optional.of(purchase));
+                .willReturn(Optional.of(lockedPurchase));
 
-        given(purchase.getStatus())
+        given(lockedPurchase.getStatus())
                 .willReturn(PurchaseStatus.CANCELED);
 
         // when & then
@@ -150,9 +152,16 @@ class PurchaseServiceTest {
 
                     assertThat(businessException.getErrorCode())
                             .isEqualTo(
-                                    PurchaseErrorCode.PURCHASE_ALREADY_CANCELED
+                                    PurchaseErrorCode
+                                            .PURCHASE_ALREADY_CANCELED
                             );
                 });
+
+        verify(purchaseRepository)
+                .findByIdAndUserIdWithLock(
+                        purchaseId,
+                        userId
+                );
     }
 
     @Test
@@ -223,7 +232,7 @@ class PurchaseServiceTest {
     }
 
     @Test
-    @DisplayName("결제 대기 중인 구매를 취소하면 재고를 복구하고 구매를 취소한다")
+    @DisplayName("결제 대기 중인 구매를 취소하면 READY 결제를 취소하고 재고를 복구한다")
     void cancelPendingPaymentSuccess() {
         // given
         User user = mock(User.class);
@@ -232,18 +241,32 @@ class PurchaseServiceTest {
         given(sale.getId())
                 .willReturn(saleId);
 
-        Purchase purchase = Purchase.create(
+        given(sale.getEndAt())
+                .willReturn(LocalDateTime.now().plusHours(1));
+
+        Purchase lockedPurchase = Purchase.create(
                 user,
                 sale,
                 1,
-                15000
+                15_000
         );
 
-        given(purchaseRepository.findByIdAndUserId(
+        Payment payment = Payment.create(
+                lockedPurchase,
+                15_000
+        );
+
+        given(purchaseRepository.findByIdAndUserIdWithLock(
                 purchaseId,
                 userId
         ))
-                .willReturn(Optional.of(purchase));
+                .willReturn(Optional.of(lockedPurchase));
+
+        // 실제 Entity의 ID는 단위 테스트에서 null이므로 null로 설정
+        given(paymentService.getPaymentByPurchaseId(
+                lockedPurchase.getId()
+        ))
+                .willReturn(payment);
 
         // when
         PurchaseCancelResponse response =
@@ -253,6 +276,12 @@ class PurchaseServiceTest {
                 );
 
         // then
+        assertThat(payment.getStatus())
+                .isEqualTo(PaymentStatus.CANCELED);
+
+        assertThat(payment.getCanceledAt())
+                .isNotNull();
+
         assertThat(response.status())
                 .isEqualTo(PurchaseStatus.CANCELED);
 
@@ -267,54 +296,59 @@ class PurchaseServiceTest {
     @DisplayName("결제 완료된 구매를 취소하면 결제를 취소하고 재고를 복구한다")
     void cancelCompletedPurchaseSuccess() {
         // given
-        Purchase purchase = mock(Purchase.class);
-        Payment payment = mock(Payment.class);
+        User user = mock(User.class);
         Sale sale = mock(Sale.class);
-
-        given(purchaseRepository.findByIdAndUserId(
-                purchaseId,
-                userId
-        ))
-                .willReturn(Optional.of(purchase));
-
-        given(purchase.getId())
-                .willReturn(purchaseId);
-
-        given(purchase.getStatus())
-                .willReturn(PurchaseStatus.PURCHASED);
-
-        given(purchase.getSale())
-                .willReturn(sale);
-
-        given(purchase.getQuantity())
-                .willReturn(1);
+        Payment payment = mock(Payment.class);
 
         given(sale.getId())
                 .willReturn(saleId);
 
-        given(paymentService.getPaymentByPurchaseId(purchaseId))
+        given(sale.getEndAt())
+                .willReturn(LocalDateTime.now().plusHours(1));
+
+        Purchase lockedPurchase = Purchase.create(
+                user,
+                sale,
+                1,
+                15_000
+        );
+        lockedPurchase.complete();
+
+        given(purchaseRepository.findByIdAndUserIdWithLock(
+                purchaseId,
+                userId
+        ))
+                .willReturn(Optional.of(lockedPurchase));
+
+        given(paymentService.getPaymentByPurchaseId(
+                lockedPurchase.getId()
+        ))
                 .willReturn(payment);
 
         given(payment.getPaymentKey())
                 .willReturn("payment-key");
 
         // when
-        purchaseService.cancel(
-                userId,
-                purchaseId
-        );
+        PurchaseCancelResponse response =
+                purchaseService.cancel(
+                        userId,
+                        purchaseId
+                );
 
         // then
-        verify(paymentService)
-                .getPaymentByPurchaseId(purchaseId);
-
         verify(paymentService)
                 .cancelCompletedPayment("payment-key");
 
         verify(inventoryService)
                 .restoreStock(saleId, userId, 1);
 
-        verify(purchase)
-                .cancel();
+        assertThat(lockedPurchase.getStatus())
+                .isEqualTo(PurchaseStatus.CANCELED);
+
+        assertThat(response.status())
+                .isEqualTo(PurchaseStatus.CANCELED);
+
+        assertThat(response.canceledAt())
+                .isNotNull();
     }
 }
