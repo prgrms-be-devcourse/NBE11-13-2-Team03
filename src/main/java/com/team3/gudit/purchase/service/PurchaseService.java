@@ -105,7 +105,8 @@ public class PurchaseService {
     public PurchaseListResponse getMyPurchases(Long userId) {
 
         List<PurchaseSummaryResponse> purchases =
-                purchaseRepository.findAllByUserId(userId)
+                purchaseRepository
+                        .findAllByUserIdOrderByCreatedAtDesc(userId)
                         .stream()
                         .map(this::toSummaryResponse)
                         .toList();
