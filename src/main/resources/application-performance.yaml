@@ -1,0 +1,19 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5433/gudit
+    username: postgres
+    password: 1234
+    driver-class-name: org.postgresql.Driver
+
+  data:
+    redis:
+      host: localhost
+      port: 7002
+      database: 0
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+
+jwt:
+  secret-key: ${PERFORMANCE_JWT_SECRET_KEY}
