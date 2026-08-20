@@ -141,9 +141,7 @@ async function requestPayment() {
     } catch (error) {
         const isUserCanceled =
             error.code === "PAY_PROCESS_CANCELED"
-            || error.code === "USER_CANCEL"
-            || error.message?.includes("취소")
-            || error.message?.toLowerCase().includes("cancel");
+            || error.code === "USER_CANCEL";
 
         if (isUserCanceled) {
             try {
