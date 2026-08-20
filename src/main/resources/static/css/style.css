@@ -1471,6 +1471,62 @@ a {
     letter-spacing: -0.4px;
 }
 
+.payment-timeout {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    margin-top: 18px;
+    padding: 14px 16px;
+
+    border: 1px solid var(--border);
+    border-radius: 12px;
+
+    background: #f8fafc;
+
+    transition:
+            background 0.2s ease,
+            border-color 0.2s ease;
+}
+
+.payment-timeout-text {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.payment-timeout-text span {
+    font-size: 13px;
+    font-weight: 700;
+
+    color: var(--text-main);
+}
+
+.payment-timeout-text small {
+    font-size: 11px;
+
+    color: var(--text-sub);
+}
+
+#payment-time-left {
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+
+    color: var(--primary);
+
+    transition: color 0.2s ease;
+}
+
+.payment-timeout.is-urgent {
+    border-color: #f3c9c9;
+    background: #fff5f5;
+}
+
+.payment-timeout.is-urgent #payment-time-left {
+    color: #df5c58;
+}
+
 .payment-summary {
     margin-top: 22px;
 }

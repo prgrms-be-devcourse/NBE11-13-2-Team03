@@ -25,8 +25,15 @@ const paymentBackLink =
 const paymentProductImage =
     document.getElementById("payment-product-image");
 
+const paymentTimeLeft =
+    document.getElementById("payment-time-left");
+
+const paymentTimeout =
+    document.getElementById("payment-timeout");
+
 let currentPayment = null;
 let payment = null;
+let paymentTimeoutTimer = null;
 
 document.addEventListener("DOMContentLoaded", () => {
     loadPayment();
@@ -52,6 +59,7 @@ function loadPayment() {
     });
 
     renderPayment(currentPayment);
+    startPaymentTimeout(currentPayment.createdAt);
 
     paymentButton.addEventListener(
         "click",
@@ -87,6 +95,72 @@ function renderPayment(paymentData) {
         `/sales/${paymentData.saleId}`;
 }
 
+function startPaymentTimeout(createdAt) {
+    if (!createdAt) {
+        paymentTimeLeft.textContent = "-";
+        return;
+    }
+
+    const expiresAt =
+        new Date(createdAt).getTime()
+        + 10 * 60 * 1000;
+
+    updatePaymentTimeout(expiresAt);
+
+    paymentTimeoutTimer = setInterval(
+        () => {
+            updatePaymentTimeout(expiresAt);
+        },
+        1000
+    );
+}
+
+function updatePaymentTimeout(expiresAt) {
+    const remaining =
+        expiresAt - Date.now();
+
+    if (remaining <= 0) {
+        clearInterval(paymentTimeoutTimer);
+
+        paymentTimeLeft.textContent =
+            "00:00";
+
+        paymentTimeout.classList.add(
+            "is-urgent"
+        );
+
+        paymentButton.disabled = true;
+        paymentButton.textContent =
+            "결제 시간 만료";
+
+        return;
+    }
+
+    if (remaining <= 60 * 1000) {
+        paymentTimeout.classList.add(
+            "is-urgent"
+        );
+    } else {
+        paymentTimeout.classList.remove(
+            "is-urgent"
+        );
+    }
+
+    const minutes =
+        Math.floor(
+            remaining / (1000 * 60)
+        );
+
+    const seconds =
+        Math.floor(
+            (remaining % (1000 * 60))
+            / 1000
+        );
+
+    paymentTimeLeft.textContent =
+        `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+}
+
 function renderPaymentImage(paymentData) {
     if (!paymentData.imageUrl) {
         paymentProductImage.innerHTML = `
@@ -109,6 +183,26 @@ function renderPaymentImage(paymentData) {
 
 async function requestPayment() {
     if (!currentPayment) {
+        return;
+    }
+
+    if (!currentPayment.createdAt) {
+        alert("결제 시간 정보를 확인할 수 없습니다.");
+        return;
+    }
+
+    const expiresAt =
+        new Date(currentPayment.createdAt).getTime()
+        + 10 * 60 * 1000;
+
+    if (Date.now() >= expiresAt) {
+        paymentButton.disabled = true;
+        paymentButton.textContent =
+            "결제 시간 만료";
+
+        paymentTimeLeft.textContent =
+            "00:00";
+
         return;
     }
 
@@ -186,6 +280,10 @@ async function cancelPurchase(purchaseId) {
 }
 
 function handleMissingPayment() {
+    if (paymentTimeoutTimer) {
+        clearInterval(paymentTimeoutTimer);
+    }
+
     paymentProductImage.innerHTML = `
         <div class="detail-mock-keyring">
             GUDIT
@@ -200,6 +298,7 @@ function handleMissingPayment() {
     summaryPrice.textContent = "-";
     summaryQuantity.textContent = "-";
     totalPrice.textContent = "-";
+    paymentTimeLeft.textContent = "-";
 
     paymentButton.disabled = true;
     paymentButton.textContent =

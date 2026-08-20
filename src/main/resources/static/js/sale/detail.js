@@ -214,6 +214,7 @@ async function purchase() {
                 amount: purchase.purchasePrice,
                 orderId: purchase.orderId,
                 status: purchase.status,
+                createdAt: purchase.createdAt,
                 goodsName: currentSale.goodsName,
                 imageUrl: currentSale.imageUrl
             })
