@@ -98,6 +98,7 @@ public class PurchaseService {
                 savedPurchase.getPurchasePrice(),
                 savedPurchase.getStatus(),
                 savedPurchase.getPurchasedAt(),
+                savedPurchase.getCreatedAt(),
                 payment.getOrderId()
         );
     }
