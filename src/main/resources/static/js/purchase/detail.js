@@ -160,7 +160,7 @@ function renderImage(purchase) {
         <img
                 src="${escapeHtml(purchase.imageUrl)}"
                 alt="${escapeHtml(purchase.goodsName)}"
-                class="purchase-image">
+                class="purchase-detail-real-image">
     `;
 }
 
