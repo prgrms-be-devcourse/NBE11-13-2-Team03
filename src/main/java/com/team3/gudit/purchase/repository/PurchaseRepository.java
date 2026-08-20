@@ -20,10 +20,9 @@ public interface PurchaseRepository extends JpaRepository<Purchase, Long> {
             PurchaseStatus status
     );
 
-    List<Purchase> findAllByUserId(Long userId);
+    List<Purchase> findAllByUserIdOrderByCreatedAtDesc(Long userId);
 
     Optional<Purchase> findByIdAndUserId(Long purchaseId, Long userId);
-
 
     List<Purchase> findAllByStatusAndCreatedAtBefore(
             PurchaseStatus status,
