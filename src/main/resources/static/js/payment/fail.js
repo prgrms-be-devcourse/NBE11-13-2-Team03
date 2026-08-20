@@ -71,7 +71,7 @@ function renderFailureState(
     code,
     message
 ) {
-    if (isCanceledPayment(code, message)) {
+    if (isCanceledPayment(code)) {
         failTitle.textContent =
             "결제가 취소되었습니다";
 
@@ -79,7 +79,7 @@ function renderFailureState(
             "PAYMENT CANCELED";
 
         failDescription.textContent =
-            "결제를 취소했습니다. 다시 결제할 수 있습니다.";
+            "결제가 취소되었습니다. 상품 페이지에서 다시 구매해 주세요.";
 
         return;
     }
@@ -94,17 +94,10 @@ function renderFailureState(
         message;
 }
 
-function isCanceledPayment(
-    code,
-    message
-) {
+function isCanceledPayment(code) {
     return (
         code === "PAY_PROCESS_CANCELED"
         || code === "USER_CANCEL"
-        || message.includes("취소")
-        || message
-            .toLowerCase()
-            .includes("cancel")
     );
 }
 
@@ -129,7 +122,7 @@ function renderPayment(payment) {
         `/sales/${payment.saleId}`;
 
     retryLink.href =
-        "/payments";
+        `/sales/${payment.saleId}`;
 }
 
 function getStoredPayment() {
