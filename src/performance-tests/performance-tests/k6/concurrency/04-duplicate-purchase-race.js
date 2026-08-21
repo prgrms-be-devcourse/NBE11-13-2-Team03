@@ -24,7 +24,11 @@ export const options = {
 
 export default function () {
   const actor = actorForUser(1001);
-  record(purchase(103, actor), ["PURCHASE_002"]);
+
+  record(
+      purchase(103, actor),
+      ["PURCHASE_002", "SALE_003"]
+  );
 }
 
 export function teardown() {

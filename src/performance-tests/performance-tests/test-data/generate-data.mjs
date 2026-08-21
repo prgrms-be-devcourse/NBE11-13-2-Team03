@@ -7,75 +7,16 @@ const USER_COUNT = 1_002;
 const DISTRIBUTED_SALE_COUNT = 100;
 const ISSUER = "test@naver.com";
 
-const JWT_ISSUED_AT = Math.floor(
-    Date.parse("2026-01-01T00:00:00Z") / 1000
-);
+const KST_OFFSET_MILLIS = 9 * 60 * 60 * 1000;
+const ONE_MINUTE_MILLIS = 60 * 1000;
+const ONE_DAY_MILLIS = 24 * 60 * 60 * 1000;
 
-const JWT_EXPIRES_AT = Math.floor(
-    Date.parse("2035-01-01T00:00:00Z") / 1000
-);
-
-function pad(value) {
-  return String(value).padStart(2, "0");
-}
-
-function toLocalDateTime(date) {
-  return [
-    date.getFullYear(),
-    "-",
-    pad(date.getMonth() + 1),
-    "-",
-    pad(date.getDate()),
-    "T",
-    pad(date.getHours()),
-    ":",
-    pad(date.getMinutes()),
-    ":",
-    pad(date.getSeconds())
-  ].join("");
-}
-
-const generatedAt = new Date();
-
-/**
- * 고정된 과거 시각을 제거한다.
- *
- * PurchaseTimeoutScheduler가 생성 후 10분이 지난
- * PENDING_PAYMENT 구매를 자동 취소하므로 모든 테스트 데이터의
- * 생성 시각을 스크립트 실행 시각으로 설정한다.
- */
-const CREATED_AT =
-    toLocalDateTime(generatedAt);
-
-/**
- * 판매는 READY 상태로 생성한다.
- *
- * 시작 시각을 생성 시각보다 1분 전으로 설정하면
- * startSales() 스케줄러의 다음 조건에 포함된다.
- *
- * status = READY
- * startAt <= now
- * endAt > now
- *
- * 이후 스케줄러가 다음 순서로 처리한다.
- *
- * warmupSaleInfo()
- * → Redis 적재
- * → startSale()
- * → ON_SALE 전환
- */
-const SALE_START_AT = toLocalDateTime(
-    new Date(
-        generatedAt.getTime() - 60 * 1_000
-    )
-);
-
-const SALE_END_AT = toLocalDateTime(
-    new Date(
-        generatedAt.getTime()
-        + 24 * 60 * 60 * 1_000
-    )
-);
+const FIXTURE_NOW = Date.now();
+const CREATED_AT = toKstLocalDateTime(FIXTURE_NOW);
+const SALE_START_AT = toKstLocalDateTime(FIXTURE_NOW - 5 * ONE_MINUTE_MILLIS);
+const SALE_END_AT = toKstLocalDateTime(FIXTURE_NOW + ONE_DAY_MILLIS);
+const JWT_ISSUED_AT = Math.floor(Date.parse("2026-01-01T00:00:00Z") / 1000);
+const JWT_EXPIRES_AT = Math.floor(Date.parse("2035-01-01T00:00:00Z") / 1000);
 
 const secretBytes = createHash("sha512")
     .update(
@@ -92,6 +33,12 @@ function base64Url(value) {
       .replaceAll("=", "")
       .replaceAll("+", "-")
       .replaceAll("/", "_");
+}
+
+function toKstLocalDateTime(epochMillis) {
+  return new Date(epochMillis + KST_OFFSET_MILLIS)
+    .toISOString()
+    .slice(0, 19);
 }
 
 function createAccessToken(userId) {
@@ -236,18 +183,10 @@ const actors = users.map(({ id }) => ({
 
 const output = {
   metadata: {
-    name:
-        "Gudit k6 concurrency performance fixtures",
-
-    generatedAt:
-        generatedAt.toISOString(),
-
-    targetApi:
-        "POST /api/sales/{saleId}/purchases",
-
-    cancelApi:
-        "POST /api/purchases/{purchaseId}/cancel",
-
+    name: "Gudit k6 concurrency performance fixtures",
+    generatedAt: `${CREATED_AT}+09:00`,
+    targetApi: "POST /api/sales/{saleId}/purchases",
+    cancelApi: "POST /api/purchases/{purchaseId}/cancel",
     maximumConcurrentVus: 1_000,
 
     requiresEmptyIsolatedDatabase: true,
@@ -264,7 +203,7 @@ const output = {
     },
 
     requiredEnvironment: {
-      JWT_SECRET_KEY:
+      PERFORMANCE_JWT_SECRET_KEY:
       jwtSecretKeyBase64,
       JWT_ISSUER:
       ISSUER
@@ -380,22 +319,10 @@ const output = {
     },
 
     distributedBaseline: {
-      description:
-          "The same 1,000 users are spread evenly over 100 sale rows to provide a low-contention baseline.",
-
-      saleIds: {
-        from: 3,
-        to: 102
-      },
-
-      actorUserIds: {
-        from: 1,
-        to: 1_000
-      },
-
-      mapping:
-          "saleId = 3 + ((userId - 1) % 100)",
-
+      description: "The same 1,000 users are spread evenly over 100 Redis stock keys to provide a distributed baseline.",
+      saleIds: { from: 3, to: 102 },
+      actorUserIds: { from: 1, to: 1_000 },
+      mapping: "saleId = 3 + ((userId - 1) % 100)",
       requestsPerActor: 1,
 
       expectedInvariant: {
@@ -417,13 +344,14 @@ const output = {
       expectedInvariant: {
         successfulPurchases: 1,
         rejectedPurchases: 49,
-        rejectCode: "PURCHASE_002",
+        allowedRejectCodes: [
+          "PURCHASE_002",
+          "SALE_003"
+        ],
         finalRemainingStock: 99,
         activePurchasesForUserAndSale: 1
       },
-
-      riskNote:
-          "The current application checks duplicates before inserting but has no database unique constraint, so this scenario can reveal duplicate rows."
+      riskNote: "Concurrent duplicate requests may be rejected either by the database duplicate check or by the Redis per-user purchase limit."
     },
 
     cancelRace: {
@@ -441,9 +369,7 @@ const output = {
         finalPurchaseStatus: "CANCELED",
         finalRemainingStock: 100
       },
-
-      riskNote:
-          "The current application reads the purchase without a row lock, so repeated stock restoration is an important invariant to check."
+      riskNote: "The Purchase pessimistic lock and status revalidation must ensure that Redis stock is restored exactly once."
     }
   },
 
