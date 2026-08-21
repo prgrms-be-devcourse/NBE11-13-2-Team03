@@ -1,7 +1,6 @@
 package com.team3.gudit.purchase.service;
 
 import com.team3.gudit.global.exception.BusinessException;
-import com.team3.gudit.goods.domain.repository.GoodsRepository;
 import com.team3.gudit.payment.entity.Payment;
 import com.team3.gudit.payment.entity.PaymentStatus;
 import com.team3.gudit.payment.exception.PaymentErrorCode;
@@ -109,8 +108,9 @@ class PurchaseServiceRedisCompensationTest {
                 15_000
         );
 
-        given(paymentService.getPaymentByPurchaseId(purchaseId))
-                .willReturn(payment);
+        given(paymentService.getPaymentByPurchaseIdWithLock(
+                purchaseId
+        )).willReturn(payment);
 
         // when
         PurchaseCancelResponse response =
@@ -120,6 +120,11 @@ class PurchaseServiceRedisCompensationTest {
                 );
 
         // then
+        verify(paymentService)
+                .getPaymentByPurchaseIdWithLock(
+                        purchaseId
+                );
+
         verify(purchaseRepository)
                 .findByIdAndUserIdWithLock(
                         purchaseId,
@@ -156,8 +161,7 @@ class PurchaseServiceRedisCompensationTest {
 
         given(purchase.getStatus())
                 .willReturn(PurchaseStatus.PENDING_PAYMENT);
-        given(purchase.getId())
-                .willReturn(purchaseId);
+
         given(purchase.getSale())
                 .willReturn(sale);
 
@@ -170,8 +174,9 @@ class PurchaseServiceRedisCompensationTest {
         );
         payment.start("payment-key");
 
-        given(paymentService.getPaymentByPurchaseId(purchaseId))
-                .willReturn(payment);
+        given(paymentService.getPaymentByPurchaseIdWithLock(
+                purchaseId
+        )).willReturn(payment);
 
         // when & then
         assertThatThrownBy(() ->
@@ -193,6 +198,11 @@ class PurchaseServiceRedisCompensationTest {
         assertThat(payment.getStatus())
                 .isEqualTo(PaymentStatus.IN_PROGRESS);
 
+        verify(paymentService)
+                .getPaymentByPurchaseIdWithLock(
+                        purchaseId
+                );
+
         verify(inventoryService, never())
                 .restoreStock(
                         anyLong(),
@@ -208,6 +218,11 @@ class PurchaseServiceRedisCompensationTest {
     void cancelAlreadyCanceledPurchase() {
         // given
         Purchase purchase = mock(Purchase.class);
+        Payment payment = mock(Payment.class);
+
+        given(paymentService.getPaymentByPurchaseIdWithLock(
+                purchaseId
+        )).willReturn(payment);
 
         given(purchaseRepository.findByIdAndUserIdWithLock(
                 purchaseId,
@@ -235,15 +250,17 @@ class PurchaseServiceRedisCompensationTest {
                         )
                 );
 
+        verify(paymentService)
+                .getPaymentByPurchaseIdWithLock(
+                        purchaseId
+                );
+
         verify(inventoryService, never())
                 .restoreStock(
                         anyLong(),
                         anyLong(),
                         anyInt()
                 );
-
-        verify(paymentService, never())
-                .getPaymentByPurchaseId(anyLong());
 
         verify(purchase, never()).cancel();
     }
@@ -254,6 +271,11 @@ class PurchaseServiceRedisCompensationTest {
         // given
         Purchase purchase = mock(Purchase.class);
         Sale sale = mock(Sale.class);
+        Payment payment = mock(Payment.class);
+
+        given(paymentService.getPaymentByPurchaseIdWithLock(
+                purchaseId
+        )).willReturn(payment);
 
         given(purchaseRepository.findByIdAndUserIdWithLock(
                 purchaseId,
@@ -286,8 +308,10 @@ class PurchaseServiceRedisCompensationTest {
                         )
                 );
 
-        verify(paymentService, never())
-                .getPaymentByPurchaseId(anyLong());
+        verify(paymentService)
+                .getPaymentByPurchaseIdWithLock(
+                        purchaseId
+                );
 
         verify(inventoryService, never())
                 .restoreStock(
@@ -306,6 +330,10 @@ class PurchaseServiceRedisCompensationTest {
         Purchase purchase = mock(Purchase.class);
         Sale sale = mock(Sale.class);
         Payment payment = mock(Payment.class);
+
+        given(paymentService.getPaymentByPurchaseIdWithLock(
+                purchaseId
+        )).willReturn(payment);
 
         given(purchaseRepository.findByIdAndUserIdWithLock(
                 purchaseId,
@@ -326,8 +354,6 @@ class PurchaseServiceRedisCompensationTest {
         given(sale.getEndAt())
                 .willReturn(LocalDateTime.now().plusHours(1));
 
-        given(paymentService.getPaymentByPurchaseId(purchaseId))
-                .willReturn(payment);
         given(payment.getPaymentKey())
                 .willReturn("payment-key");
 
@@ -338,6 +364,11 @@ class PurchaseServiceRedisCompensationTest {
         );
 
         // then
+        verify(paymentService)
+                .getPaymentByPurchaseIdWithLock(
+                        purchaseId
+                );
+
         verify(paymentService)
                 .cancelCompletedPayment("payment-key");
 

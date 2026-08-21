@@ -78,14 +78,21 @@ class PurchaseServiceTest {
                 .willReturn(true);
 
         // when & then
-        assertThatThrownBy(() -> purchaseService.purchase(userId, saleId))
+        assertThatThrownBy(() ->
+                purchaseService.purchase(
+                        userId,
+                        saleId
+                )
+        )
                 .isInstanceOf(BusinessException.class)
                 .satisfies(exception -> {
                     BusinessException businessException =
                             (BusinessException) exception;
 
                     assertThat(businessException.getErrorCode())
-                            .isEqualTo(PurchaseErrorCode.DUPLICATE_PURCHASE);
+                            .isEqualTo(
+                                    PurchaseErrorCode.DUPLICATE_PURCHASE
+                            );
                 });
 
         verify(purchaseRepository)
@@ -119,7 +126,9 @@ class PurchaseServiceTest {
                             (BusinessException) exception;
 
                     assertThat(businessException.getErrorCode())
-                            .isEqualTo(PurchaseErrorCode.PURCHASE_NOT_FOUND);
+                            .isEqualTo(
+                                    PurchaseErrorCode.PURCHASE_NOT_FOUND
+                            );
                 });
     }
 
@@ -128,6 +137,12 @@ class PurchaseServiceTest {
     void cancelAlreadyCanceledPurchase() {
         // given
         Purchase lockedPurchase = mock(Purchase.class);
+        Payment payment = mock(Payment.class);
+
+        given(paymentService.getPaymentByPurchaseIdWithLock(
+                purchaseId
+        ))
+                .willReturn(payment);
 
         given(purchaseRepository.findByIdAndUserIdWithLock(
                 purchaseId,
@@ -156,6 +171,11 @@ class PurchaseServiceTest {
                                             .PURCHASE_ALREADY_CANCELED
                             );
                 });
+
+        verify(paymentService)
+                .getPaymentByPurchaseIdWithLock(
+                        purchaseId
+                );
 
         verify(purchaseRepository)
                 .findByIdAndUserIdWithLock(
@@ -196,7 +216,9 @@ class PurchaseServiceTest {
                 .willReturn(15000);
 
         given(purchaseRepository.save(any(Purchase.class)))
-                .willAnswer(invocation -> invocation.getArgument(0));
+                .willAnswer(invocation ->
+                        invocation.getArgument(0)
+                );
 
         given(paymentService.createPayment(any(Purchase.class)))
                 .willReturn(payment);
@@ -212,17 +234,30 @@ class PurchaseServiceTest {
                 );
 
         // then
-        assertThat(response.saleId()).isEqualTo(saleId);
-        assertThat(response.quantity()).isEqualTo(1);
-        assertThat(response.purchasePrice()).isEqualTo(15000);
+        assertThat(response.saleId())
+                .isEqualTo(saleId);
+
+        assertThat(response.quantity())
+                .isEqualTo(1);
+
+        assertThat(response.purchasePrice())
+                .isEqualTo(15000);
+
         assertThat(response.status())
                 .isEqualTo(PurchaseStatus.PENDING_PAYMENT);
-        assertThat(response.purchasedAt()).isNull();
+
+        assertThat(response.purchasedAt())
+                .isNull();
+
         assertThat(response.orderId())
                 .isEqualTo("GUDIT_test-order-id");
 
         verify(inventoryService)
-                .decreaseStock(saleId, userId, 1);
+                .decreaseStock(
+                        saleId,
+                        userId,
+                        1
+                );
 
         verify(purchaseRepository)
                 .save(any(Purchase.class));
@@ -242,7 +277,10 @@ class PurchaseServiceTest {
                 .willReturn(saleId);
 
         given(sale.getEndAt())
-                .willReturn(LocalDateTime.now().plusHours(1));
+                .willReturn(
+                        LocalDateTime.now()
+                                .plusHours(1)
+                );
 
         Purchase lockedPurchase = Purchase.create(
                 user,
@@ -256,17 +294,16 @@ class PurchaseServiceTest {
                 15_000
         );
 
+        given(paymentService.getPaymentByPurchaseIdWithLock(
+                purchaseId
+        ))
+                .willReturn(payment);
+
         given(purchaseRepository.findByIdAndUserIdWithLock(
                 purchaseId,
                 userId
         ))
                 .willReturn(Optional.of(lockedPurchase));
-
-        // 실제 Entity의 ID는 단위 테스트에서 null이므로 null로 설정
-        given(paymentService.getPaymentByPurchaseId(
-                lockedPurchase.getId()
-        ))
-                .willReturn(payment);
 
         // when
         PurchaseCancelResponse response =
@@ -288,8 +325,17 @@ class PurchaseServiceTest {
         assertThat(response.canceledAt())
                 .isNotNull();
 
+        verify(paymentService)
+                .getPaymentByPurchaseIdWithLock(
+                        purchaseId
+                );
+
         verify(inventoryService)
-                .restoreStock(saleId, userId, 1);
+                .restoreStock(
+                        saleId,
+                        userId,
+                        1
+                );
     }
 
     @Test
@@ -304,7 +350,10 @@ class PurchaseServiceTest {
                 .willReturn(saleId);
 
         given(sale.getEndAt())
-                .willReturn(LocalDateTime.now().plusHours(1));
+                .willReturn(
+                        LocalDateTime.now()
+                                .plusHours(1)
+                );
 
         Purchase lockedPurchase = Purchase.create(
                 user,
@@ -312,18 +361,19 @@ class PurchaseServiceTest {
                 1,
                 15_000
         );
+
         lockedPurchase.complete();
+
+        given(paymentService.getPaymentByPurchaseIdWithLock(
+                purchaseId
+        ))
+                .willReturn(payment);
 
         given(purchaseRepository.findByIdAndUserIdWithLock(
                 purchaseId,
                 userId
         ))
                 .willReturn(Optional.of(lockedPurchase));
-
-        given(paymentService.getPaymentByPurchaseId(
-                lockedPurchase.getId()
-        ))
-                .willReturn(payment);
 
         given(payment.getPaymentKey())
                 .willReturn("payment-key");
@@ -337,10 +387,21 @@ class PurchaseServiceTest {
 
         // then
         verify(paymentService)
-                .cancelCompletedPayment("payment-key");
+                .getPaymentByPurchaseIdWithLock(
+                        purchaseId
+                );
+
+        verify(paymentService)
+                .cancelCompletedPayment(
+                        "payment-key"
+                );
 
         verify(inventoryService)
-                .restoreStock(saleId, userId, 1);
+                .restoreStock(
+                        saleId,
+                        userId,
+                        1
+                );
 
         assertThat(lockedPurchase.getStatus())
                 .isEqualTo(PurchaseStatus.CANCELED);
