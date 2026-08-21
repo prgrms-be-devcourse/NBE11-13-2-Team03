@@ -120,7 +120,7 @@ function sale(id, stock, label) {
     max_purchase_quantity: 1,
 
     // 스케줄러가 조회할 수 있도록 READY로 생성
-    status: "READY",
+    status: "ON_SALE",
 
     start_at: SALE_START_AT,
     end_at: SALE_END_AT,
