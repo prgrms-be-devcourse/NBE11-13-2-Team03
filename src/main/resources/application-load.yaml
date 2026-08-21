@@ -1,0 +1,14 @@
+server:
+  tomcat:
+    max-connections: 1500
+    accept-count: 300
+    threads:
+      max: 240
+      min-spare: 24
+
+spring:
+  datasource:
+    hikari:
+      maximum-pool-size: 30
+      minimum-idle: 10
+      connection-timeout: 5000

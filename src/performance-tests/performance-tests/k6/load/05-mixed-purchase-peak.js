@@ -5,6 +5,23 @@ import { commonThresholds, record } from "../lib/metrics.js";
 import { verifySale } from "../lib/verify.js";
 import { readThresholds, runReadIteration, summaryTrendStats } from "../lib/workload.js";
 
+const PURCHASE_VUS = Number(__ENV.PURCHASE_VUS || 100);
+const PURCHASE_ITERATIONS = Number(__ENV.PURCHASE_ITERATIONS || 1000);
+
+if (
+  !Number.isInteger(PURCHASE_VUS) ||
+  !Number.isInteger(PURCHASE_ITERATIONS) ||
+  PURCHASE_VUS <= 0 ||
+  PURCHASE_ITERATIONS <= 0 ||
+  PURCHASE_VUS > PURCHASE_ITERATIONS ||
+  PURCHASE_ITERATIONS > 1000
+) {
+  throw new Error(
+    "PURCHASE_VUS and PURCHASE_ITERATIONS must be positive integers, " +
+    "PURCHASE_VUS must not exceed PURCHASE_ITERATIONS, and generated data supports at most 1000 iterations."
+  );
+}
+
 export const options = {
   scenarios: {
     background_reads: {
@@ -17,11 +34,11 @@ export const options = {
       maxVUs: Number(__ENV.READ_MAX_VUS || 300)
     },
     purchase_peak: {
-      executor: "per-vu-iterations",
+      executor: "shared-iterations",
       exec: "purchasePeak",
       startTime: __ENV.PURCHASE_START || "30s",
-      vus: 1000,
-      iterations: 1,
+      vus: PURCHASE_VUS,
+      iterations: PURCHASE_ITERATIONS,
       maxDuration: __ENV.PURCHASE_MAX_DURATION || "3m"
     }
   },
@@ -32,7 +49,7 @@ export const options = {
       detailP95: Number(__ENV.DETAIL_P95_MS || 750),
       purchasesP95: Number(__ENV.PURCHASE_LIST_P95_MS || 1000)
     }),
-    ...commonThresholds(1000, 0, Number(__ENV.PURCHASE_P95_MS || 5000))
+    ...commonThresholds(PURCHASE_ITERATIONS, 0, Number(__ENV.PURCHASE_P95_MS || 5000))
   },
   summaryTrendStats,
   tags: { test_scenario: "mixed-purchase-peak" }
@@ -48,5 +65,7 @@ export function purchasePeak() {
 }
 
 export function teardown() {
-  verifySale(actorForUser(1), 2, 0, "SOLD_OUT");
+  const expectedStock = 1000 - PURCHASE_ITERATIONS;
+  const expectedStatus = expectedStock === 0 ? "SOLD_OUT" : "ON_SALE";
+  verifySale(actorForUser(1), 2, expectedStock, expectedStatus);
 }

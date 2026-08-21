@@ -1,6 +1,6 @@
 param(
     [switch]$ResetPerformanceDatabase,
-    [string]$Container = "postgres-db",
+    [string]$Container = "gudit-performance-postgres",
     [string]$Database = "gudit",
     [string]$DatabaseUser = "postgres"
 )
