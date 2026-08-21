@@ -55,6 +55,9 @@ public class SecurityConfig {
                                 "/login/**",
                                 "/api/auth/reissue",
 
+                                // Toss Webhook
+                                "/api/webhooks/toss/**",
+
                                 // 사용자 화면
                                 "/sales",
                                 "/sales/**",

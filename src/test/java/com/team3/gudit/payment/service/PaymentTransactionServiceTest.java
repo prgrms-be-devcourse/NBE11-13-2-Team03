@@ -25,8 +25,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class PaymentTransactionServiceTest {
@@ -531,5 +530,430 @@ class PaymentTransactionServiceTest {
                                     PaymentErrorCode.PAYMENT_NOT_FOUND
                             );
                 });
+    }
+
+    @Test
+    @DisplayName("DONE Webhook 보정 시 READY 결제와 PENDING_PAYMENT 구매를 완료한다")
+    void reconcileDone() {
+        // given
+        Long purchaseId = 100L;
+
+        Purchase purchase = mock(Purchase.class);
+
+        Payment payment = Payment.create(
+                purchase,
+                15_000
+        );
+
+        TossPaymentResponse response =
+                mock(TossPaymentResponse.class);
+
+        given(purchase.getId())
+                .willReturn(purchaseId);
+
+        given(purchase.getStatus())
+                .willReturn(PurchaseStatus.PENDING_PAYMENT);
+
+        given(response.orderId())
+                .willReturn(payment.getOrderId());
+
+        given(response.paymentKey())
+                .willReturn("payment-key");
+
+        given(response.totalAmount())
+                .willReturn(15_000);
+
+        given(response.approvedAt())
+                .willReturn(
+                        OffsetDateTime.parse(
+                                "2026-08-20T17:00:00+09:00"
+                        )
+                );
+
+        given(paymentRepository.findByOrderId(
+                payment.getOrderId()
+        ))
+                .willReturn(Optional.of(payment));
+
+        given(purchaseRepository.findByIdWithLock(purchaseId))
+                .willReturn(Optional.of(purchase));
+
+        // when
+        paymentTransactionService.reconcileDone(response);
+
+        // then
+        assertThat(payment.getStatus())
+                .isEqualTo(PaymentStatus.DONE);
+
+        assertThat(payment.getPaymentKey())
+                .isEqualTo("payment-key");
+
+        verify(purchaseRepository)
+                .findByIdWithLock(purchaseId);
+
+        verify(purchase)
+                .complete();
+    }
+
+    @Test
+    @DisplayName("CANCELED Webhook 보정 시 결제와 구매를 취소하고 재고를 복구한다")
+    void reconcileCanceled() {
+        // given
+        Long purchaseId = 100L;
+        Sale sale = mock(Sale.class);
+        User user = mock(User.class);
+        Purchase purchase = mock(Purchase.class);
+
+        Payment payment = Payment.create(
+                purchase,
+                15_000
+        );
+
+        TossPaymentResponse response =
+                mock(TossPaymentResponse.class);
+
+        given(purchase.getId())
+                .willReturn(purchaseId);
+
+        given(purchase.getStatus())
+                .willReturn(PurchaseStatus.PENDING_PAYMENT);
+
+        given(purchase.getSale())
+                .willReturn(sale);
+
+        given(purchase.getUser())
+                .willReturn(user);
+
+        given(purchase.getQuantity())
+                .willReturn(1);
+
+        given(sale.getId())
+                .willReturn(10L);
+
+        given(user.getId())
+                .willReturn(1L);
+
+        given(response.orderId())
+                .willReturn(payment.getOrderId());
+
+        given(response.totalAmount())
+                .willReturn(15_000);
+
+        given(paymentRepository.findByOrderId(
+                payment.getOrderId()
+        ))
+                .willReturn(Optional.of(payment));
+
+        given(purchaseRepository.findByIdWithLock(purchaseId))
+                .willReturn(Optional.of(purchase));
+
+        // when
+        paymentTransactionService.reconcileCanceled(response);
+
+        // then
+        assertThat(payment.getStatus())
+                .isEqualTo(PaymentStatus.CANCELED);
+
+        verify(purchase)
+                .cancel();
+
+        verify(inventoryService)
+                .restoreStock(10L, 1L, 1);
+    }
+
+    @Test
+    @DisplayName("ABORTED Webhook 보정 시 결제를 실패 처리하고 구매와 재고를 복구한다")
+    void reconcileAborted() {
+        // given
+        Long purchaseId = 100L;
+        Sale sale = mock(Sale.class);
+        User user = mock(User.class);
+        Purchase purchase = mock(Purchase.class);
+
+        Payment payment = Payment.create(
+                purchase,
+                15_000
+        );
+
+        TossPaymentResponse response =
+                mock(TossPaymentResponse.class);
+
+        given(purchase.getId())
+                .willReturn(purchaseId);
+
+        given(purchase.getStatus())
+                .willReturn(PurchaseStatus.PENDING_PAYMENT);
+
+        given(purchase.getSale())
+                .willReturn(sale);
+
+        given(purchase.getUser())
+                .willReturn(user);
+
+        given(purchase.getQuantity())
+                .willReturn(1);
+
+        given(sale.getId())
+                .willReturn(10L);
+
+        given(user.getId())
+                .willReturn(1L);
+
+        given(response.orderId())
+                .willReturn(payment.getOrderId());
+
+        given(response.totalAmount())
+                .willReturn(15_000);
+
+        given(paymentRepository.findByOrderId(
+                payment.getOrderId()
+        ))
+                .willReturn(Optional.of(payment));
+
+        given(purchaseRepository.findByIdWithLock(purchaseId))
+                .willReturn(Optional.of(purchase));
+
+        // when
+        paymentTransactionService.reconcileAborted(response);
+
+        // then
+        assertThat(payment.getStatus())
+                .isEqualTo(PaymentStatus.FAILED);
+
+        verify(purchase)
+                .cancel();
+
+        verify(inventoryService)
+                .restoreStock(10L, 1L, 1);
+    }
+
+    @Test
+    @DisplayName("EXPIRED Webhook 보정 시 결제와 구매를 취소하고 재고를 복구한다")
+    void reconcileExpired() {
+        // given
+        Long purchaseId = 100L;
+        Sale sale = mock(Sale.class);
+        User user = mock(User.class);
+        Purchase purchase = mock(Purchase.class);
+
+        Payment payment = Payment.create(
+                purchase,
+                15_000
+        );
+
+        TossPaymentResponse response =
+                mock(TossPaymentResponse.class);
+
+        given(purchase.getId())
+                .willReturn(purchaseId);
+
+        given(purchase.getStatus())
+                .willReturn(PurchaseStatus.PENDING_PAYMENT);
+
+        given(purchase.getSale())
+                .willReturn(sale);
+
+        given(purchase.getUser())
+                .willReturn(user);
+
+        given(purchase.getQuantity())
+                .willReturn(1);
+
+        given(sale.getId())
+                .willReturn(10L);
+
+        given(user.getId())
+                .willReturn(1L);
+
+        given(response.orderId())
+                .willReturn(payment.getOrderId());
+
+        given(response.totalAmount())
+                .willReturn(15_000);
+
+        given(paymentRepository.findByOrderId(
+                payment.getOrderId()
+        ))
+                .willReturn(Optional.of(payment));
+
+        given(purchaseRepository.findByIdWithLock(purchaseId))
+                .willReturn(Optional.of(purchase));
+
+        // when
+        paymentTransactionService.reconcileExpired(response);
+
+        // then
+        assertThat(payment.getStatus())
+                .isEqualTo(PaymentStatus.CANCELED);
+
+        verify(purchase)
+                .cancel();
+
+        verify(inventoryService)
+                .restoreStock(10L, 1L, 1);
+    }
+
+    @Test
+    @DisplayName("이미 CANCELED인 결제의 Webhook을 다시 처리해도 재고를 중복 복구하지 않는다")
+    void reconcileCanceledAlreadyCanceled() {
+        // given
+        Long purchaseId = 100L;
+
+        Purchase purchase = mock(Purchase.class);
+
+        Payment payment = Payment.create(
+                purchase,
+                15_000
+        );
+
+        payment.cancelByWebhook();
+
+        TossPaymentResponse response =
+                mock(TossPaymentResponse.class);
+
+        given(purchase.getId())
+                .willReturn(purchaseId);
+
+        given(response.orderId())
+                .willReturn(payment.getOrderId());
+
+        given(response.totalAmount())
+                .willReturn(15_000);
+
+        given(paymentRepository.findByOrderId(
+                payment.getOrderId()
+        ))
+                .willReturn(Optional.of(payment));
+
+        given(purchaseRepository.findByIdWithLock(purchaseId))
+                .willReturn(Optional.of(purchase));
+
+        // when
+        paymentTransactionService.reconcileCanceled(response);
+
+        // then
+        assertThat(payment.getStatus())
+                .isEqualTo(PaymentStatus.CANCELED);
+
+        verify(inventoryService, never())
+                .restoreStock(
+                        anyLong(),
+                        anyLong(),
+                        anyInt()
+                );
+
+        verify(purchase, never())
+                .cancel();
+    }
+
+    @Test
+    @DisplayName("이미 FAILED인 결제의 ABORTED Webhook을 다시 처리해도 재고를 중복 복구하지 않는다")
+    void reconcileAbortedAlreadyFailed() {
+        // given
+        Long purchaseId = 100L;
+
+        Purchase purchase = mock(Purchase.class);
+
+        Payment payment = Payment.create(
+                purchase,
+                15_000
+        );
+
+        payment.failByWebhook();
+
+        TossPaymentResponse response =
+                mock(TossPaymentResponse.class);
+
+        given(purchase.getId())
+                .willReturn(purchaseId);
+
+        given(response.orderId())
+                .willReturn(payment.getOrderId());
+
+        given(response.totalAmount())
+                .willReturn(15_000);
+
+        given(paymentRepository.findByOrderId(
+                payment.getOrderId()
+        ))
+                .willReturn(Optional.of(payment));
+
+        given(purchaseRepository.findByIdWithLock(purchaseId))
+                .willReturn(Optional.of(purchase));
+
+        // when
+        paymentTransactionService.reconcileAborted(response);
+
+        // then
+        assertThat(payment.getStatus())
+                .isEqualTo(PaymentStatus.FAILED);
+
+        verify(inventoryService, never())
+                .restoreStock(
+                        anyLong(),
+                        anyLong(),
+                        anyInt()
+                );
+
+        verify(purchase, never())
+                .cancel();
+    }
+
+    @Test
+    @DisplayName("이미 DONE인 결제의 Webhook을 다시 처리해도 중복 완료 처리하지 않는다")
+    void reconcileDoneAlreadyDone() {
+        // given
+        Long purchaseId = 100L;
+
+        Purchase purchase = mock(Purchase.class);
+
+        Payment payment = Payment.create(
+                purchase,
+                15_000
+        );
+
+        payment.start("payment-key");
+        payment.complete(
+                OffsetDateTime.parse(
+                        "2026-08-20T17:00:00+09:00"
+                ).toLocalDateTime()
+        );
+
+        TossPaymentResponse response =
+                mock(TossPaymentResponse.class);
+
+        given(purchase.getId())
+                .willReturn(purchaseId);
+
+        given(response.orderId())
+                .willReturn(payment.getOrderId());
+
+        given(response.totalAmount())
+                .willReturn(15_000);
+
+        given(paymentRepository.findByOrderId(
+                payment.getOrderId()
+        ))
+                .willReturn(Optional.of(payment));
+
+        given(purchaseRepository.findByIdWithLock(purchaseId))
+                .willReturn(Optional.of(purchase));
+
+        // when
+        paymentTransactionService.reconcileDone(response);
+
+        // then
+        assertThat(payment.getStatus())
+                .isEqualTo(PaymentStatus.DONE);
+
+        verify(purchase, never())
+                .complete();
+
+        verify(inventoryService, never())
+                .restoreStock(
+                        anyLong(),
+                        anyLong(),
+                        anyInt()
+                );
     }
 }
