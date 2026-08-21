@@ -8,6 +8,9 @@
 → 테스트 데이터 초기화
 → Spring performance 프로필 실행
 → preflight
+→ VU 도달 임계점 테스트
+→ 테스트 데이터 재초기화
+→ preflight
 → 동시성 테스트
 → 테스트 데이터 재초기화
 → Spring 재실행
@@ -36,13 +39,7 @@ Get-Location
 
 새 PowerShell 터미널을 열 때마다 한 번 실행한다.
 
-권장 폴더 구조라면:
-
-```powershell
-. ".\performance-tests\scripts\set-performance-paths.ps1"
-```
-
-현재 중첩 폴더 구조를 유지한다면:
+현재 저장소 구조에서는:
 
 ```powershell
 . ".\src\performance-tests\performance-tests\scripts\set-performance-paths.ps1"
@@ -65,6 +62,7 @@ $prepareDbScript
 $preflightPath
 $concurrencyRunnerPath
 $loadRunnerPath
+$vuCapacityRunnerPath
 $generatedDataPath
 $performancePaths
 ```
@@ -143,16 +141,18 @@ docker exec gudit-performance-postgres `
 
 ## 6. Spring 성능테스트 설정 실행
 
-IntelliJ에서 다음 Run Configuration을 실행한다.
+IntelliJ에서 테스트 종류에 맞는 Run Configuration을 실행한다.
 
 ```text
-GuditApplication - Performance
+VU 기준 측정:  GuditApplication - Performance              (performance)
+동시성 테스트: GuditApplication - Performance Concurrency  (performance,concurrency)
+부하테스트:    GuditApplication - Performance Load         (performance,load)
 ```
 
 확인 항목:
 
 ```text
-활성 프로필: performance
+활성 프로필: performance 또는 performance,concurrency 또는 performance,load
 PostgreSQL:   localhost:5433/gudit
 Redis:        localhost:6380
 Spring:       localhost:8080
@@ -190,11 +190,35 @@ http_req_failed:  0%
 preflight가 실패하면 부하를 실행하지 않고 다음 항목을 확인한다.
 
 - Spring이 실행 중인지
-- 활성 프로필이 `performance`인지
+- 테스트 종류에 맞게 `performance`, `performance,concurrency`, `performance,load` 중 하나인지
 - datasource가 `5433`을 사용하는지
 - Redis가 `6380`을 사용하는지
 - 테스트 JWT 키가 JSON의 키와 일치하는지
 - 시드 데이터가 정상 적재됐는지
+
+## 7-1. VU 도달 임계점 테스트
+
+동시성·부하테스트 전에 서버가 어느 VU 단계부터 요청을 받지 못하는지 먼저 확인한다.
+애플리케이션을 새 계측 코드가 포함된 `performance` 프로필로 재시작한 뒤 실행한다.
+
+```powershell
+& $vuCapacityRunnerPath `
+  -BaseUrl "http://localhost:8080" `
+  -ResetPerformanceDatabase
+```
+
+실행기는 성능테스트용 Redis와 PostgreSQL을 기존 생성 데이터의 기준 상태로 초기화하고, 100~1,000 VU를
+단계별로 실행한다. 구매 모드는 각 단계 전에 두 저장소를 모두 초기화한다. 완료 또는 오류 시 다시
+기준 상태로 복원하고 preflight까지 실행하므로 바로 다음 동시성 테스트를 시작할 수 있다.
+
+결과 위치:
+
+```text
+src/performance-tests/performance-tests/results/vu-capacity-실행시간/
+```
+
+`vu-capacity-verdict.json`에서 마지막 정상 VU와 최초 미도달 VU를 확인한다. 상세 해석은
+`docs/vu-capacity-test.md`를 참고한다.
 
 ## 8. 동시성 테스트 모니터링
 
@@ -202,10 +226,8 @@ preflight가 실패하면 부하를 실행하지 않고 다음 항목을 확인�
 
 ```powershell
 Set-Location "C:\Users\a\Desktop\강좌\project\Goods Shop\Gudit"
-. ".\performance-tests\scripts\set-performance-paths.ps1"
+. ".\src\performance-tests\performance-tests\scripts\set-performance-paths.ps1"
 ```
-
-현재 중첩 구조라면 실제 중첩 경로를 사용한다.
 
 모니터 경로 준비:
 
@@ -244,19 +266,25 @@ preflight
 → 판매 100건으로 요청 분산
 → 동일 사용자 중복 구매 50건
 → 동일 구매 동시 취소 50건
+→ 성능테스트 Redis와 PostgreSQL 기준 상태 자동 복원
 ```
+
+1~5번 시나리오 사이에는 DB 상태를 초기화하지 않는다. 5번 실행까지 상태가 이어지며, 전체 실행기의
+`finally`에서만 한 번 초기화하므로 시나리오가 임계값에 실패해도 다음 테스트에 변경 상태가 남지 않는다.
 
 `04-duplicate-purchase-race`와 `05-cancel-race`가 실패하면 스크립트 문제보다 서비스의 동시성 정합성 문제일 가능성이 있다.
 
 결과 위치:
 
 ```text
-performance-tests/results/concurrency-실행시간/
+src/performance-tests/performance-tests/results/concurrency-실행시간/
 ```
 
-## 10. 부하테스트 전 데이터 재초기화
+## 10. 부하테스트 전 기준 상태 확인
 
-동시성 테스트가 재고 및 구매 데이터를 변경했으므로 다음 순서를 반드시 수행한다.
+동시성 전체 실행기가 5번 시나리오 종료 후 Redis와 PostgreSQL을 자동 초기화한다. 다음 부하테스트의
+preflight가 통과하면 별도 수동 초기화는 필요 없다. 자동 복원에 실패했거나 시나리오를 개별 실행했다면
+다음 순서로 수동 복원한다.
 
 ```text
 Spring 종료
@@ -325,7 +353,7 @@ preflight
 결과 위치:
 
 ```text
-performance-tests/results/load-실행시간/
+src/performance-tests/performance-tests/results/load-실행시간/
 ```
 
 주요 결과 파일:
@@ -379,8 +407,11 @@ comparison.csv
 → DB 초기화
 → Spring performance 실행
 → preflight
+→ VU 도달 임계점 테스트
+→ DB 자동 재초기화 및 preflight
 → 모니터링
 → 동시성 테스트
+→ Redis·DB 자동 재초기화
 → 결과 확인
 ```
 
@@ -400,8 +431,10 @@ Spring 종료
 
 1. 새 PowerShell 터미널을 열 때마다 `set-performance-paths.ps1`을 dot-source한다.
 2. 본 테스트 전에는 항상 preflight를 실행한다.
-3. 동시성 테스트 후 부하테스트 전에 반드시 DB를 재초기화한다.
-4. `prepare-db.ps1` 대상 컨테이너는 `gudit-performance-postgres`로 명시한다.
-5. Spring은 `performance` 프로필과 테스트 JWT 키로 실행한다.
-6. `ddl-auto`는 `update`를 사용해 적재 데이터를 유지한다.
-7. k6 결과뿐 아니라 JVM과 PostgreSQL 지표를 함께 기록한다.
+3. VU 테스트 후 동시성 테스트 전에 DB 기준 상태가 복원됐는지 preflight로 확인한다.
+4. 동시성 전체 테스트는 1~5번 상태를 이어가고 5번 종료 후 Redis·DB를 한 번만 자동 초기화한다.
+5. `prepare-db.ps1` 대상 컨테이너는 `gudit-performance-postgres`로 명시한다.
+6. Spring은 VU 측정에 `performance`, 동시성 테스트에 `performance,concurrency`, 부하테스트에
+   `performance,load` 프로필과 테스트 JWT 키를 사용한다.
+7. `ddl-auto`는 `update`를 사용해 적재 데이터를 유지한다.
+8. k6 결과뿐 아니라 JVM과 PostgreSQL 지표를 함께 기록한다.

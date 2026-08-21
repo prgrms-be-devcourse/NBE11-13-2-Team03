@@ -44,6 +44,7 @@ spring:
     hibernate:
       ddl-auto: update
 
+
 jwt:
   issuer: test@naver.com
   secret_key: ${JWT_SECRET_KEY}
@@ -54,3 +55,6 @@ toss:
   payments:
     client-key: ${TOSS_CLIENT_KEY}
     secret-key: ${TOSS_SECRET_KEY}
+
+springdoc:
+  show-actuator: true

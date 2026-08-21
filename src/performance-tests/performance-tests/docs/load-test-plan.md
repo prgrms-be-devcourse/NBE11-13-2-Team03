@@ -12,6 +12,9 @@
 
 ## 2. 고정 조건
 
+- Spring 애플리케이션은 `performance,load` 프로필로 실행한다. datasource, Redis, JWT는
+  `application-performance.yaml`을 사용하고 Tomcat/Hikari 차이만 `application-load.yaml`에서
+  추가 적용한다.
 - 격리된 성능테스트 DB를 사용한다.
 - 테스트마다 동일한 `performance-test-data.json`을 다시 적재한다.
 - Spring 실행 옵션, JVM 힙, HikariCP 설정, PostgreSQL 설정을 결과와 함께 기록한다.
@@ -39,9 +42,11 @@
 | 3 | 스트레스 | 25→500 RPS, 8분 | 포화 지점과 dropped iteration 발생 지점 확인 |
 | 4 | 스파이크 | 50→500 RPS 급증 | 급증 대응과 정상 부하 복귀 확인 |
 | 5 | 소크 | 100 RPS, 30분 | 메모리·연결·응답시간 증가 추세 확인 |
-| 6 | 혼합 구매 피크 | 읽기 50 RPS + 구매 1,000건 | 비관적 잠금 중 조회 성능과 구매 성공률 확인 |
+| 6 | 혼합 구매 피크 | 읽기 50 RPS + 구매 총 1,000건(기본 동시 100 VU) | 비관적 잠금 중 조회 성능과 구매 성공률 확인 |
 
 혼합 구매 피크는 판매 ID 2의 데이터를 소비하므로 항상 마지막에 실행한다.
+구매 요청은 `shared-iterations`로 총 1,000건을 유지하며 `PURCHASE_VUS`만 조정한다. 기본 100 VU는
+시작값이고, `vu-capacity-verdict.json`에서 확인한 마지막 정상 VU보다 높게 설정하지 않는다.
 
 ## 5. 초기 합격 기준
 

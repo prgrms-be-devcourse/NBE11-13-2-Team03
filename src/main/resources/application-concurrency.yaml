@@ -1,0 +1,11 @@
+server:
+  tomcat:
+    threads:
+      max: 300
+      min-spare: 30
+
+spring:
+  datasource:
+    hikari:
+      maximum-pool-size: 40
+      minimum-idle: 10
