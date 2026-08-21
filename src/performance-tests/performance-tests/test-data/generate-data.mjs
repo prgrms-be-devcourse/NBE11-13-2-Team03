@@ -3,7 +3,7 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const USER_COUNT = 1_002;
+const USER_COUNT = 1_004;
 const DISTRIBUTED_SALE_COUNT = 100;
 const ISSUER = "test@naver.com";
 
@@ -91,7 +91,7 @@ const users = Array.from(
 );
 
 const goods = Array.from(
-    { length: 104 },
+    { length: 106 },
     (_, index) => {
       const id = index + 1;
 
@@ -119,7 +119,7 @@ function sale(id, stock, label) {
     remaining_stock: stock,
     max_purchase_quantity: 1,
 
-    // 스케줄러가 조회할 수 있도록 READY로 생성
+    // 성능 테스트 실행 시 즉시 구매 가능하도록 ON_SALE로 생성
     status: "ON_SALE",
 
     start_at: SALE_START_AT,
@@ -165,6 +165,18 @@ const sales = [
       104,
       100,
       "cancel-race"
+  ),
+
+  sale(
+      105,
+      100,
+      "payment-confirm-race"
+  ),
+
+  sale(
+      106,
+      100,
+      "payment-confirm-cancel-race"
   )
 ];
 
@@ -174,6 +186,22 @@ const sales = [
  */
 sales.find(
     ({ id }) => id === 104
+).remaining_stock = 99;
+
+/**
+ * 판매 105번에는 결제 승인 동시성 테스트용 미결제 구매 1건이 존재한다.
+ * 해당 구매가 재고 1개를 예약했으므로 남은 재고는 99다.
+ */
+sales.find(
+    ({ id }) => id === 105
+).remaining_stock = 99;
+
+/**
+ * 판매 106번에는 결제 승인-취소 경쟁 테스트용 미결제 구매 1건이 존재한다.
+ * 해당 구매가 재고 1개를 예약했으므로 남은 재고는 99다.
+ */
+sales.find(
+    ({ id }) => id === 106
 ).remaining_stock = 99;
 
 const actors = users.map(({ id }) => ({
@@ -187,6 +215,7 @@ const output = {
     generatedAt: `${CREATED_AT}+09:00`,
     targetApi: "POST /api/sales/{saleId}/purchases",
     cancelApi: "POST /api/purchases/{purchaseId}/cancel",
+    paymentConfirmApi: "POST /api/payments/confirm",
     maximumConcurrentVus: 1_000,
 
     requiresEmptyIsolatedDatabase: true,
@@ -195,11 +224,9 @@ const output = {
         "The bundled JWT secret and tokens are test-only. Never use them in production.",
 
     schedulerInitialization: {
-      initialStatus: "READY",
-      expectedStatusAfterScheduler:
-          "ON_SALE",
+      initialStatus: "ON_SALE",
       behavior:
-          "startSales warms Redis before changing the sale status"
+          "Performance fixtures are preloaded in ON_SALE state for immediate test execution."
     },
 
     requiredEnvironment: {
@@ -224,10 +251,10 @@ const output = {
 
     sequenceResetAfterImport: {
       users: USER_COUNT,
-      goods: 104,
-      goods_sales: 104,
-      purchases: 1,
-      payments: 1
+      goods: 106,
+      goods_sales: 106,
+      purchases: 3,
+      payments: 3
     }
   },
 
@@ -235,31 +262,31 @@ const output = {
     users: {
       count: USER_COUNT,
       reason:
-          "1,000 unique VUs plus one duplicate-purchase actor and one cancellation actor"
+          "1,000 unique VUs plus one duplicate-purchase actor, one cancellation actor, one payment-confirm actor, and one payment-confirm-cancel actor"
     },
 
     goods: {
-      count: 104,
+      count: 106,
       reason:
           "one goods row per sale fixture"
     },
 
     sales: {
-      count: 104,
+      count: 106,
       reason:
-          "two hotspot fixtures, 100 distributed fixtures, and two race-condition fixtures"
+          "two hotspot fixtures, 100 distributed fixtures, and three race-condition fixtures"
     },
 
     purchases: {
-      count: 1,
+      count: 3,
       reason:
-          "pending purchase used by the concurrent cancellation test"
+          "pending purchases used by the concurrent cancellation and payment-confirm tests"
     },
 
     payments: {
-      count: 1,
+      count: 3,
       reason:
-          "READY payment paired with the pending cancellation purchase"
+          "READY payments paired with the cancellation and payment-confirm test purchases"
     },
 
     accessTokens: {
@@ -370,6 +397,57 @@ const output = {
         finalRemainingStock: 100
       },
       riskNote: "The Purchase pessimistic lock and status revalidation must ensure that Redis stock is restored exactly once."
+    },
+
+    paymentConfirmRace: {
+      description:
+          "One authenticated user fires 50 concurrent payment confirmation requests for the same READY payment.",
+      saleIds: [105],
+      purchaseIds: [2],
+      paymentIds: [2],
+      actorUserIds: [1_003],
+      concurrentRequests: 50,
+      expectedInvariant: {
+        successfulConfirmations: 1,
+        rejectedConfirmations: 49,
+        allowedRejectCodes: [
+          "PAYMENT_006",
+          "PURCHASE_004"
+        ],
+        finalPurchaseStatus: "PURCHASED",
+        finalPaymentStatus: "DONE",
+        finalRemainingStock: 99
+      },
+      riskNote:
+          "Concurrent confirmation requests must not complete the same payment more than once or corrupt the Purchase and Payment state."
+    },
+
+    paymentConfirmCancelRace: {
+      description:
+          "One payment confirmation request and one purchase cancellation request race against the same pending purchase.",
+      saleIds: [106],
+      purchaseIds: [3],
+      paymentIds: [3],
+      actorUserIds: [1_004],
+      concurrentRequests: 2,
+
+      expectedInvariant: {
+        allowedFinalStates: [
+          {
+            purchaseStatus: "PURCHASED",
+            paymentStatus: "DONE",
+            remainingStock: 99
+          },
+          {
+            purchaseStatus: "CANCELED",
+            paymentStatus: "CANCELED",
+            remainingStock: 100
+          }
+        ]
+      },
+
+      riskNote:
+          "Payment confirmation and purchase cancellation must not deadlock or leave Payment, Purchase, and Redis stock in inconsistent states."
     }
   },
 
@@ -391,6 +469,32 @@ const output = {
       // 고정된 과거 날짜가 아니라 데이터 생성 시각
       created_at: CREATED_AT,
       updated_at: CREATED_AT
+    },
+
+    {
+      id: 2,
+      user_id: 1_003,
+      sale_id: 105,
+      quantity: 1,
+      purchase_price: 10_105,
+      status: "PENDING_PAYMENT",
+      purchased_at: null,
+      canceled_at: null,
+      created_at: CREATED_AT,
+      updated_at: CREATED_AT
+    },
+
+    {
+      id: 3,
+      user_id: 1_004,
+      sale_id: 106,
+      quantity: 1,
+      purchase_price: 10_106,
+      status: "PENDING_PAYMENT",
+      purchased_at: null,
+      canceled_at: null,
+      created_at: CREATED_AT,
+      updated_at: CREATED_AT
     }
   ],
 
@@ -402,6 +506,34 @@ const output = {
           "GUDIT_PERF_CANCEL_RACE_0001",
       payment_key: null,
       amount: 10_104,
+      status: "READY",
+      approved_at: null,
+      canceled_at: null,
+      created_at: CREATED_AT,
+      updated_at: CREATED_AT
+    },
+
+    {
+      id: 2,
+      purchase_id: 2,
+      order_id:
+          "GUDIT_PERF_PAYMENT_CONFIRM_RACE_0002",
+      payment_key: null,
+      amount: 10_105,
+      status: "READY",
+      approved_at: null,
+      canceled_at: null,
+      created_at: CREATED_AT,
+      updated_at: CREATED_AT
+    },
+
+    {
+      id: 3,
+      purchase_id: 3,
+      order_id:
+          "GUDIT_PERF_PAYMENT_CONFIRM_CANCEL_RACE_0003",
+      payment_key: null,
+      amount: 10_106,
       status: "READY",
       approved_at: null,
       canceled_at: null,

@@ -82,7 +82,7 @@ class PaymentTransactionConcurrencyTest {
                 amount
         );
 
-        given(paymentRepository.findByOrderId(
+        given(paymentRepository.findByOrderIdWithLock(
                 payment.getOrderId()
         )).willReturn(Optional.of(payment));
 
@@ -97,6 +97,11 @@ class PaymentTransactionConcurrencyTest {
         );
 
         // then
+        verify(paymentRepository)
+                .findByOrderIdWithLock(
+                        payment.getOrderId()
+                );
+
         verify(purchaseRepository)
                 .findByIdWithLock(purchaseId);
 
@@ -128,7 +133,7 @@ class PaymentTransactionConcurrencyTest {
                 amount
         );
 
-        given(paymentRepository.findByOrderId(
+        given(paymentRepository.findByOrderIdWithLock(
                 payment.getOrderId()
         )).willReturn(Optional.of(payment));
 
@@ -179,9 +184,10 @@ class PaymentTransactionConcurrencyTest {
                 paymentPurchase,
                 amount
         );
+
         payment.start("payment-key");
 
-        given(paymentRepository.findByOrderId(
+        given(paymentRepository.findByOrderIdWithLock(
                 payment.getOrderId()
         )).willReturn(Optional.of(payment));
 
@@ -190,8 +196,10 @@ class PaymentTransactionConcurrencyTest {
 
         given(response.orderId())
                 .willReturn(payment.getOrderId());
+
         given(response.totalAmount())
                 .willReturn(amount);
+
         given(response.approvedAt())
                 .willReturn(
                         OffsetDateTime.parse(
@@ -206,6 +214,11 @@ class PaymentTransactionConcurrencyTest {
         );
 
         // then
+        verify(paymentRepository)
+                .findByOrderIdWithLock(
+                        payment.getOrderId()
+                );
+
         verify(purchaseRepository)
                 .findByIdWithLock(purchaseId);
 
@@ -249,6 +262,7 @@ class PaymentTransactionConcurrencyTest {
                 paymentPurchase,
                 15_000
         );
+
         payment.start("payment-key");
 
         given(paymentRepository.findByOrderId(
@@ -294,6 +308,7 @@ class PaymentTransactionConcurrencyTest {
                 paymentPurchase,
                 15_000
         );
+
         payment.start("payment-key");
 
         given(paymentRepository.findByOrderId(
@@ -339,6 +354,7 @@ class PaymentTransactionConcurrencyTest {
                 paymentPurchase,
                 15_000
         );
+
         payment.start("payment-key");
 
         given(paymentRepository.findByPaymentKey(

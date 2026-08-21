@@ -66,7 +66,7 @@ class PaymentTransactionServiceTest {
         given(purchase.getStatus())
                 .willReturn(PurchaseStatus.PENDING_PAYMENT);
 
-        given(paymentRepository.findByOrderId(orderId))
+        given(paymentRepository.findByOrderIdWithLock(orderId))
                 .willReturn(Optional.of(payment));
 
         given(purchaseRepository.findByIdWithLock(purchaseId))
@@ -86,6 +86,9 @@ class PaymentTransactionServiceTest {
         assertThat(payment.getPaymentKey())
                 .isEqualTo(paymentKey);
 
+        verify(paymentRepository)
+                .findByOrderIdWithLock(orderId);
+
         verify(purchaseRepository)
                 .findByIdWithLock(purchaseId);
     }
@@ -102,7 +105,7 @@ class PaymentTransactionServiceTest {
                 15000
         );
 
-        given(paymentRepository.findByOrderId(orderId))
+        given(paymentRepository.findByOrderIdWithLock(orderId))
                 .willReturn(Optional.of(payment));
 
         // when & then
@@ -141,7 +144,7 @@ class PaymentTransactionServiceTest {
         given(purchase.getPurchasePrice())
                 .willReturn(20000);
 
-        given(paymentRepository.findByOrderId(orderId))
+        given(paymentRepository.findByOrderIdWithLock(orderId))
                 .willReturn(Optional.of(payment));
 
         // when & then
@@ -200,7 +203,7 @@ class PaymentTransactionServiceTest {
                         )
                 );
 
-        given(paymentRepository.findByOrderId(
+        given(paymentRepository.findByOrderIdWithLock(
                 payment.getOrderId()
         ))
                 .willReturn(Optional.of(payment));
@@ -223,6 +226,11 @@ class PaymentTransactionServiceTest {
                         OffsetDateTime.parse(
                                 "2026-08-14T11:00:00+09:00"
                         ).toLocalDateTime()
+                );
+
+        verify(paymentRepository)
+                .findByOrderIdWithLock(
+                        payment.getOrderId()
                 );
 
         verify(purchaseRepository)
@@ -250,7 +258,7 @@ class PaymentTransactionServiceTest {
         given(response.orderId())
                 .willReturn("GUDIT_other-order-id");
 
-        given(paymentRepository.findByOrderId(
+        given(paymentRepository.findByOrderIdWithLock(
                 payment.getOrderId()
         ))
                 .willReturn(Optional.of(payment));
@@ -295,7 +303,7 @@ class PaymentTransactionServiceTest {
         given(response.totalAmount())
                 .willReturn(20000);
 
-        given(paymentRepository.findByOrderId(
+        given(paymentRepository.findByOrderIdWithLock(
                 payment.getOrderId()
         ))
                 .willReturn(Optional.of(payment));

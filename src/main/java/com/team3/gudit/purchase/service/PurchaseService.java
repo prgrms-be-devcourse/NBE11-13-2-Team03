@@ -2,8 +2,6 @@ package com.team3.gudit.purchase.service;
 
 import com.team3.gudit.global.exception.BusinessException;
 import com.team3.gudit.payment.entity.Payment;
-import com.team3.gudit.payment.entity.PaymentStatus;
-import com.team3.gudit.payment.exception.PaymentErrorCode;
 import com.team3.gudit.payment.service.PaymentService;
 import com.team3.gudit.purchase.dto.PurchaseCancelResponse;
 import com.team3.gudit.purchase.dto.PurchaseCreateResponse;
@@ -127,19 +125,26 @@ public class PurchaseService {
     }
 
     @Transactional
-    public PurchaseCancelResponse cancel(Long userId, Long purchaseId) {
+    public PurchaseCancelResponse cancel(
+            Long userId,
+            Long purchaseId
+    ) {
+        Payment payment =
+                paymentService.getPaymentByPurchaseIdWithLock(
+                        purchaseId
+                );
 
-/*        Purchase purchase = purchaseRepository.findByIdAndUserId(purchaseId, userId)
-                .orElseThrow(() -> new BusinessException(
-                        PurchaseErrorCode.PURCHASE_NOT_FOUND,
-                        "Purchase not found. purchaseId=" + purchaseId
-                ));*/
-
-        Purchase purchase = purchaseRepository.findByIdAndUserIdWithLock(purchaseId, userId)
-                .orElseThrow(() -> new BusinessException(
-                        PurchaseErrorCode.PURCHASE_NOT_FOUND,
-                        "Purchase not found. purchaseId=" + purchaseId
-                ));
+        Purchase purchase =
+                purchaseRepository.findByIdAndUserIdWithLock(
+                                purchaseId,
+                                userId
+                        )
+                        .orElseThrow(() ->
+                                new BusinessException(
+                                        PurchaseErrorCode.PURCHASE_NOT_FOUND,
+                                        "Purchase not found. purchaseId=" + purchaseId
+                                )
+                        );
 
         if (purchase.getStatus() == PurchaseStatus.CANCELED) {
             throw new BusinessException(
@@ -150,9 +155,17 @@ public class PurchaseService {
         validateCancellationPeriod(purchase);
 
         if (purchase.getStatus() == PurchaseStatus.PENDING_PAYMENT) {
-            cancelPendingPayment(purchase, userId);
+            cancelPendingPayment(
+                    purchase,
+                    payment,
+                    userId
+            );
         } else if (purchase.getStatus() == PurchaseStatus.PURCHASED) {
-            cancelCompletedPayment(purchase, userId);
+            cancelCompletedPayment(
+                    purchase,
+                    payment,
+                    userId
+            );
         }
 
         return new PurchaseCancelResponse(
@@ -162,41 +175,70 @@ public class PurchaseService {
         );
     }
 
-    private void cancelPendingPayment(Purchase purchase, Long userId) {
-
-        Payment payment = paymentService.getPaymentByPurchaseId(
-                        purchase.getId()
-                );
-
-        // 결제가 시작되지 않은 READY 상태에서만 즉시 취소 가능
+    private void cancelPendingPayment(
+            Purchase purchase,
+            Payment payment,
+            Long userId
+    ) {
         payment.cancelReady();
 
-        inventoryService.restoreStock(
+        purchase.cancel();
+
+        registerStockRestoreAfterCommit(
                 purchase.getSale().getId(),
                 userId,
                 purchase.getQuantity()
         );
-
-        purchase.cancel();
     }
 
-    private void cancelCompletedPayment(Purchase purchase, Long userId) {
-
-        Payment payment = paymentService.getPaymentByPurchaseId(
-                purchase.getId()
-        );
-
+    private void cancelCompletedPayment(
+            Purchase purchase,
+            Payment payment,
+            Long userId
+    ) {
         paymentService.cancelCompletedPayment(
                 payment.getPaymentKey()
         );
 
-        inventoryService.restoreStock(
+        purchase.cancel();
+
+        registerStockRestoreAfterCommit(
                 purchase.getSale().getId(),
                 userId,
                 purchase.getQuantity()
         );
+    }
 
-        purchase.cancel();
+    private void registerStockRestoreAfterCommit(
+            Long saleId,
+            Long userId,
+            int quantity
+    ) {
+        if (!TransactionSynchronizationManager
+                .isSynchronizationActive()) {
+
+            inventoryService.restoreStock(
+                    saleId,
+                    userId,
+                    quantity
+            );
+
+            return;
+        }
+
+        TransactionSynchronizationManager.registerSynchronization(
+                new TransactionSynchronization() {
+
+                    @Override
+                    public void afterCommit() {
+                        inventoryService.restoreStock(
+                                saleId,
+                                userId,
+                                quantity
+                        );
+                    }
+                }
+        );
     }
 
     private PurchaseSummaryResponse toSummaryResponse(Purchase purchase) {

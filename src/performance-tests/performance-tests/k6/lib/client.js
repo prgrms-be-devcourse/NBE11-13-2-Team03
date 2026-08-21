@@ -28,6 +28,26 @@ export function cancelPurchase(purchaseId, actor) {
   );
 }
 
+export function confirmPayment(paymentKey, orderId, amount, actor) {
+  const requestParams = params(
+      actor,
+      "POST /api/payments/confirm"
+  );
+
+  requestParams.headers["Content-Type"] =
+      "application/json";
+
+  return http.post(
+      `${BASE_URL}/api/payments/confirm`,
+      JSON.stringify({
+        paymentKey,
+        orderId,
+        amount
+      }),
+      requestParams
+  );
+}
+
 export function getSale(saleId, actor) {
   return http.get(
     `${BASE_URL}/api/sales/${saleId}`,
