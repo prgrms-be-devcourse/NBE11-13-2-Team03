@@ -13,7 +13,7 @@
       "behavior": "startSales warms Redis before changing the sale status"
     },
     "requiredEnvironment": {
-      "JWT_SECRET_KEY": "mvCNeCbQE86W0nc+vxsyOZRXeCyzWpRatqcAkC47nJZkUn0n9lmxpefi0JLKIkurcGJ2ir4iWnqqnH67j4t91g==",
+      "PERFORMANCE_JWT_SECRET_KEY": "mvCNeCbQE86W0nc+vxsyOZRXeCyzWpRatqcAkC47nJZkUn0n9lmxpefi0JLKIkurcGJ2ir4iWnqqnH67j4t91g==",
       "JWT_ISSUER": "test@naver.com"
     },
     "activePeriod": {

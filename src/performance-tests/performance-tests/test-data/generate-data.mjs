@@ -203,7 +203,7 @@ const output = {
     },
 
     requiredEnvironment: {
-      JWT_SECRET_KEY:
+      PERFORMANCE_JWT_SECRET_KEY:
       jwtSecretKeyBase64,
       JWT_ISSUER:
       ISSUER
