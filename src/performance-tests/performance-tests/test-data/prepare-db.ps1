@@ -1,5 +1,7 @@
 param(
     [switch]$ResetPerformanceDatabase,
+    [ValidateSet("1", "2", "3", "4", "5", "All")]
+    [string]$Scenario = "All",
     [string]$Container = "gudit-performance-postgres",
     [string]$Database = "gudit",
     [string]$DatabaseUser = "postgres",
@@ -54,100 +56,450 @@ $fixture = Get-Content `
     -LiteralPath $fixturePath |
     ConvertFrom-Json
 
-$saleFixture = $fixture.sales |
-    Where-Object { $_.id -eq 1 }
+if ($Scenario -in @("1", "All")) {
+    $saleFixture = $fixture.sales |
+        Where-Object { $_.id -eq 1 }
 
-if ($null -eq $saleFixture) {
-    throw "Sale 1 fixture was not found."
-}
+    if ($null -eq $saleFixture) {
+        throw "Sale 1 fixture was not found."
+    }
 
-$startAt = [DateTimeOffset]::Parse(
-    "$($saleFixture.start_at)+09:00"
-).ToUnixTimeMilliseconds()
+    $startAt = [DateTimeOffset]::Parse(
+        "$($saleFixture.start_at)+09:00"
+    ).ToUnixTimeMilliseconds()
 
-$endAt = [DateTimeOffset]::Parse(
-    "$($saleFixture.end_at)+09:00"
-).ToUnixTimeMilliseconds()
+    $endAt = [DateTimeOffset]::Parse(
+        "$($saleFixture.end_at)+09:00"
+    ).ToUnixTimeMilliseconds()
 
-# 판매 종료 시각 + 2일
-$saleCacheExpireAt = $endAt + 172800000
+    # 판매 종료 시각 + 2일
+    $saleCacheExpireAt = $endAt + 172800000
 
-& docker exec $RedisContainer `
-    redis-cli `
-    SET `
-    "sale:1:stock" `
-    "$($saleFixture.remaining_stock)"
+    & docker exec $RedisContainer `
+        redis-cli `
+        SET `
+        "sale:1:stock" `
+        "$($saleFixture.remaining_stock)"
 
-if ($LASTEXITCODE -ne 0) {
-    throw "Redis oversell-hotspot stock fixture initialization failed."
-}
+    if ($LASTEXITCODE -ne 0) {
+        throw "Redis oversell-hotspot stock fixture initialization failed."
+    }
 
-& docker exec $RedisContainer `
-    redis-cli `
-    HSET `
-    "sale:1:info" `
-    "startAt" `
-    "$startAt" `
-    "endAt" `
-    "$endAt" `
-    "maxPurchaseQuantity" `
-    "$($saleFixture.max_purchase_quantity)" `
-    "status" `
-    "$($saleFixture.status)"
+    & docker exec $RedisContainer `
+        redis-cli `
+        HSET `
+        "sale:1:info" `
+        "startAt" `
+        "$startAt" `
+        "endAt" `
+        "$endAt" `
+        "maxPurchaseQuantity" `
+        "$($saleFixture.max_purchase_quantity)" `
+        "status" `
+        "$($saleFixture.status)"
 
-if ($LASTEXITCODE -ne 0) {
-    throw "Redis oversell-hotspot info fixture initialization failed."
-}
+    if ($LASTEXITCODE -ne 0) {
+        throw "Redis oversell-hotspot info fixture initialization failed."
+    }
 
-& docker exec $RedisContainer `
-    redis-cli `
-    PEXPIREAT `
-    "sale:1:stock" `
-    "$saleCacheExpireAt"
+    & docker exec $RedisContainer `
+        redis-cli `
+        PEXPIREAT `
+        "sale:1:stock" `
+        "$saleCacheExpireAt"
 
-if ($LASTEXITCODE -ne 0) {
-    throw "Redis oversell-hotspot stock TTL initialization failed."
-}
+    if ($LASTEXITCODE -ne 0) {
+        throw "Redis oversell-hotspot stock TTL initialization failed."
+    }
 
-& docker exec $RedisContainer `
-    redis-cli `
-    PEXPIREAT `
-    "sale:1:info" `
-    "$saleCacheExpireAt"
+    & docker exec $RedisContainer `
+        redis-cli `
+        PEXPIREAT `
+        "sale:1:info" `
+        "$saleCacheExpireAt"
 
-if ($LASTEXITCODE -ne 0) {
-    throw "Redis oversell-hotspot info TTL initialization failed."
-}
+    if ($LASTEXITCODE -ne 0) {
+        throw "Redis oversell-hotspot info TTL initialization failed."
+    }
 
-Write-Host (
-    "Redis oversell-hotspot fixture loaded: " +
-    "sale:$($saleFixture.id):stock=$($saleFixture.remaining_stock), " +
-    "status=$($saleFixture.status), " +
-    "expireAt=$saleCacheExpireAt"
+    Write-Host (
+        "Redis oversell-hotspot fixture loaded: " +
+        "sale:$($saleFixture.id):stock=$($saleFixture.remaining_stock), " +
+        "status=$($saleFixture.status), " +
+        "expireAt=$saleCacheExpireAt"
 )
+}
+# Sale 2: 재고 1,000개에 사용자 1,000명이 동시에 구매하는 처리량 테스트
+if ($Scenario -in @("2", "All")) {
+    $sale2Fixture = $fixture.sales |
+        Where-Object { $_.id -eq 2 }
 
-& docker exec $RedisContainer `
-    redis-cli `
-    SET `
-    "sale:104:stock" `
-    "99"
+    if ($null -eq $sale2Fixture) {
+        throw "Sale 2 fixture was not found."
+    }
 
-if ($LASTEXITCODE -ne 0) {
-    throw "Redis cancel-race stock fixture initialization failed."
+    $sale2StartAt = [DateTimeOffset]::Parse(
+        "$($sale2Fixture.start_at)+09:00"
+    ).ToUnixTimeMilliseconds()
+
+    $sale2EndAt = [DateTimeOffset]::Parse(
+        "$($sale2Fixture.end_at)+09:00"
+    ).ToUnixTimeMilliseconds()
+
+    # 판매 종료 시각 + 2일
+    $sale2CacheExpireAt = $sale2EndAt + 172800000
+
+    & docker exec $RedisContainer `
+        redis-cli `
+        SET `
+        "sale:2:stock" `
+        "$($sale2Fixture.remaining_stock)"
+
+    if ($LASTEXITCODE -ne 0) {
+        throw "Redis capacity-test stock fixture initialization failed."
+    }
+
+    & docker exec $RedisContainer `
+        redis-cli `
+        HSET `
+        "sale:2:info" `
+        "startAt" `
+        "$sale2StartAt" `
+        "endAt" `
+        "$sale2EndAt" `
+        "maxPurchaseQuantity" `
+        "$($sale2Fixture.max_purchase_quantity)" `
+        "status" `
+        "$($sale2Fixture.status)"
+
+    if ($LASTEXITCODE -ne 0) {
+        throw "Redis capacity-test info fixture initialization failed."
+    }
+
+    & docker exec $RedisContainer `
+        redis-cli `
+        PEXPIREAT `
+        "sale:2:stock" `
+        "$sale2CacheExpireAt"
+
+    if ($LASTEXITCODE -ne 0) {
+        throw "Redis capacity-test stock TTL initialization failed."
+    }
+
+    & docker exec $RedisContainer `
+        redis-cli `
+        PEXPIREAT `
+        "sale:2:info" `
+        "$sale2CacheExpireAt"
+
+    if ($LASTEXITCODE -ne 0) {
+        throw "Redis capacity-test info TTL initialization failed."
+    }
+
+    Write-Host (
+        "Redis capacity-test fixture loaded: " +
+        "sale:$($sale2Fixture.id):stock=$($sale2Fixture.remaining_stock), " +
+        "status=$($sale2Fixture.status), " +
+        "expireAt=$sale2CacheExpireAt"
+    )
 }
 
-& docker exec $RedisContainer `
-    redis-cli `
-    SET `
-    "sale:104:user:1002" `
-    "1"
+# Sale 3~102: 사용자 1,000명을 판매 100개에 분산하는 기준 성능 테스트
+if ($Scenario -in @("3", "All")) {
+    $distributedSaleFixtures = @(
+        $fixture.sales |
+            Where-Object {
+                $_.id -ge 3 -and $_.id -le 102
+            }
+    )
 
-if ($LASTEXITCODE -ne 0) {
-    throw "Redis cancel-race user fixture initialization failed."
+    if ($distributedSaleFixtures.Count -ne 100) {
+        throw (
+            "Expected 100 distributed Sale fixtures, " +
+            "but found $($distributedSaleFixtures.Count)."
+        )
+    }
+
+    foreach ($distributedSaleFixture in $distributedSaleFixtures) {
+        $distributedSaleId = $distributedSaleFixture.id
+
+        $distributedStartAt = [DateTimeOffset]::Parse(
+            "$($distributedSaleFixture.start_at)+09:00"
+        ).ToUnixTimeMilliseconds()
+
+        $distributedEndAt = [DateTimeOffset]::Parse(
+            "$($distributedSaleFixture.end_at)+09:00"
+        ).ToUnixTimeMilliseconds()
+
+        # 판매 종료 시각 + 2일
+        $distributedCacheExpireAt =
+            $distributedEndAt + 172800000
+
+        $distributedStockKey =
+            "sale:$distributedSaleId`:stock"
+
+        $distributedInfoKey =
+            "sale:$distributedSaleId`:info"
+
+        & docker exec $RedisContainer `
+            redis-cli `
+            SET `
+            $distributedStockKey `
+            "$($distributedSaleFixture.remaining_stock)" |
+            Out-Null
+
+        if ($LASTEXITCODE -ne 0) {
+            throw (
+                "Redis distributed-test stock fixture " +
+                "initialization failed: saleId=$distributedSaleId"
+            )
+        }
+
+        & docker exec $RedisContainer `
+            redis-cli `
+            HSET `
+            $distributedInfoKey `
+            "startAt" `
+            "$distributedStartAt" `
+            "endAt" `
+            "$distributedEndAt" `
+            "maxPurchaseQuantity" `
+            "$($distributedSaleFixture.max_purchase_quantity)" `
+            "status" `
+            "$($distributedSaleFixture.status)" |
+            Out-Null
+
+        if ($LASTEXITCODE -ne 0) {
+            throw (
+                "Redis distributed-test info fixture " +
+                "initialization failed: saleId=$distributedSaleId"
+            )
+        }
+
+        & docker exec $RedisContainer `
+            redis-cli `
+            PEXPIREAT `
+            $distributedStockKey `
+            "$distributedCacheExpireAt" |
+            Out-Null
+
+        if ($LASTEXITCODE -ne 0) {
+            throw (
+                "Redis distributed-test stock TTL " +
+                "initialization failed: saleId=$distributedSaleId"
+            )
+        }
+
+        & docker exec $RedisContainer `
+            redis-cli `
+            PEXPIREAT `
+            $distributedInfoKey `
+            "$distributedCacheExpireAt" |
+            Out-Null
+
+        if ($LASTEXITCODE -ne 0) {
+            throw (
+                "Redis distributed-test info TTL " +
+                "initialization failed: saleId=$distributedSaleId"
+            )
+        }
+    }
+
+    Write-Host (
+        "Redis distributed-test fixtures loaded: " +
+        "saleIds=3..102, count=$($distributedSaleFixtures.Count)"
+    )
 }
 
-Write-Host(
+# Sale 103: 동일 사용자의 중복 구매 요청 50건 동시 처리 테스트
+if ($Scenario -in @("4", "All")) {
+    $sale103Fixture = $fixture.sales |
+        Where-Object { $_.id -eq 103 }
+
+    if ($null -eq $sale103Fixture) {
+        throw "Sale 103 fixture was not found."
+    }
+
+    $sale103StartAt = [DateTimeOffset]::Parse(
+        "$($sale103Fixture.start_at)+09:00"
+    ).ToUnixTimeMilliseconds()
+
+    $sale103EndAt = [DateTimeOffset]::Parse(
+        "$($sale103Fixture.end_at)+09:00"
+    ).ToUnixTimeMilliseconds()
+
+    # 판매 종료 시각 + 2일
+    $sale103CacheExpireAt = $sale103EndAt + 172800000
+
+    & docker exec $RedisContainer `
+        redis-cli `
+        SET `
+        "sale:103:stock" `
+        "$($sale103Fixture.remaining_stock)"
+
+    if ($LASTEXITCODE -ne 0) {
+        throw "Redis duplicate-purchase stock fixture initialization failed."
+    }
+
+    & docker exec $RedisContainer `
+        redis-cli `
+        HSET `
+        "sale:103:info" `
+        "startAt" `
+        "$sale103StartAt" `
+        "endAt" `
+        "$sale103EndAt" `
+        "maxPurchaseQuantity" `
+        "$($sale103Fixture.max_purchase_quantity)" `
+        "status" `
+        "$($sale103Fixture.status)"
+
+    if ($LASTEXITCODE -ne 0) {
+        throw "Redis duplicate-purchase info fixture initialization failed."
+    }
+
+    & docker exec $RedisContainer `
+        redis-cli `
+        PEXPIREAT `
+        "sale:103:stock" `
+        "$sale103CacheExpireAt"
+
+    if ($LASTEXITCODE -ne 0) {
+        throw "Redis duplicate-purchase stock TTL initialization failed."
+    }
+
+    & docker exec $RedisContainer `
+        redis-cli `
+        PEXPIREAT `
+        "sale:103:info" `
+        "$sale103CacheExpireAt"
+
+    if ($LASTEXITCODE -ne 0) {
+        throw "Redis duplicate-purchase info TTL initialization failed."
+    }
+
+    Write-Host (
+        "Redis duplicate-purchase fixture loaded: " +
+        "sale:$($sale103Fixture.id):stock=$($sale103Fixture.remaining_stock), " +
+        "status=$($sale103Fixture.status), " +
+        "expireAt=$sale103CacheExpireAt"
+    )
+}
+
+# Sale 104: 동일 Purchase에 대한 취소 요청 50건 동시 처리 테스트
+if ($Scenario -in @("5", "All")) {
+    $sale104Fixture = $fixture.sales |
+        Where-Object { $_.id -eq 104 }
+
+    if ($null -eq $sale104Fixture) {
+        throw "Sale 104 fixture was not found."
+    }
+
+    $cancelPurchaseFixture = $fixture.purchases |
+        Where-Object {
+            $_.sale_id -eq $sale104Fixture.id
+        }
+
+    if ($null -eq $cancelPurchaseFixture) {
+        throw "Cancel-race Purchase fixture was not found."
+    }
+
+    $sale104StartAt = [DateTimeOffset]::Parse(
+        "$($sale104Fixture.start_at)+09:00"
+    ).ToUnixTimeMilliseconds()
+
+    $sale104EndAt = [DateTimeOffset]::Parse(
+        "$($sale104Fixture.end_at)+09:00"
+    ).ToUnixTimeMilliseconds()
+
+    # stock/info Key: 판매 종료 시각 + 2일
+    $sale104CacheExpireAt =
+        $sale104EndAt + 172800000
+
+    # 사용자 구매 Key: 판매 종료 시각 + 1일
+    $sale104UserExpireAt =
+        $sale104EndAt + 86400000
+
+    $sale104StockKey =
+        "sale:$($sale104Fixture.id):stock"
+
+    $sale104InfoKey =
+        "sale:$($sale104Fixture.id):info"
+
+    $sale104UserKey =
+        "sale:$($sale104Fixture.id):user:$($cancelPurchaseFixture.user_id)"
+
+    & docker exec $RedisContainer `
+        redis-cli `
+        SET `
+        $sale104StockKey `
+        "$($sale104Fixture.remaining_stock)"
+
+    if ($LASTEXITCODE -ne 0) {
+        throw "Redis cancel-race stock fixture initialization failed."
+    }
+
+    & docker exec $RedisContainer `
+        redis-cli `
+        HSET `
+        $sale104InfoKey `
+        "startAt" `
+        "$sale104StartAt" `
+        "endAt" `
+        "$sale104EndAt" `
+        "maxPurchaseQuantity" `
+        "$($sale104Fixture.max_purchase_quantity)" `
+        "status" `
+        "$($sale104Fixture.status)"
+
+    if ($LASTEXITCODE -ne 0) {
+        throw "Redis cancel-race info fixture initialization failed."
+    }
+
+    & docker exec $RedisContainer `
+        redis-cli `
+        SET `
+        $sale104UserKey `
+        "$($cancelPurchaseFixture.quantity)"
+
+    if ($LASTEXITCODE -ne 0) {
+        throw "Redis cancel-race user fixture initialization failed."
+    }
+
+    & docker exec $RedisContainer `
+        redis-cli `
+        PEXPIREAT `
+        $sale104StockKey `
+        "$sale104CacheExpireAt"
+
+    if ($LASTEXITCODE -ne 0) {
+        throw "Redis cancel-race stock TTL initialization failed."
+    }
+
+    & docker exec $RedisContainer `
+        redis-cli `
+        PEXPIREAT `
+        $sale104InfoKey `
+        "$sale104CacheExpireAt"
+
+    if ($LASTEXITCODE -ne 0) {
+        throw "Redis cancel-race info TTL initialization failed."
+    }
+
+    & docker exec $RedisContainer `
+        redis-cli `
+        PEXPIREAT `
+        $sale104UserKey `
+        "$sale104UserExpireAt"
+
+    if ($LASTEXITCODE -ne 0) {
+        throw "Redis cancel-race user TTL initialization failed."
+    }
+
+    Write-Host (
         "Redis cancel-race fixture loaded: " +
-        "sale:104:stock=99, " +
-        "sale:104:user:1002=1"
-)
+        "$sale104StockKey=$($sale104Fixture.remaining_stock), " +
+        "$sale104UserKey=$($cancelPurchaseFixture.quantity), " +
+        "status=$($sale104Fixture.status)"
+    )
+}

@@ -6,7 +6,7 @@
 |---|---:|---|
 | `01-oversell-hotspot.js` | 1,000 VU / 재고 100 | 초과 판매 방지와 품절 전환 |
 | `02-single-row-lock-capacity.js` | 1,000 VU / 재고 1,000 | 단일 비관적 잠금 행의 대기 시간 |
-| `03-distributed-baseline.js` | 1,000 VU / 판매 100건 | 잠금 경합이 분산됐을 때의 기준 성능 |
+| `03-distributed-baseline.js` | 1,000 VU / 판매 100건 | Redis 재고 Key 100개로 요청을 분산한 기준 성능 |
 | `04-duplicate-purchase-race.js` | 동일 사용자 요청 50건 | 중복 구매 1건만 생성되는지 확인 |
 | `05-cancel-race.js` | 동일 구매 취소 50건 | 재고가 한 번만 복구되는지 확인 |
 

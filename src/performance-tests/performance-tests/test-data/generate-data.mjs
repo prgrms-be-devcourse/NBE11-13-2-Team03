@@ -195,7 +195,7 @@ const output = {
       }
     },
     distributedBaseline: {
-      description: "The same 1,000 users are spread evenly over 100 sale rows to provide a low-contention baseline.",
+      description: "The same 1,000 users are spread evenly over 100 Redis stock keys to provide a distributed baseline.",
       saleIds: { from: 3, to: 102 },
       actorUserIds: { from: 1, to: 1_000 },
       mapping: "saleId = 3 + ((userId - 1) % 100)",
@@ -215,11 +215,14 @@ const output = {
       expectedInvariant: {
         successfulPurchases: 1,
         rejectedPurchases: 49,
-        rejectCode: "PURCHASE_002",
+        allowedRejectCodes: [
+          "PURCHASE_002",
+          "SALE_003"
+        ],
         finalRemainingStock: 99,
         activePurchasesForUserAndSale: 1
       },
-      riskNote: "The current application checks duplicates before inserting but has no database unique constraint, so this scenario can reveal duplicate rows."
+      riskNote: "Concurrent duplicate requests may be rejected either by the database duplicate check or by the Redis per-user purchase limit."
     },
     cancelRace: {
       description: "One authenticated user fires 50 concurrent cancels for the same pending purchase.",
@@ -233,7 +236,7 @@ const output = {
         finalPurchaseStatus: "CANCELED",
         finalRemainingStock: 100
       },
-      riskNote: "The current application reads the purchase without a row lock, so repeated stock restoration is an important invariant to check."
+      riskNote: "The Purchase pessimistic lock and status revalidation must ensure that Redis stock is restored exactly once."
     }
   },
   users,
