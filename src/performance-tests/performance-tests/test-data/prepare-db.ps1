@@ -1,6 +1,6 @@
 param(
     [switch]$ResetPerformanceDatabase,
-    [ValidateSet("1", "2", "3", "4", "5", "All")]
+    [ValidateSet("1", "2", "3", "4", "5", "6", "All")]
     [string]$Scenario = "All",
     [string]$Container = "gudit-performance-postgres",
     [string]$Database = "gudit",
@@ -23,22 +23,36 @@ if (-not $ResetPerformanceDatabase) {
 }
 
 $dataDirectory = $PSScriptRoot
+
 & node (Join-Path $dataDirectory "generate-data.mjs")
-if ($LASTEXITCODE -ne 0) { throw "Fixture JSON generation failed." }
+if ($LASTEXITCODE -ne 0) {
+    throw "Fixture JSON generation failed."
+}
 
 & node (Join-Path $dataDirectory "generate-seed-sql.mjs")
-if ($LASTEXITCODE -ne 0) { throw "Seed SQL generation failed." }
+if ($LASTEXITCODE -ne 0) {
+    throw "Seed SQL generation failed."
+}
 
-$seedPath = Join-Path $dataDirectory "generated/seed-performance-data.sql"
+$seedPath = Join-Path `
+    $dataDirectory `
+    "generated/seed-performance-data.sql"
+
 Get-Content -Raw -LiteralPath $seedPath |
-    docker exec -i $Container psql -v ON_ERROR_STOP=1 -U $DatabaseUser -d $Database
+    docker exec -i `
+        $Container `
+        psql `
+        -v ON_ERROR_STOP=1 `
+        -U $DatabaseUser `
+        -d $Database
 
 if ($LASTEXITCODE -ne 0) {
     throw "PostgreSQL seed import failed."
 }
+
 Write-Host (
     "Performance-test data loaded into " +
-    "database  '$Database' in container '$Container'."
+    "database '$Database' in container '$Container'."
 )
 
 & docker exec $RedisContainer redis-cli FLUSHDB
@@ -56,6 +70,7 @@ $fixture = Get-Content `
     -LiteralPath $fixturePath |
     ConvertFrom-Json
 
+# Sale 1: 단일 판매 재고 초과 구매 테스트
 if ($Scenario -in @("1", "All")) {
     $saleFixture = $fixture.sales |
         Where-Object { $_.id -eq 1 }
@@ -73,7 +88,8 @@ if ($Scenario -in @("1", "All")) {
     ).ToUnixTimeMilliseconds()
 
     # 판매 종료 시각 + 2일
-    $saleCacheExpireAt = $endAt + 172800000
+    $saleCacheExpireAt =
+        $endAt + 172800000
 
     & docker exec $RedisContainer `
         redis-cli `
@@ -127,8 +143,9 @@ if ($Scenario -in @("1", "All")) {
         "sale:$($saleFixture.id):stock=$($saleFixture.remaining_stock), " +
         "status=$($saleFixture.status), " +
         "expireAt=$saleCacheExpireAt"
-)
+    )
 }
+
 # Sale 2: 재고 1,000개에 사용자 1,000명이 동시에 구매하는 처리량 테스트
 if ($Scenario -in @("2", "All")) {
     $sale2Fixture = $fixture.sales |
@@ -147,7 +164,8 @@ if ($Scenario -in @("2", "All")) {
     ).ToUnixTimeMilliseconds()
 
     # 판매 종료 시각 + 2일
-    $sale2CacheExpireAt = $sale2EndAt + 172800000
+    $sale2CacheExpireAt =
+        $sale2EndAt + 172800000
 
     & docker exec $RedisContainer `
         redis-cli `
@@ -221,7 +239,8 @@ if ($Scenario -in @("3", "All")) {
     }
 
     foreach ($distributedSaleFixture in $distributedSaleFixtures) {
-        $distributedSaleId = $distributedSaleFixture.id
+        $distributedSaleId =
+            $distributedSaleFixture.id
 
         $distributedStartAt = [DateTimeOffset]::Parse(
             "$($distributedSaleFixture.start_at)+09:00"
@@ -329,7 +348,8 @@ if ($Scenario -in @("4", "All")) {
     ).ToUnixTimeMilliseconds()
 
     # 판매 종료 시각 + 2일
-    $sale103CacheExpireAt = $sale103EndAt + 172800000
+    $sale103CacheExpireAt =
+        $sale103EndAt + 172800000
 
     & docker exec $RedisContainer `
         redis-cli `
@@ -504,13 +524,143 @@ if ($Scenario -in @("5", "All")) {
     )
 }
 
+# Sale 105: 동일 Payment에 대한 결제 승인 요청 50건 동시 처리 테스트
+if ($Scenario -in @("6", "All")) {
+    $sale105Fixture = $fixture.sales |
+        Where-Object { $_.id -eq 105 }
+
+    if ($null -eq $sale105Fixture) {
+        throw "Sale 105 fixture was not found."
+    }
+
+    $paymentConfirmPurchaseFixture = $fixture.purchases |
+        Where-Object {
+            $_.sale_id -eq $sale105Fixture.id
+        }
+
+    if ($null -eq $paymentConfirmPurchaseFixture) {
+        throw "Payment-confirm-race Purchase fixture was not found."
+    }
+
+    $paymentConfirmFixture = $fixture.payments |
+        Where-Object {
+            $_.purchase_id -eq $paymentConfirmPurchaseFixture.id
+        }
+
+    if ($null -eq $paymentConfirmFixture) {
+        throw "Payment-confirm-race Payment fixture was not found."
+    }
+
+    $sale105StartAt = [DateTimeOffset]::Parse(
+        "$($sale105Fixture.start_at)+09:00"
+    ).ToUnixTimeMilliseconds()
+
+    $sale105EndAt = [DateTimeOffset]::Parse(
+        "$($sale105Fixture.end_at)+09:00"
+    ).ToUnixTimeMilliseconds()
+
+    # stock/info Key: 판매 종료 시각 + 2일
+    $sale105CacheExpireAt =
+        $sale105EndAt + 172800000
+
+    # 사용자 구매 Key: 판매 종료 시각 + 1일
+    $sale105UserExpireAt =
+        $sale105EndAt + 86400000
+
+    $sale105StockKey =
+        "sale:$($sale105Fixture.id):stock"
+
+    $sale105InfoKey =
+        "sale:$($sale105Fixture.id):info"
+
+    $sale105UserKey =
+        "sale:$($sale105Fixture.id):user:$($paymentConfirmPurchaseFixture.user_id)"
+
+    & docker exec $RedisContainer `
+        redis-cli `
+        SET `
+        $sale105StockKey `
+        "$($sale105Fixture.remaining_stock)"
+
+    if ($LASTEXITCODE -ne 0) {
+        throw "Redis payment-confirm-race stock fixture initialization failed."
+    }
+
+    & docker exec $RedisContainer `
+        redis-cli `
+        HSET `
+        $sale105InfoKey `
+        "startAt" `
+        "$sale105StartAt" `
+        "endAt" `
+        "$sale105EndAt" `
+        "maxPurchaseQuantity" `
+        "$($sale105Fixture.max_purchase_quantity)" `
+        "status" `
+        "$($sale105Fixture.status)"
+
+    if ($LASTEXITCODE -ne 0) {
+        throw "Redis payment-confirm-race info fixture initialization failed."
+    }
+
+    & docker exec $RedisContainer `
+        redis-cli `
+        SET `
+        $sale105UserKey `
+        "$($paymentConfirmPurchaseFixture.quantity)"
+
+    if ($LASTEXITCODE -ne 0) {
+        throw "Redis payment-confirm-race user fixture initialization failed."
+    }
+
+    & docker exec $RedisContainer `
+        redis-cli `
+        PEXPIREAT `
+        $sale105StockKey `
+        "$sale105CacheExpireAt"
+
+    if ($LASTEXITCODE -ne 0) {
+        throw "Redis payment-confirm-race stock TTL initialization failed."
+    }
+
+    & docker exec $RedisContainer `
+        redis-cli `
+        PEXPIREAT `
+        $sale105InfoKey `
+        "$sale105CacheExpireAt"
+
+    if ($LASTEXITCODE -ne 0) {
+        throw "Redis payment-confirm-race info TTL initialization failed."
+    }
+
+    & docker exec $RedisContainer `
+        redis-cli `
+        PEXPIREAT `
+        $sale105UserKey `
+        "$sale105UserExpireAt"
+
+    if ($LASTEXITCODE -ne 0) {
+        throw "Redis payment-confirm-race user TTL initialization failed."
+    }
+
+    Write-Host (
+        "Redis payment-confirm-race fixture loaded: " +
+        "$sale105StockKey=$($sale105Fixture.remaining_stock), " +
+        "$sale105UserKey=$($paymentConfirmPurchaseFixture.quantity), " +
+        "paymentId=$($paymentConfirmFixture.id), " +
+        "paymentStatus=$($paymentConfirmFixture.status), " +
+        "status=$($sale105Fixture.status)"
+    )
+}
+
 $targetSaleIds = switch ($Scenario) {
     "1" { @(1) }
     "2" { @(2) }
     "3" { @(3..102) }
     "4" { @(103) }
     "5" { @(104) }
-    "All" { @(1..104) }
+    "6" { @(105) }
+    "All" { @(1..105) }
 }
 
 foreach ($saleId in $targetSaleIds) {

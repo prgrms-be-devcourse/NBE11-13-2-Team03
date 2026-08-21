@@ -1,6 +1,6 @@
 param(
     [Parameter(Mandatory = $true)]
-    [ValidateSet("1", "2", "3", "4", "5")]
+    [ValidateSet("1", "2", "3", "4", "5", "6")]
     [string]$Scenario,
 
     [string]$BaseUrl = "http://localhost:8080",
@@ -21,6 +21,7 @@ $scenarioScripts = @{
     "3" = "03-distributed-baseline.js"
     "4" = "04-duplicate-purchase-race.js"
     "5" = "05-cancel-race.js"
+    "6" = "06-payment-confirm-race.js"
 }
 
 $scenarioFile = $scenarioScripts[$Scenario]
@@ -62,6 +63,39 @@ $k6Arguments += $scenarioPath
 
 if ($LASTEXITCODE -ne 0) {
     throw "k6 scenario $Scenario failed."
+}
+
+if ($Scenario -eq "6") {
+    Write-Host "Verifying payment fixture"
+
+    $paymentState = & docker exec `
+        gudit-performance-postgres `
+        psql `
+        -U postgres `
+        -d gudit `
+        -t `
+        -A `
+        -F "|" `
+        -c "SELECT status, payment_key FROM payments WHERE id = 2;"
+
+    if ($LASTEXITCODE -ne 0) {
+        throw "Payment state verification query failed."
+    }
+
+    $paymentState = $paymentState.Trim()
+
+    if ($paymentState -ne "DONE|PERF_PAYMENT_KEY_0002") {
+        throw (
+            "Payment state verification failed. " +
+            "Expected DONE|PERF_PAYMENT_KEY_0002, " +
+            "actual=$paymentState"
+        )
+    }
+
+    Write-Host (
+        "Payment fixture verified: " +
+        $paymentState
+    )
 }
 
 Write-Host "k6 scenario $Scenario passed."

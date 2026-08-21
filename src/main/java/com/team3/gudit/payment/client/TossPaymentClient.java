@@ -6,6 +6,7 @@ import com.team3.gudit.payment.dto.TossPaymentConfirmRequest;
 import com.team3.gudit.payment.dto.TossPaymentErrorResponse;
 import com.team3.gudit.payment.dto.TossPaymentResponse;
 import com.team3.gudit.payment.exception.TossPaymentException;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -17,6 +18,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
 @Component
+@Profile("!performance")
 public class TossPaymentClient {
 
     private static final String TOSS_API_URL = "https://api.tosspayments.com";

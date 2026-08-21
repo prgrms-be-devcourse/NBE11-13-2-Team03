@@ -29,7 +29,7 @@ public class PaymentTransactionService {
             String paymentKey,
             int amount
     ) {
-        Payment payment = getPaymentByOrderId(orderId);
+        Payment payment = getPaymentByOrderIdWithLock(orderId);
 
         validateAmount(payment, amount);
 
@@ -45,7 +45,7 @@ public class PaymentTransactionService {
             String orderId,
             TossPaymentResponse response
     ) {
-        Payment payment = getPaymentByOrderId(orderId);
+        Payment payment = getPaymentByOrderIdWithLock(orderId);
 
         validatePaymentResponse(payment, response);
 
@@ -128,6 +128,16 @@ public class PaymentTransactionService {
                         new BusinessException(
                                 PaymentErrorCode.PAYMENT_NOT_FOUND,
                                 "Payment not found. paymentKey=" + paymentKey
+                        )
+                );
+    }
+
+    private Payment getPaymentByOrderIdWithLock(String orderId) {
+        return paymentRepository.findByOrderIdWithLock(orderId)
+                .orElseThrow(() ->
+                        new BusinessException(
+                                PaymentErrorCode.PAYMENT_NOT_FOUND,
+                                "Payment not found. orderId=" + orderId
                         )
                 );
     }
