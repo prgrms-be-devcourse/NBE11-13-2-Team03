@@ -200,4 +200,91 @@ class PaymentTest {
 
         return payment;
     }
+
+    @Test
+    @DisplayName("READY 상태의 결제를 Webhook으로 완료하면 DONE 상태가 된다")
+    void completeByWebhookFromReady() {
+        // given
+        Payment payment = createReadyPayment();
+        LocalDateTime approvedAt = LocalDateTime.now();
+
+        // when
+        payment.completeByWebhook(
+                "payment-key",
+                approvedAt
+        );
+
+        // then
+        assertThat(payment.getStatus())
+                .isEqualTo(PaymentStatus.DONE);
+
+        assertThat(payment.getPaymentKey())
+                .isEqualTo("payment-key");
+
+        assertThat(payment.getApprovedAt())
+                .isEqualTo(approvedAt);
+    }
+
+    @Test
+    @DisplayName("IN_PROGRESS 상태의 결제를 Webhook으로 완료하면 DONE 상태가 된다")
+    void completeByWebhookFromInProgress() {
+        // given
+        Payment payment = createInProgressPayment();
+        LocalDateTime approvedAt = LocalDateTime.now();
+
+        // when
+        payment.completeByWebhook(
+                "payment-key",
+                approvedAt
+        );
+
+        // then
+        assertThat(payment.getStatus())
+                .isEqualTo(PaymentStatus.DONE);
+    }
+
+    @Test
+    @DisplayName("READY 상태의 결제를 Webhook으로 실패 처리하면 FAILED 상태가 된다")
+    void failByWebhookFromReady() {
+        // given
+        Payment payment = createReadyPayment();
+
+        // when
+        payment.failByWebhook();
+
+        // then
+        assertThat(payment.getStatus())
+                .isEqualTo(PaymentStatus.FAILED);
+    }
+
+    @Test
+    @DisplayName("READY 상태의 결제를 Webhook으로 취소하면 CANCELED 상태가 된다")
+    void cancelByWebhookFromReady() {
+        // given
+        Payment payment = createReadyPayment();
+
+        // when
+        payment.cancelByWebhook();
+
+        // then
+        assertThat(payment.getStatus())
+                .isEqualTo(PaymentStatus.CANCELED);
+
+        assertThat(payment.getCanceledAt())
+                .isNotNull();
+    }
+
+    @Test
+    @DisplayName("DONE 상태의 결제를 Webhook으로 다시 완료하면 예외가 발생한다")
+    void completeByWebhookInvalidStatus() {
+        Payment payment = createDonePayment();
+
+        assertThatThrownBy(
+                () -> payment.completeByWebhook(
+                        "payment-key",
+                        LocalDateTime.now()
+                )
+        )
+                .isInstanceOf(BusinessException.class);
+    }
 }

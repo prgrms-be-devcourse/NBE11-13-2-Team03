@@ -55,6 +55,12 @@ public enum PaymentErrorCode implements ErrorCode {
             HttpStatus.INTERNAL_SERVER_ERROR,
             "PAYMENT_008",
             "결제 승인 후 보상 처리에 실패했습니다."
+    ),
+
+    PAYMENT_WEBHOOK_VALIDATION_FAILED(
+            HttpStatus.BAD_REQUEST,
+            "PAYMENT_009",
+            "결제 Webhook 정보 검증에 실패했습니다."
     );
 
     private final HttpStatus status;

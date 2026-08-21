@@ -5,7 +5,7 @@
 # 점 표기법(dot-sourcing)으로 실행해야 한다.
 #
 # 예:
-# . ".\performance-tests\scripts\set-performance-paths.ps1"
+# . ".\src\performance-tests\performance-tests\scripts\set-performance-paths.ps1"
 
 $ErrorActionPreference = "Stop"
 
@@ -30,6 +30,10 @@ $loadRunnerPath = Join-Path `
     $performanceRoot `
     "scripts\run-load-suite.ps1"
 
+$vuCapacityRunnerPath = Join-Path `
+    $performanceRoot `
+    "scripts\run-vu-capacity.ps1"
+
 $generatedDataPath = Join-Path `
     $performanceRoot `
     "test-data\generated\performance-test-data.json"
@@ -41,6 +45,7 @@ $requiredPaths = @(
     $preflightPath,
     $concurrencyRunnerPath,
     $loadRunnerPath,
+    $vuCapacityRunnerPath,
     $generatedDataPath
 )
 
@@ -60,6 +65,7 @@ $performancePaths = [PSCustomObject]@{
     Preflight         = $preflightPath
     ConcurrencyRunner = $concurrencyRunnerPath
     LoadRunner        = $loadRunnerPath
+    VuCapacityRunner  = $vuCapacityRunnerPath
     GeneratedData     = $generatedDataPath
 }
 
@@ -74,5 +80,6 @@ Write-Host '  $prepareDbScript'
 Write-Host '  $preflightPath'
 Write-Host '  $concurrencyRunnerPath'
 Write-Host '  $loadRunnerPath'
+Write-Host '  $vuCapacityRunnerPath'
 Write-Host '  $generatedDataPath'
 Write-Host '  $performancePaths'

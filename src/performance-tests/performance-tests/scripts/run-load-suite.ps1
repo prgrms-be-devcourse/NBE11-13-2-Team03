@@ -2,10 +2,16 @@ param(
     [string]$BaseUrl = "http://localhost:8080",
     [switch]$IncludeSoak,
     [switch]$SkipMixedPurchase,
-    [int]$CooldownSeconds = 15
+    [int]$CooldownSeconds = 15,
+    [int]$PurchaseVus = 100,
+    [int]$PurchaseIterations = 1000
 )
 
 $ErrorActionPreference = "Stop"
+if ($PurchaseVus -le 0) { throw "PurchaseVus must be greater than zero." }
+if ($PurchaseIterations -le 0 -or $PurchaseIterations -gt 1000 -or $PurchaseVus -gt $PurchaseIterations) {
+    throw "PurchaseIterations must be 1..1000 and at least PurchaseVus because the generated fixture has 1000 purchase actors."
+}
 $suiteRoot = Split-Path $PSScriptRoot -Parent
 $k6Directory = Join-Path $suiteRoot "k6"
 $loadDirectory = Join-Path $k6Directory "load"
@@ -36,7 +42,15 @@ foreach ($scenario in $scenarios) {
     $scriptPath = Join-Path $loadDirectory $scenario
     $summaryPath = Join-Path $resultDirectory ($scenario -replace "\.js$", ".summary.json")
     Write-Host "Starting $scenario"
-    & k6 run -e "BASE_URL=$BaseUrl" --summary-export $summaryPath $scriptPath
+    $arguments = @("run", "-e", "BASE_URL=$BaseUrl")
+    if ($scenario -eq "05-mixed-purchase-peak.js") {
+        $arguments += @(
+            "-e", "PURCHASE_VUS=$PurchaseVus",
+            "-e", "PURCHASE_ITERATIONS=$PurchaseIterations"
+        )
+    }
+    $arguments += @("--summary-export", $summaryPath, $scriptPath)
+    & k6 @arguments
     if ($LASTEXITCODE -ne 0) {
         $failed += $scenario
     }

@@ -47,6 +47,7 @@ public class SecurityConfig {
                                 "/js/**",
                                 "/images/**",
                                 "/swagger-ui",
+                                "/actuator/**",
 
                                 // OAuth2
                                 "/login-success.html",
@@ -54,6 +55,9 @@ public class SecurityConfig {
                                 "/oauth2/**",
                                 "/login/**",
                                 "/api/auth/reissue",
+
+                                // Toss Webhook
+                                "/api/webhooks/toss/**",
 
                                 // 사용자 화면
                                 "/sales",
