@@ -11,8 +11,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
-import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
+import com.team3.gudit.user.domain.repository.UserRepository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 
@@ -21,7 +22,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@Transactional
 class AuthenticationIntegrationTest {
+    @Autowired
+    private UserRepository userRepository;
 
     @Autowired
     private MockMvc mockMvc;
@@ -33,17 +37,14 @@ class AuthenticationIntegrationTest {
 
     @BeforeEach
     void setUp() {
-
         user = User.builder()
+                .kakaoId(12345L)
                 .role(Role.USER)
                 .nickname("testUser")
+                .email("test@example.com")
                 .build();
 
-        ReflectionTestUtils.setField(
-                user,
-                "id",
-                1L
-        );
+        user = userRepository.saveAndFlush(user);
     }
 
 

@@ -9,6 +9,10 @@ spring:
     hibernate:
       ddl-auto: create-drop
 
+  sql:
+    init:
+      mode: never
+
   security:
     oauth2:
       client:

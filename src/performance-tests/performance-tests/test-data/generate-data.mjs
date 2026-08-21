@@ -6,13 +6,18 @@ import { fileURLToPath } from "node:url";
 const USER_COUNT = 1_002;
 const DISTRIBUTED_SALE_COUNT = 100;
 const ISSUER = "test@naver.com";
-const CREATED_AT = "2026-08-19T00:00:00";
-const SALE_START_AT = "2025-01-01T00:00:00";
-const SALE_END_AT = "2035-01-01T00:00:00";
+
+const KST_OFFSET_MILLIS = 9 * 60 * 60 * 1000;
+const ONE_MINUTE_MILLIS = 60 * 1000;
+const ONE_DAY_MILLIS = 24 * 60 * 60 * 1000;
+
+const FIXTURE_NOW = Date.now();
+const CREATED_AT = toKstLocalDateTime(FIXTURE_NOW);
+const SALE_START_AT = toKstLocalDateTime(FIXTURE_NOW - 5 * ONE_MINUTE_MILLIS);
+const SALE_END_AT = toKstLocalDateTime(FIXTURE_NOW + ONE_DAY_MILLIS);
 const JWT_ISSUED_AT = Math.floor(Date.parse("2026-01-01T00:00:00Z") / 1000);
 const JWT_EXPIRES_AT = Math.floor(Date.parse("2035-01-01T00:00:00Z") / 1000);
 
-// This is deliberately deterministic and must only be used in an isolated performance-test environment.
 const secretBytes = createHash("sha512")
   .update("gudit-performance-test-only-key-2026")
   .digest();
@@ -24,6 +29,12 @@ function base64Url(value) {
     .replaceAll("=", "")
     .replaceAll("+", "-")
     .replaceAll("/", "_");
+}
+
+function toKstLocalDateTime(epochMillis) {
+  return new Date(epochMillis + KST_OFFSET_MILLIS)
+    .toISOString()
+    .slice(0, 19);
 }
 
 function createAccessToken(userId) {
@@ -108,7 +119,7 @@ const actors = users.map(({ id }) => ({
 const output = {
   metadata: {
     name: "Gudit k6 concurrency performance fixtures",
-    generatedAt: "2026-08-19T00:00:00+09:00",
+    generatedAt: `${CREATED_AT}+09:00`,
     targetApi: "POST /api/sales/{saleId}/purchases",
     cancelApi: "POST /api/purchases/{purchaseId}/cancel",
     maximumConcurrentVus: 1_000,
