@@ -149,7 +149,7 @@ VALUES (
            NULL,
            100,
            100,
-           2,
+           1,
            'READY',
            NOW() - INTERVAL '10 minutes',
            NOW() + INTERVAL '1 day 6 hours',
@@ -182,7 +182,7 @@ VALUES (
            NULL,
            150,
            150,
-           3,
+           1,
            'READY',
            NOW() + INTERVAL '5 minutes',
            NOW() + INTERVAL '3 days',
@@ -215,7 +215,7 @@ VALUES (
            NULL,
            80,
            12,
-           2,
+           1,
            'CLOSED',
            NOW() - INTERVAL '8 days',
            NOW() - INTERVAL '3 days',
@@ -289,13 +289,6 @@ VALUES (
            NOW(),
            NOW()
        );
-
-
--- ---------------------------------------------------------
--- Goods 6
--- 노트북 파우치
--- INACTIVE 상품이므로 판매 데이터 없음
--- ---------------------------------------------------------
 
 
 -- ---------------------------------------------------------

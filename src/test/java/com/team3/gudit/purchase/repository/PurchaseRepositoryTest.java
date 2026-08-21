@@ -60,32 +60,46 @@ class PurchaseRepositoryTest {
     }
 
     @Test
-    @DisplayName("사용자 ID로 해당 사용자의 구매 목록을 조회한다")
-    void findAllByUserId() {
+    @DisplayName("사용자 ID로 구매 목록을 최신 생성순으로 조회한다")
+    void findAllByUserIdOrderByCreatedAtDesc() {
         // Given
         TestData data = saveTestData();
 
-        Purchase purchase = Purchase.create(
+        Purchase firstPurchase = Purchase.create(
                 data.user(),
                 data.sale(),
                 1,
                 10_000
         );
-        purchaseRepository.save(purchase);
+        purchaseRepository.save(firstPurchase);
+
+        entityManager.flush();
+
+        Purchase secondPurchase = Purchase.create(
+                data.user(),
+                data.sale(),
+                1,
+                20_000
+        );
+        purchaseRepository.save(secondPurchase);
 
         entityManager.flush();
         entityManager.clear();
 
         // When
         List<Purchase> result =
-                purchaseRepository.findAllByUserId(
-                        data.user().getId()
-                );
+                purchaseRepository
+                        .findAllByUserIdOrderByCreatedAtDesc(
+                                data.user().getId()
+                        );
 
         // Then
         assertThat(result)
                 .extracting(Purchase::getId)
-                .containsExactly(purchase.getId());
+                .containsExactly(
+                        secondPurchase.getId(),
+                        firstPurchase.getId()
+                );
     }
 
     @Test

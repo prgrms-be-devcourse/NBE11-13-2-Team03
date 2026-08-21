@@ -22,9 +22,13 @@ async function loadPurchases() {
         );
 
         if (!response.ok) {
-            throw new Error(
-                "구매 내역 조회에 실패했습니다."
-            );
+            if (response.status === 401) {
+                alert("구매 내역을 확인하려면 로그인이 필요합니다.");
+                window.location.href = "/oauth2/authorization/kakao";
+                return;
+            }
+
+            throw new Error("구매 내역 조회에 실패했습니다.");
         }
 
         const result = await response.json();
