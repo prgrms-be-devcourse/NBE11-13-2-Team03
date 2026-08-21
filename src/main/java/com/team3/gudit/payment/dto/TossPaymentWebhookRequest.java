@@ -1,10 +1,10 @@
 package com.team3.gudit.payment.dto;
 
-import java.time.OffsetDateTime;
+import java.time.LocalDateTime;
 
 public record TossPaymentWebhookRequest(
         String eventType,
-        OffsetDateTime createdAt,
+        LocalDateTime createdAt,
         TossPaymentResponse data
 ) {
 }

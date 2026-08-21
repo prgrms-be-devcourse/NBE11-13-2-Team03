@@ -14,6 +14,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -322,7 +323,7 @@ class PaymentWebhookServiceTest {
         TossPaymentWebhookRequest request =
                 new TossPaymentWebhookRequest(
                         "OTHER_EVENT",
-                        OffsetDateTime.now(),
+                        LocalDateTime.now(),
                         createPaymentResponse("DONE")
                 );
 
@@ -339,8 +340,8 @@ class PaymentWebhookServiceTest {
     ) {
         return new TossPaymentWebhookRequest(
                 "PAYMENT_STATUS_CHANGED",
-                OffsetDateTime.parse(
-                        "2026-08-20T17:00:00+09:00"
+                LocalDateTime.parse(
+                        "2026-08-20T17:00:00"
                 ),
                 createPaymentResponse(status)
         );
