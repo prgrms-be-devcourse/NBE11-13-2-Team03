@@ -503,3 +503,37 @@ if ($Scenario -in @("5", "All")) {
         "status=$($sale104Fixture.status)"
     )
 }
+
+$targetSaleIds = switch ($Scenario) {
+    "1" { @(1) }
+    "2" { @(2) }
+    "3" { @(3..102) }
+    "4" { @(103) }
+    "5" { @(104) }
+    "All" { @(1..104) }
+}
+
+foreach ($saleId in $targetSaleIds) {
+    $redisStatus = & docker exec `
+        $RedisContainer `
+        redis-cli `
+        HGET `
+        "sale:$saleId`:info" `
+        status
+
+    if ($LASTEXITCODE -ne 0) {
+        throw "Failed to read Redis fixture: saleId=$saleId"
+    }
+
+    if ($redisStatus.Trim() -ne "ON_SALE") {
+        throw (
+            "Redis fixture is not ON_SALE: " +
+            "saleId=$saleId, status=$redisStatus"
+        )
+    }
+}
+
+Write-Host (
+    "Performance fixtures are ready: " +
+    "scenario=$Scenario, status=ON_SALE"
+)
