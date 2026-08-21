@@ -1,6 +1,6 @@
 param(
     [switch]$ResetPerformanceDatabase,
-    [ValidateSet("1", "2", "3", "4", "5", "6", "All")]
+    [ValidateSet("1", "2", "3", "4", "5", "6", "7", "All")]
     [string]$Scenario = "All",
     [string]$Container = "gudit-performance-postgres",
     [string]$Database = "gudit",
@@ -653,6 +653,135 @@ if ($Scenario -in @("6", "All")) {
     )
 }
 
+# Sale 106: 결제 승인과 구매 취소 동시 처리 테스트
+if ($Scenario -in @("7", "All")) {
+    $sale106Fixture = $fixture.sales |
+        Where-Object { $_.id -eq 106 }
+
+    if ($null -eq $sale106Fixture) {
+        throw "Sale 106 fixture was not found."
+    }
+
+    $paymentConfirmCancelPurchaseFixture = $fixture.purchases |
+        Where-Object {
+            $_.sale_id -eq $sale106Fixture.id
+        }
+
+    if ($null -eq $paymentConfirmCancelPurchaseFixture) {
+        throw "Payment-confirm-cancel-race Purchase fixture was not found."
+    }
+
+    $paymentConfirmCancelFixture = $fixture.payments |
+        Where-Object {
+            $_.purchase_id -eq $paymentConfirmCancelPurchaseFixture.id
+        }
+
+    if ($null -eq $paymentConfirmCancelFixture) {
+        throw "Payment-confirm-cancel-race Payment fixture was not found."
+    }
+
+    $sale106StartAt = [DateTimeOffset]::Parse(
+        "$($sale106Fixture.start_at)+09:00"
+    ).ToUnixTimeMilliseconds()
+
+    $sale106EndAt = [DateTimeOffset]::Parse(
+        "$($sale106Fixture.end_at)+09:00"
+    ).ToUnixTimeMilliseconds()
+
+    # stock/info Key: 판매 종료 시각 + 2일
+    $sale106CacheExpireAt =
+        $sale106EndAt + 172800000
+
+    # 사용자 구매 Key: 판매 종료 시각 + 1일
+    $sale106UserExpireAt =
+        $sale106EndAt + 86400000
+
+    $sale106StockKey =
+        "sale:$($sale106Fixture.id):stock"
+
+    $sale106InfoKey =
+        "sale:$($sale106Fixture.id):info"
+
+    $sale106UserKey =
+        "sale:$($sale106Fixture.id):user:$($paymentConfirmCancelPurchaseFixture.user_id)"
+
+    & docker exec $RedisContainer `
+        redis-cli `
+        SET `
+        $sale106StockKey `
+        "$($sale106Fixture.remaining_stock)"
+
+    if ($LASTEXITCODE -ne 0) {
+        throw "Redis payment-confirm-cancel-race stock fixture initialization failed."
+    }
+
+    & docker exec $RedisContainer `
+        redis-cli `
+        HSET `
+        $sale106InfoKey `
+        "startAt" `
+        "$sale106StartAt" `
+        "endAt" `
+        "$sale106EndAt" `
+        "maxPurchaseQuantity" `
+        "$($sale106Fixture.max_purchase_quantity)" `
+        "status" `
+        "$($sale106Fixture.status)"
+
+    if ($LASTEXITCODE -ne 0) {
+        throw "Redis payment-confirm-cancel-race info fixture initialization failed."
+    }
+
+    & docker exec $RedisContainer `
+        redis-cli `
+        SET `
+        $sale106UserKey `
+        "$($paymentConfirmCancelPurchaseFixture.quantity)"
+
+    if ($LASTEXITCODE -ne 0) {
+        throw "Redis payment-confirm-cancel-race user fixture initialization failed."
+    }
+
+    & docker exec $RedisContainer `
+        redis-cli `
+        PEXPIREAT `
+        $sale106StockKey `
+        "$sale106CacheExpireAt"
+
+    if ($LASTEXITCODE -ne 0) {
+        throw "Redis payment-confirm-cancel-race stock TTL initialization failed."
+    }
+
+    & docker exec $RedisContainer `
+        redis-cli `
+        PEXPIREAT `
+        $sale106InfoKey `
+        "$sale106CacheExpireAt"
+
+    if ($LASTEXITCODE -ne 0) {
+        throw "Redis payment-confirm-cancel-race info TTL initialization failed."
+    }
+
+    & docker exec $RedisContainer `
+        redis-cli `
+        PEXPIREAT `
+        $sale106UserKey `
+        "$sale106UserExpireAt"
+
+    if ($LASTEXITCODE -ne 0) {
+        throw "Redis payment-confirm-cancel-race user TTL initialization failed."
+    }
+
+    Write-Host (
+        "Redis payment-confirm-cancel-race fixture loaded: " +
+        "$sale106StockKey=$($sale106Fixture.remaining_stock), " +
+        "$sale106UserKey=$($paymentConfirmCancelPurchaseFixture.quantity), " +
+        "paymentId=$($paymentConfirmCancelFixture.id), " +
+        "paymentStatus=$($paymentConfirmCancelFixture.status), " +
+        "status=$($sale106Fixture.status)"
+    )
+}
+
 $targetSaleIds = switch ($Scenario) {
     "1" { @(1) }
     "2" { @(2) }
@@ -660,6 +789,7 @@ $targetSaleIds = switch ($Scenario) {
     "4" { @(103) }
     "5" { @(104) }
     "6" { @(105) }
+    "7" { @(106) }
     "All" { @(1..105) }
 }
 

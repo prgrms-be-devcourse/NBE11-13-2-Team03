@@ -211,6 +211,17 @@ public class PaymentService {
                 );
     }
 
+    @Transactional
+    public Payment getPaymentByPurchaseIdWithLock(Long purchaseId) {
+        return paymentRepository.findByPurchaseIdWithLock(purchaseId)
+                .orElseThrow(() ->
+                        new BusinessException(
+                                PaymentErrorCode.PAYMENT_NOT_FOUND,
+                                "Payment not found. purchaseId=" + purchaseId
+                        )
+                );
+    }
+
     private boolean isDefinitePaymentFailure(String tossErrorCode) {
         return switch (tossErrorCode) {
             case "REJECT_ACCOUNT_PAYMENT",

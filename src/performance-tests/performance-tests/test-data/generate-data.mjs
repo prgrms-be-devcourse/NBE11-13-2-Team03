@@ -3,7 +3,7 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const USER_COUNT = 1_003;
+const USER_COUNT = 1_004;
 const DISTRIBUTED_SALE_COUNT = 100;
 const ISSUER = "test@naver.com";
 
@@ -91,7 +91,7 @@ const users = Array.from(
 );
 
 const goods = Array.from(
-    { length: 105 },
+    { length: 106 },
     (_, index) => {
       const id = index + 1;
 
@@ -171,6 +171,12 @@ const sales = [
       105,
       100,
       "payment-confirm-race"
+  ),
+
+  sale(
+      106,
+      100,
+      "payment-confirm-cancel-race"
   )
 ];
 
@@ -188,6 +194,14 @@ sales.find(
  */
 sales.find(
     ({ id }) => id === 105
+).remaining_stock = 99;
+
+/**
+ * 판매 106번에는 결제 승인-취소 경쟁 테스트용 미결제 구매 1건이 존재한다.
+ * 해당 구매가 재고 1개를 예약했으므로 남은 재고는 99다.
+ */
+sales.find(
+    ({ id }) => id === 106
 ).remaining_stock = 99;
 
 const actors = users.map(({ id }) => ({
@@ -237,10 +251,10 @@ const output = {
 
     sequenceResetAfterImport: {
       users: USER_COUNT,
-      goods: 105,
-      goods_sales: 105,
-      purchases: 2,
-      payments: 2
+      goods: 106,
+      goods_sales: 106,
+      purchases: 3,
+      payments: 3
     }
   },
 
@@ -248,29 +262,29 @@ const output = {
     users: {
       count: USER_COUNT,
       reason:
-          "1,000 unique VUs plus one duplicate-purchase actor, one cancellation actor, and one payment-confirm actor"
+          "1,000 unique VUs plus one duplicate-purchase actor, one cancellation actor, one payment-confirm actor, and one payment-confirm-cancel actor"
     },
 
     goods: {
-      count: 105,
+      count: 106,
       reason:
           "one goods row per sale fixture"
     },
 
     sales: {
-      count: 105,
+      count: 106,
       reason:
           "two hotspot fixtures, 100 distributed fixtures, and three race-condition fixtures"
     },
 
     purchases: {
-      count: 2,
+      count: 3,
       reason:
           "pending purchases used by the concurrent cancellation and payment-confirm tests"
     },
 
     payments: {
-      count: 2,
+      count: 3,
       reason:
           "READY payments paired with the cancellation and payment-confirm test purchases"
     },
@@ -406,6 +420,34 @@ const output = {
       },
       riskNote:
           "Concurrent confirmation requests must not complete the same payment more than once or corrupt the Purchase and Payment state."
+    },
+
+    paymentConfirmCancelRace: {
+      description:
+          "One payment confirmation request and one purchase cancellation request race against the same pending purchase.",
+      saleIds: [106],
+      purchaseIds: [3],
+      paymentIds: [3],
+      actorUserIds: [1_004],
+      concurrentRequests: 2,
+
+      expectedInvariant: {
+        allowedFinalStates: [
+          {
+            purchaseStatus: "PURCHASED",
+            paymentStatus: "DONE",
+            remainingStock: 99
+          },
+          {
+            purchaseStatus: "CANCELED",
+            paymentStatus: "CANCELED",
+            remainingStock: 100
+          }
+        ]
+      },
+
+      riskNote:
+          "Payment confirmation and purchase cancellation must not deadlock or leave Payment, Purchase, and Redis stock in inconsistent states."
     }
   },
 
@@ -440,6 +482,19 @@ const output = {
       canceled_at: null,
       created_at: CREATED_AT,
       updated_at: CREATED_AT
+    },
+
+    {
+      id: 3,
+      user_id: 1_004,
+      sale_id: 106,
+      quantity: 1,
+      purchase_price: 10_106,
+      status: "PENDING_PAYMENT",
+      purchased_at: null,
+      canceled_at: null,
+      created_at: CREATED_AT,
+      updated_at: CREATED_AT
     }
   ],
 
@@ -465,6 +520,20 @@ const output = {
           "GUDIT_PERF_PAYMENT_CONFIRM_RACE_0002",
       payment_key: null,
       amount: 10_105,
+      status: "READY",
+      approved_at: null,
+      canceled_at: null,
+      created_at: CREATED_AT,
+      updated_at: CREATED_AT
+    },
+
+    {
+      id: 3,
+      purchase_id: 3,
+      order_id:
+          "GUDIT_PERF_PAYMENT_CONFIRM_CANCEL_RACE_0003",
+      payment_key: null,
+      amount: 10_106,
       status: "READY",
       approved_at: null,
       canceled_at: null,

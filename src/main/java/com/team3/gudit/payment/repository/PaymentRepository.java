@@ -26,4 +26,14 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
     Optional<Payment> findByPaymentKey(String paymentKey);
 
     Optional<Payment> findByPurchaseId(Long purchaseId);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("""
+            select p
+            from Payment p
+            where p.purchase.id = :purchaseId
+            """)
+    Optional<Payment> findByPurchaseIdWithLock(
+            @Param("purchaseId") Long purchaseId
+    );
 }
