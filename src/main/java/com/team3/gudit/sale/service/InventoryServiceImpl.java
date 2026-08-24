@@ -5,12 +5,18 @@ import com.team3.gudit.sale.domain.entity.Sale;
 import com.team3.gudit.sale.domain.repository.SaleRepository;
 import com.team3.gudit.sale.exception.SaleErrorCode;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 
 @Service
+@ConditionalOnProperty(
+        prefix = "gudit.inventory",
+        name = "mode",
+        havingValue = "db-pessimistic"
+)
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class InventoryServiceImpl implements InventoryService {

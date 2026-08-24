@@ -11,6 +11,8 @@ spring:
   
   data:
     redis:
+      host: localhost
+      port: 7001
       repositories:
         enabled: false
 
@@ -42,7 +44,13 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: create
+    defer-datasource-initialization: true
+
+  sql:
+    init:
+      mode: always
+      data-locations: classpath:/init-data.sql
 
 
 jwt:
@@ -58,3 +66,6 @@ toss:
 
 springdoc:
   show-actuator: true
+
+server:
+  port: 8081

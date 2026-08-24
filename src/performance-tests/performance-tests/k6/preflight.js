@@ -24,7 +24,9 @@ const expectedSales = [
   { id: 2, stock: 1000 },
   ...Array.from({ length: 100 }, (_, index) => ({ id: index + 3, stock: 10 })),
   { id: 103, stock: 100 },
-  { id: 104, stock: 99 }
+  { id: 104, stock: 99 },
+  { id: 105, stock: 99 },
+  { id: 106, stock: 99 }
 ];
 
 function statusSummary(sales) {
