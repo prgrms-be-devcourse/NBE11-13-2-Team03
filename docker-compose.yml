@@ -16,7 +16,7 @@ services:
     image: redis:alpine
     container_name: redis-event
     ports:
-      - "7001:6379"
+      - "6379:6379"
     # 데이터 영속화(AOF) 및 비번 없음 설정
     command: redis-server --appendonly yes --requirepass ""
     volumes:

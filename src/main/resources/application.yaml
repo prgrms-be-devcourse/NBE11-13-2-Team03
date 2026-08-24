@@ -11,8 +11,6 @@ spring:
   
   data:
     redis:
-      host: localhost
-      port: 7001
       repositories:
         enabled: false
 
@@ -66,6 +64,3 @@ toss:
 
 springdoc:
   show-actuator: true
-
-server:
-  port: 8081
