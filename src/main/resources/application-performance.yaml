@@ -17,3 +17,8 @@ spring:
 
 jwt:
   secret-key: ${PERFORMANCE_JWT_SECRET_KEY}
+
+gudit:
+  inventory:
+    # redis: Redis Lua 원자 연산(기본값), db-pessimistic: DB SELECT FOR UPDATE
+    mode: ${GUDIT_INVENTORY_MODE:redis}

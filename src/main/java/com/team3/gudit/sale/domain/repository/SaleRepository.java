@@ -4,6 +4,7 @@ import com.team3.gudit.goods.domain.enums.GoodsStatus;
 import com.team3.gudit.sale.domain.entity.Sale;
 import com.team3.gudit.sale.domain.enums.SaleStatus;
 import jakarta.persistence.LockModeType;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
@@ -42,6 +43,7 @@ public interface SaleRepository extends JpaRepository<Sale, Long> {
             LocalDateTime endAt
     );
 
+    @EntityGraph(attributePaths = "goods")
     List<Sale> findAllByGoods_Status(
             GoodsStatus goodsStatus
     );

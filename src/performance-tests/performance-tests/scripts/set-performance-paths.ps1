@@ -34,6 +34,18 @@ $vuCapacityRunnerPath = Join-Path `
     $performanceRoot `
     "scripts\run-vu-capacity.ps1"
 
+$experimentRunnerPath = Join-Path `
+    $performanceRoot `
+    "scripts\run-performance-experiments.ps1"
+
+$acceptCountExperimentRunnerPath = Join-Path `
+    $performanceRoot `
+    "scripts\run-accept-count-experiment.ps1"
+
+$experimentMatrixPath = Join-Path `
+    $performanceRoot `
+    "config\performance-experiment-matrix.csv"
+
 $generatedDataPath = Join-Path `
     $performanceRoot `
     "test-data\generated\performance-test-data.json"
@@ -46,6 +58,9 @@ $requiredPaths = @(
     $concurrencyRunnerPath,
     $loadRunnerPath,
     $vuCapacityRunnerPath,
+    $experimentRunnerPath,
+    $acceptCountExperimentRunnerPath,
+    $experimentMatrixPath,
     $generatedDataPath
 )
 
@@ -66,6 +81,9 @@ $performancePaths = [PSCustomObject]@{
     ConcurrencyRunner = $concurrencyRunnerPath
     LoadRunner        = $loadRunnerPath
     VuCapacityRunner  = $vuCapacityRunnerPath
+    ExperimentRunner  = $experimentRunnerPath
+    AcceptCountRunner = $acceptCountExperimentRunnerPath
+    ExperimentMatrix  = $experimentMatrixPath
     GeneratedData     = $generatedDataPath
 }
 
@@ -81,5 +99,8 @@ Write-Host '  $preflightPath'
 Write-Host '  $concurrencyRunnerPath'
 Write-Host '  $loadRunnerPath'
 Write-Host '  $vuCapacityRunnerPath'
+Write-Host '  $experimentRunnerPath'
+Write-Host '  $acceptCountExperimentRunnerPath'
+Write-Host '  $experimentMatrixPath'
 Write-Host '  $generatedDataPath'
 Write-Host '  $performancePaths'

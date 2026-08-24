@@ -18,7 +18,8 @@ Spring 애플리케이션의 구매 동시성 및 지속 부하를 검증하는 
 
 1. PowerShell의 현재 위치를 Spring 프로젝트 루트로 맞춘다. 현재 저장소에서 성능테스트 루트는
    `src/performance-tests/performance-tests`다.
-2. `test-data/generated/performance-test-data.json`의 `metadata.requiredEnvironment.JWT_SECRET_KEY` 값을 IntelliJ Spring Boot Run Configuration에 설정한다.
+2. `test-data/generated/performance-test-data.json`의
+   `metadata.requiredEnvironment.PERFORMANCE_JWT_SECRET_KEY` 값을 같은 이름의 Spring Boot 환경변수로 설정한다.
 3. PostgreSQL과 Spring 애플리케이션을 테스트 전용 환경에서 실행한다.
    VU 기준 측정은 `performance`, 동시성 테스트는 `performance,concurrency`, 부하테스트는
    `performance,load` 프로필을 사용한다. `application-concurrency.yaml`과
@@ -74,6 +75,18 @@ preflight를 다시 복원한다. Spring 애플리케이션에는
 `PerformanceProbeRegistry`가 포함되어 있어야 한다. 상세 판정법은
 `docs/vu-capacity-test.md`를 참고한다.
 
+Tomcat, HikariCP, VU, 부하 증가 방식, DB Lock, 실행 환경 비교 실험:
+
+```powershell
+. ".\src\performance-tests\performance-tests\scripts\set-performance-paths.ps1"
+
+& $experimentRunnerPath `
+  -ResetPerformanceDatabase `
+  -Group "tomcat-accept"
+```
+
+실험 matrix와 그룹별 실행·해석 방법은 `docs/performance-experiment-guide.md`를 참고한다.
+
 30분 소크 테스트 포함:
 
 ```powershell
@@ -86,7 +99,7 @@ preflight를 다시 복원한다. Spring 애플리케이션에는
 
 - 테스트 데이터와 JWT 키는 격리된 성능테스트 환경에서만 사용한다.
 - `prepare-db.ps1`은 지정한 5개 테이블을 초기화한다.
-- 동시성 전체 실행기는 1~5번 시나리오 사이에는 상태를 유지하고 5번 종료 후 Redis와 DB를 한 번만 초기화한다.
+- 동시성 전체 실행기는 1~5번 시나리오 사이에는 상태를 유지한다. 이후 6번과 7번은 각각 전용 결제 fixture로 초기화해 실행하고 DB·Redis 최종 상태를 검증하며, 전체 종료 후 기준 상태로 복원한다.
 - 자동 초기화 대상은 기본적으로 `gudit-performance-redis`와 `gudit-performance-postgres`다.
 - 혼합 부하의 구매 1,000건은 기본적으로 100 VU가 나눠 실행한다. `PURCHASE_VUS`는 VU 탐색에서 확인한 정상 범위 안에서 조정한다.
 - 운영 DB나 공용 개발 DB에서는 데이터 초기화 스크립트를 실행하지 않는다.

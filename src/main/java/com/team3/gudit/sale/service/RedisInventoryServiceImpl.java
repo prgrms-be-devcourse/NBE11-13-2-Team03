@@ -7,6 +7,7 @@ import com.team3.gudit.sale.domain.repository.SaleRepository;
 import com.team3.gudit.sale.dto.SaleRedisDto;
 import com.team3.gudit.sale.exception.SaleErrorCode;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
@@ -17,6 +18,12 @@ import java.util.List;
 
 @Primary
 @Service
+@ConditionalOnProperty(
+        prefix = "gudit.inventory",
+        name = "mode",
+        havingValue = "redis",
+        matchIfMissing = true
+)
 @RequiredArgsConstructor
 public class RedisInventoryServiceImpl implements InventoryService {
 

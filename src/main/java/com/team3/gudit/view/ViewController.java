@@ -1,11 +1,13 @@
 package com.team3.gudit.view;
 
 import com.team3.gudit.payment.config.TossPaymentProperties;
+import io.swagger.v3.oas.annotations.Hidden;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
+@Hidden
 @Controller
 @RequiredArgsConstructor
 public class ViewController {

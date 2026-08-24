@@ -1,0 +1,29 @@
+enabled,experiment_group,case_id,description,repeats,tomcat_max_threads,tomcat_min_spare,tomcat_max_connections,tomcat_accept_count,hikari_max_pool_size,hikari_min_idle,hikari_connection_timeout_ms,vus,load_model,request_mode,spread_duration_seconds,ramp_up,hold,ramp_down,start_rate,target_rate,pre_allocated_vus,max_vus,no_connection_reuse,inventory_mode,k6_environment,application_environment
+true,tomcat-accept,accept-100,"기본 backlog",3,300,30,8192,100,40,10,5000,1000,burst,read,10,10s,20s,10s,10,500,150,1000,true,redis,host,host
+true,tomcat-accept,accept-300,"backlog 300",3,300,30,8192,300,40,10,5000,1000,burst,read,10,10s,20s,10s,10,500,150,1000,true,redis,host,host
+true,tomcat-accept,accept-1000,"backlog 1000",3,300,30,8192,1000,40,10,5000,1000,burst,read,10,10s,20s,10s,10,500,150,1000,true,redis,host,host
+true,tomcat-threads,threads-100,"worker 100",3,100,30,8192,1000,40,10,5000,1000,burst,read,10,10s,20s,10s,10,500,150,1000,true,redis,host,host
+true,tomcat-threads,threads-300,"worker 300",3,300,30,8192,1000,40,10,5000,1000,burst,read,10,10s,20s,10s,10,500,150,1000,true,redis,host,host
+true,tomcat-threads,threads-600,"worker 600",3,600,30,8192,1000,40,10,5000,1000,burst,read,10,10s,20s,10s,10,500,150,1000,true,redis,host,host
+true,tomcat-connections,connections-500,"accepted connection 상한 500",3,300,30,500,1000,40,10,5000,1000,burst,read,10,10s,20s,10s,10,500,150,1000,true,redis,host,host
+true,tomcat-connections,connections-1500,"accepted connection 상한 1500",3,300,30,1500,1000,40,10,5000,1000,burst,read,10,10s,20s,10s,10,500,150,1000,true,redis,host,host
+true,tomcat-connections,connections-8192,"accepted connection 기본 상한",3,300,30,8192,1000,40,10,5000,1000,burst,read,10,10s,20s,10s,10,500,150,1000,true,redis,host,host
+true,hikari,hikari-10,"DB pool 10",3,300,30,8192,1000,10,10,5000,500,burst,single-row-purchase,10,10s,20s,10s,10,500,150,1000,true,redis,host,host
+true,hikari,hikari-40,"DB pool 40",3,300,30,8192,1000,40,10,5000,500,burst,single-row-purchase,10,10s,20s,10s,10,500,150,1000,true,redis,host,host
+true,hikari,hikari-80,"DB pool 80",3,300,30,8192,1000,80,10,5000,500,burst,single-row-purchase,10,10s,20s,10s,10,500,150,1000,true,redis,host,host
+true,vu,vu-100,"VU 100",3,300,30,8192,100,40,10,5000,100,burst,read,10,10s,20s,10s,10,500,150,1000,true,redis,host,host
+true,vu,vu-300,"VU 300",3,300,30,8192,100,40,10,5000,300,burst,read,10,10s,20s,10s,10,500,150,1000,true,redis,host,host
+true,vu,vu-500,"VU 500",3,300,30,8192,100,40,10,5000,500,burst,read,10,10s,20s,10s,10,500,150,1000,true,redis,host,host
+true,vu,vu-700,"VU 700",3,300,30,8192,100,40,10,5000,700,burst,read,10,10s,20s,10s,10,500,150,1000,true,redis,host,host
+true,vu,vu-900,"VU 900",3,300,30,8192,100,40,10,5000,900,burst,read,10,10s,20s,10s,10,500,150,1000,true,redis,host,host
+true,vu,vu-1000,"VU 1000",3,300,30,8192,100,40,10,5000,1000,burst,read,10,10s,20s,10s,10,500,150,1000,true,redis,host,host
+true,load-model,load-burst,"동시 시작",3,300,30,8192,1000,40,10,5000,500,burst,read,10,10s,20s,10s,10,500,150,1000,true,redis,host,host
+true,load-model,load-linear-spread,"동일 500건을 10초에 분산",3,300,30,8192,1000,40,10,5000,500,linear-spread,read,10,10s,20s,10s,10,500,150,1000,true,redis,host,host
+true,load-model,load-ramping-vus,"VU를 점진 증가",3,300,30,8192,1000,40,10,5000,500,ramping-vus,read,10,10s,20s,10s,10,500,150,1000,false,redis,host,host
+true,load-model,load-ramping-arrival,"도착률을 점진 증가",3,300,30,8192,1000,40,10,5000,500,ramping-arrival-rate,read,10,10s,20s,10s,10,500,150,1000,false,redis,host,host
+true,db-lock,inventory-redis,"DB 재고 행 잠금 없음(Redis Lua)",3,300,30,8192,1000,40,10,5000,300,burst,single-row-purchase,10,10s,20s,10s,10,500,150,1000,true,redis,host,host
+true,db-lock,inventory-db-lock,"DB 재고 행 비관적 잠금",3,300,30,8192,1000,40,10,5000,300,burst,single-row-purchase,10,10s,20s,10s,10,500,150,1000,true,db-pessimistic,host,host
+true,environment,env-host-host,"k6 host / app host",3,300,30,8192,1000,40,10,5000,500,burst,read,10,10s,20s,10s,10,500,150,1000,true,redis,host,host
+true,environment,env-docker-host,"k6 Docker / app host",3,300,30,8192,1000,40,10,5000,500,burst,read,10,10s,20s,10s,10,500,150,1000,true,redis,docker,host
+true,environment,env-host-docker,"k6 host / app Docker",3,300,30,8192,1000,40,10,5000,500,burst,read,10,10s,20s,10s,10,500,150,1000,true,redis,host,docker
+true,environment,env-docker-docker,"k6 Docker / app Docker",3,300,30,8192,1000,40,10,5000,500,burst,read,10,10s,20s,10s,10,500,150,1000,true,redis,docker,docker

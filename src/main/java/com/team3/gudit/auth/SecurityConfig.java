@@ -88,31 +88,31 @@ public class SecurityConfig {
                         )
                         .hasAuthority("ADMIN")
 
-//                        // 관리자 화면
-//                        .requestMatchers("/admin/**")
-//                        .hasAuthority("ADMIN")
-//
-//                        // 상품 관리
-//                        .requestMatchers("/api/goods/**")
-//                        .hasAuthority("ADMIN")
-//
-//                        // 판매 등록·수정·삭제
-//                        .requestMatchers(HttpMethod.POST, "/api/sales")
-//                        .hasAuthority("ADMIN")
-//
-//                        .requestMatchers(HttpMethod.PATCH, "/api/sales/**")
-//                        .hasAuthority("ADMIN")
-//
-//                        .requestMatchers(HttpMethod.DELETE, "/api/sales/**")
-//                        .hasAuthority("ADMIN")
-//
-//                        // 판매 조회
-//                        .requestMatchers(HttpMethod.GET, "/api/sales", "/api/sales/**")
-//                        .permitAll()
-//
-//                        // 그 외 API
-//                        .requestMatchers("/api/**")
-//                        .hasAnyAuthority("USER", "ADMIN")
+                        // 관리자 화면
+                        .requestMatchers("/admin/**")
+                        .hasAuthority("ADMIN")
+
+                        // 상품 관리
+                        .requestMatchers("/api/goods/**")
+                        .hasAuthority("ADMIN")
+
+                        // 판매 등록·수정·삭제
+                        .requestMatchers(HttpMethod.POST, "/api/sales")
+                        .hasAuthority("ADMIN")
+
+                        .requestMatchers(HttpMethod.PATCH, "/api/sales/**")
+                        .hasAuthority("ADMIN")
+
+                        .requestMatchers(HttpMethod.DELETE, "/api/sales/**")
+                        .hasAuthority("ADMIN")
+
+                        // 판매 조회
+                        .requestMatchers(HttpMethod.GET, "/api/sales", "/api/sales/**")
+                        .permitAll()
+
+                        // 그 외 API
+                        .requestMatchers("/api/**")
+                        .hasAnyAuthority("USER", "ADMIN")
 
                         .anyRequest().authenticated()
                 )
