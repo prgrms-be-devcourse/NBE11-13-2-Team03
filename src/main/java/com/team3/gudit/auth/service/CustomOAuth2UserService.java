@@ -8,6 +8,7 @@ import com.team3.gudit.user.domain.entity.Role;
 import com.team3.gudit.user.domain.entity.User;
 import com.team3.gudit.user.domain.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
@@ -15,9 +16,16 @@ import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
+
+    @Value("${app.admin-kakao-ids:}")
+    private String adminKakaoIds;
 
     private final UserRepository userRepository;
 
@@ -55,8 +63,11 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         User user = userRepository
                 .findByKakaoIdAndProvider(userInfo.id(), provider)
                 .map(existing -> {
-
                     existing.updateProfile(userInfo.name());
+
+                    if (isAdmin(userInfo.id()) && existing.getRole() != Role.ADMIN) {
+                        existing.promoteToAdmin();
+                    }
 
                     return existing;
                 })
@@ -66,7 +77,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                             .kakaoId(userInfo.id())
                             .nickname(userInfo.name())
                             .email(userInfo.email())
-                            .role(Role.USER)
+                            .role(isAdmin(userInfo.id()) ? Role.ADMIN : Role.USER)
                             .provider(provider)
                             .build();
 
@@ -80,5 +91,19 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                 oAuth2User.getAttributes(),
                 nameAttributeKey
         );
+    }
+
+    private boolean isAdmin(Long kakaoId) {
+        if (adminKakaoIds == null || adminKakaoIds.isBlank()) {
+            return false;
+        }
+
+        Set<Long> adminIds = Arrays.stream(adminKakaoIds.split(","))
+                .map(String::trim)
+                .filter(id -> !id.isBlank())
+                .map(Long::valueOf)
+                .collect(Collectors.toSet());
+
+        return adminIds.contains(kakaoId);
     }
 }

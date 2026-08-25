@@ -66,34 +66,24 @@ public class SecurityConfig {
                                 "/payments/**",
                                 "/mypage/**",
 
-                                // 관리자 화면
-                                "/admin/**",
-                                "/api/goods/**",
-
                                 // 기존 결제 테스트 화면
                                 "/payments/test",
                                 "/payments/test/**"
 
                         ).permitAll()
 
+                        // 판매 조회
                         .requestMatchers(
                                 HttpMethod.GET,
                                 "/api/sales",
                                 "/api/sales/**"
                         ).permitAll()
 
+                        // 관리자 화면 / 상품 관리
                         .requestMatchers(
                                 "/admin/**",
                                 "/api/goods/**"
                         )
-                        .hasAuthority("ADMIN")
-
-                        // 관리자 화면
-                        .requestMatchers("/admin/**")
-                        .hasAuthority("ADMIN")
-
-                        // 상품 관리
-                        .requestMatchers("/api/goods/**")
                         .hasAuthority("ADMIN")
 
                         // 판매 등록·수정·삭제
@@ -105,10 +95,6 @@ public class SecurityConfig {
 
                         .requestMatchers(HttpMethod.DELETE, "/api/sales/**")
                         .hasAuthority("ADMIN")
-
-                        // 판매 조회
-                        .requestMatchers(HttpMethod.GET, "/api/sales", "/api/sales/**")
-                        .permitAll()
 
                         // 그 외 API
                         .requestMatchers("/api/**")
