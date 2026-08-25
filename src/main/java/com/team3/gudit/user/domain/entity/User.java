@@ -58,4 +58,8 @@ public class User {
     protected void onUpdate() {
         this.updatedAt = LocalDateTime.now();
     }
+
+    public void promoteToAdmin() {
+        this.role = Role.ADMIN;
+    }
 }

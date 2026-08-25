@@ -113,6 +113,33 @@ a {
     color: var(--primary);
 }
 
+.nav a.admin-link {
+    color: #4b5563;
+    font-weight: 600;
+}
+
+.nav a.admin-link:hover {
+    color: var(--text-main);
+}
+
+.admin-nav {
+    display: flex;
+    gap: 24px;
+    margin-bottom: 24px;
+    border-bottom: 1px solid var(--border);
+}
+
+.admin-nav a {
+    padding: 12px 4px;
+    color: var(--text-sub);
+    font-weight: 500;
+}
+
+.admin-nav a.active {
+    color: var(--text-main);
+    border-bottom: 2px solid var(--text-main);
+}
+
 .auth-area {
     display: flex;
     align-items: center;

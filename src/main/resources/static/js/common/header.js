@@ -1,6 +1,9 @@
 const loginLink =
     document.getElementById("login-link");
 
+const adminLink =
+    document.getElementById("admin-link");
+
 const userArea =
     document.getElementById("user-area");
 
@@ -52,11 +55,15 @@ function renderLoggedIn(user) {
 
     userName.textContent =
         `${user.nickname}님`;
+
+    adminLink.hidden =
+        user.role !== "ADMIN";
 }
 
 function renderLoggedOut() {
     loginLink.hidden = false;
     userArea.hidden = true;
+    adminLink.hidden = true;
 }
 
 async function logout() {
