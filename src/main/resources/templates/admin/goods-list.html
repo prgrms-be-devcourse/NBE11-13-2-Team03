@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>상품 관리 | Gudit</title>
+
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<header th:replace="~{fragments/header :: header}"></header>
+
+<main class="main admin-page">
+
+    <nav class="admin-nav">
+        <a href="/admin/goods" class="active">상품 관리</a>
+        <a href="/admin/sales">판매 관리</a>
+    </nav>
+
+    <section class="admin-page-header">
+        <div>
+            <span class="page-eyebrow">ADMIN</span>
+            <h1>상품 관리</h1>
+            <p>판매에 사용할 굿즈를 등록하고 상품 정보를 관리합니다.</p>
+        </div>
+
+        <a href="/admin/goods/new"
+           class="primary-button admin-create-button">
+            상품 등록
+        </a>
+    </section>
+
+    <section class="admin-summary">
+
+        <div class="admin-summary-card">
+            <span>전체 상품</span>
+            <strong id="goods-total-count">0</strong>
+        </div>
+
+        <div class="admin-summary-card">
+            <span>판매 가능</span>
+            <strong id="goods-enabled-count">0</strong>
+        </div>
+
+        <div class="admin-summary-card">
+            <span>판매 중지</span>
+            <strong id="goods-disabled-count">0</strong>
+        </div>
+
+    </section>
+
+    <section class="admin-table-card">
+
+        <div class="admin-table-header">
+
+            <h2>상품 목록</h2>
+
+            <span
+                    id="goods-table-count"
+                    class="admin-table-count">
+                총 0개
+            </span>
+
+        </div>
+
+        <div class="admin-table-wrap">
+
+            <table class="admin-table">
+
+                <thead>
+                <tr>
+                    <th>상품</th>
+                    <th>가격</th>
+                    <th>상태</th>
+                    <th>등록일</th>
+                    <th></th>
+                </tr>
+                </thead>
+
+                <tbody id="admin-goods-list">
+                <!-- GET /api/goods 결과 렌더링 -->
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+</main>
+
+<script src="/js/admin/goods-list.js"></script>
+
+</body>
+</html>

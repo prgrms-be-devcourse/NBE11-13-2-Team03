@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>결제 | GUDIT</title>
+
+    <link rel="stylesheet" href="/css/style.css">
+
+    <script src="https://js.tosspayments.com/v2/standard"></script>
+</head>
+
+<body>
+
+<header th:replace="~{fragments/header :: header}"></header>
+
+<main class="main payment-page">
+
+    <a id="payment-back-link"
+       href="/sales"
+       class="back-link">
+        ← 상품 상세로 돌아가기
+    </a>
+
+    <section class="payment-layout">
+
+        <div class="payment-product-card">
+
+            <div
+                    id="payment-product-image"
+                    class="payment-product-image">
+
+                <div class="detail-mock-keyring">
+                    GUDIT
+                </div>
+
+            </div>
+
+            <div class="payment-product-content">
+
+                <span class="page-eyebrow">
+                    PAYMENT
+                </span>
+
+                <h1>
+                    주문 내용을 확인해 주세요
+                </h1>
+
+                <p class="payment-description">
+                    결제하기 전에 상품과 결제 금액을 다시 확인해 주세요.
+                </p>
+
+                <div class="payment-product-info">
+
+                    <div class="payment-info-row">
+                        <span>상품명</span>
+                        <strong id="payment-goods-name">-</strong>
+                    </div>
+
+                    <div class="payment-info-row">
+                        <span>구매 수량</span>
+                        <strong id="payment-quantity">-</strong>
+                    </div>
+
+                    <div class="payment-info-row">
+                        <span>상품 금액</span>
+                        <strong id="payment-product-price">-</strong>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <aside class="payment-summary-card">
+
+            <h2>
+                결제 정보
+            </h2>
+
+            <div
+                    id="payment-timeout"
+                    class="payment-timeout">
+
+                <div class="payment-timeout-text">
+                    <span>남은 결제 시간</span>
+                    <small>시간 내에 결제를 완료해 주세요.</small>
+                </div>
+
+                <strong id="payment-time-left">
+                    10:00
+                </strong>
+
+            </div>
+
+            <div class="payment-summary">
+
+                <div class="payment-summary-row">
+                    <span>상품 금액</span>
+                    <strong id="payment-summary-price">-</strong>
+                </div>
+
+                <div class="payment-summary-row">
+                    <span>구매 수량</span>
+                    <strong id="payment-summary-quantity">-</strong>
+                </div>
+
+            </div>
+
+            <div class="payment-total">
+
+                <span>
+                    최종 결제 금액
+                </span>
+
+                <strong id="payment-total-price">
+                    -
+                </strong>
+
+            </div>
+
+            <button
+                    id="payment-button"
+                    type="button"
+                    class="payment-submit-button">
+                결제하기
+            </button>
+
+            <p class="payment-notice">
+                결제 버튼을 누르면 결제 서비스 화면으로 이동합니다.
+            </p>
+
+        </aside>
+
+    </section>
+
+</main>
+
+<script th:inline="javascript">
+    window.TOSS_CLIENT_KEY = /*[[${clientKey}]]*/ "";
+</script>
+<script src="/js/payment/payment.js"></script>
+
+</body>
+</html>

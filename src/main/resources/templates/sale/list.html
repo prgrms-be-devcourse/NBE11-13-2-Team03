@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>판매 중인 굿즈 | Gudit</title>
+
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<header th:replace="~{fragments/header :: header}"></header>
+
+<main class="main sales-page">
+
+    <section class="page-header">
+        <span class="page-eyebrow">LIMITED DROP</span>
+        <h1>한정 굿즈</h1>
+        <p>한정 수량으로 준비된 굿즈의 판매 상태를 확인하세요.</p>
+    </section>
+
+    <section class="sale-filter" aria-label="판매 상태 필터">
+        <button type="button"
+                class="filter-button active"
+                data-status="ALL">
+            전체
+        </button>
+
+        <button type="button"
+                class="filter-button"
+                data-status="READY">
+            판매 예정
+        </button>
+
+        <button type="button"
+                class="filter-button"
+                data-status="ON_SALE">
+            판매 중
+        </button>
+
+        <button type="button"
+                class="filter-button"
+                data-status="SOLD_OUT">
+            품절
+        </button>
+
+        <button type="button"
+                class="filter-button"
+                data-status="CLOSED">
+            종료
+        </button>
+    </section>
+
+    <section id="sale-grid" class="sale-grid">
+        <!-- GET /api/sales 결과 렌더링 -->
+    </section>
+
+</main>
+
+<script src="/js/sale/list.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,28 @@
+services:
+  postgres-db:
+    image: postgres:16-alpine
+    container_name: postgres-db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: "1234"
+      POSTGRES_DB: gudit
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: always
+
+  redis:
+    image: redis:alpine
+    container_name: redis-event
+    ports:
+      - "6379:6379"
+    # 데이터 영속화(AOF) 및 비번 없음 설정
+    command: redis-server --appendonly yes --requirepass ""
+    volumes:
+      - redis_data:/data
+    restart: always
+
+volumes:
+  postgres_data:
+  redis_data:

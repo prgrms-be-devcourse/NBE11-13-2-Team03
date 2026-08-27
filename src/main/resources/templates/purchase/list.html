@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>내 구매 내역 | Gudit</title>
+
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<header th:replace="~{fragments/header :: header}"></header>
+
+<main class="main purchase-list-page">
+
+    <section class="page-header">
+        <span class="page-eyebrow">MY PURCHASE</span>
+        <h1>내 구매 내역</h1>
+        <p>구매한 굿즈와 현재 구매 상태를 확인할 수 있습니다.</p>
+    </section>
+
+    <section class="purchase-filter" aria-label="구매 상태 필터">
+
+        <button
+                type="button"
+                class="filter-button active"
+                data-status="ALL">
+            전체
+        </button>
+
+        <button
+                type="button"
+                class="filter-button"
+                data-status="PENDING_PAYMENT">
+            결제 대기
+        </button>
+
+        <button
+                type="button"
+                class="filter-button"
+                data-status="PURCHASED">
+            구매 완료
+        </button>
+
+        <button
+                type="button"
+                class="filter-button"
+                data-status="CANCELED">
+            취소
+        </button>
+
+    </section>
+
+    <section
+            id="purchase-list"
+            class="purchase-list">
+        <!-- GET /api/purchases 결과 렌더링 -->
+    </section>
+
+</main>
+
+<script src="/js/purchase/list.js"></script>
+
+</body>
+</html>

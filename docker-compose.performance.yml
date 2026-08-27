@@ -1,0 +1,71 @@
+name: gudit-performance
+
+services:
+  postgres-performance:
+    image: postgres:16-alpine
+    container_name: gudit-performance-postgres
+
+    ports:
+      - "5433:5432"
+
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: "1234"
+      POSTGRES_DB: gudit
+
+    command:
+      - postgres
+      - -c
+      - shared_preload_libraries=pg_stat_statements
+      - -c
+      - track_io_timing=on
+
+    volumes:
+      - postgres_performance_data:/var/lib/postgresql/data
+
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d gudit" ]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+    restart: unless-stopped
+
+  redis-performance:
+    image: redis:7-alpine
+    container_name: gudit-performance-redis
+
+    ports:
+      - "7002:6379"
+
+    command:
+      - redis-server
+      - --appendonly
+      - "yes"
+
+      # 100ms 이상 지연된 이벤트 기록
+      - --latency-monitor-threshold
+      - "100"
+
+      # 10ms 이상 걸린 명령을 slowlog에 기록
+      - --slowlog-log-slower-than
+      - "10000"
+
+      # slowlog를 최대 256건까지 보관
+      - --slowlog-max-len
+      - "256"
+
+    volumes:
+      - redis_performance_data:/data
+
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+    restart: unless-stopped
+
+volumes:
+  postgres_performance_data:
+  redis_performance_data:

@@ -1,0 +1,45 @@
+services:
+  spring-performance:
+    image: eclipse-temurin:25-jre
+    container_name: gudit-performance-spring
+    init: true
+    working_dir: /app
+    command:
+      - java
+      - -jar
+      - /app/Gudit.jar
+    environment:
+      SERVER_PORT: "8080"
+      SPRING_PROFILES_ACTIVE: performance,${GUDIT_TEST_PROFILE:-concurrency}
+      SPRING_SQL_INIT_MODE: never
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-performance:5432/gudit
+      SPRING_DATA_REDIS_HOST: redis-performance
+      SPRING_DATA_REDIS_PORT: "6379"
+      PERFORMANCE_JWT_SECRET_KEY: ${PERFORMANCE_JWT_SECRET_KEY:?Set from generated performance-test metadata}
+      KAKAO_CLIENT_ID: container-test-not-used
+      KAKAO_CLIENT_SECRET: container-test-not-used
+      JWT_SECRET_KEY: ${PERFORMANCE_JWT_SECRET_KEY:?Set from generated performance-test metadata}
+      TOSS_CLIENT_KEY: container-test-not-used
+      TOSS_SECRET_KEY: container-test-not-used
+    volumes:
+      - ./build/libs/Gudit-0.0.1-SNAPSHOT.jar:/app/Gudit.jar:ro
+    ports:
+      - "127.0.0.1:8080:8080"
+    depends_on:
+      postgres-performance:
+        condition: service_healthy
+      redis-performance:
+        condition: service_healthy
+
+  k6-performance:
+    image: grafana/k6:2.2.0
+    working_dir: /performance-tests
+    network_mode: "service:spring-performance"
+    volumes:
+      - ./src/performance-tests/performance-tests:/performance-tests:ro
+      - ./src/performance-tests/performance-tests/results/docker-spring-k6:/results
+    depends_on:
+      spring-performance:
+        condition: service_started
+    profiles:
+      - test-runner

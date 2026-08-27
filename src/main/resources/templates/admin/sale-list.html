@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>판매 관리 | Gudit</title>
+
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<header th:replace="~{fragments/header :: header}"></header>
+
+<main class="main admin-page">
+
+    <nav class="admin-nav">
+        <a href="/admin/goods">상품 관리</a>
+        <a href="/admin/sales" class="active">판매 관리</a>
+    </nav>
+
+    <section class="admin-page-header admin-sale-header">
+        <div>
+            <span class="page-eyebrow">ADMIN</span>
+            <h1>판매 관리</h1>
+            <p>굿즈별 판매 일정과 재고, 현재 판매 상태를 관리합니다.</p>
+        </div>
+
+        <a href="/admin/sales/new"
+           class="primary-button admin-create-button">
+            판매 등록
+        </a>
+    </section>
+
+    <section class="admin-summary admin-sale-summary">
+
+        <div class="admin-summary-card">
+            <span>전체 판매</span>
+            <strong id="sale-total-count">0</strong>
+        </div>
+
+        <div class="admin-summary-card">
+            <span>판매 중</span>
+            <strong id="sale-on-count">0</strong>
+        </div>
+
+        <div class="admin-summary-card">
+            <span>판매 예정</span>
+            <strong id="sale-ready-count">0</strong>
+        </div>
+
+        <div class="admin-summary-card">
+            <span>품절 · 종료</span>
+            <strong id="sale-finished-count">0</strong>
+        </div>
+
+    </section>
+
+    <section class="admin-table-card">
+
+        <div class="admin-table-header">
+
+            <h2>판매 목록</h2>
+
+            <span
+                    id="sale-table-count"
+                    class="admin-table-count">
+                총 0건
+            </span>
+
+        </div>
+
+        <div class="admin-table-wrap">
+
+            <table class="admin-table admin-sale-table">
+
+                <thead>
+                <tr>
+                    <th>상품</th>
+                    <th>가격</th>
+                    <th>재고</th>
+                    <th>상태</th>
+                    <th>판매 기간</th>
+                    <th></th>
+                </tr>
+                </thead>
+
+                <tbody id="admin-sale-list">
+                <!-- GET /api/sales 결과 렌더링 -->
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+</main>
+
+<script src="/js/admin/sale-list.js"></script>
+
+</body>
+</html>

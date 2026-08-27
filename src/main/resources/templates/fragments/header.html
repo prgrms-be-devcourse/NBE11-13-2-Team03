@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org">
+
+<body>
+
+<header class="header" th:fragment="header">
+    <div class="header-inner">
+        <a href="/" class="logo">GUDIT</a>
+
+        <div class="header-right">
+
+            <nav class="nav">
+                <a href="/sales">판매 중인 굿즈</a>
+                <a href="/mypage/purchases">내 구매 내역</a>
+                <a href="/admin/goods"
+                   id="admin-link"
+                   class="admin-link"
+                   hidden>
+                    관리자
+                </a>
+            </nav>
+
+            <div class="auth-area">
+
+                <a href="/oauth2/authorization/kakao"
+                   id="login-link"
+                   class="kakao-header-login">
+                    <img src="/images/kakao_login_small.png"
+                         alt="카카오 로그인">
+                </a>
+
+                <div id="user-area"
+                     class="user-area"
+                     hidden>
+
+                    <span id="user-name"
+                          class="user-name">
+                        사용자님
+                    </span>
+
+                    <button type="button"
+                            id="logout-button"
+                            class="logout-button">
+                        로그아웃
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <script src="/js/common/header.js"></script>
+</header>
+
+</body>
+</html>

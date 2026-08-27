@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>굿즈 상세 | Gudit</title>
+
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+
+<header th:replace="~{fragments/header :: header}"></header>
+
+<main class="main sale-detail-page">
+
+    <a href="/sales" class="back-link">
+        ← 판매 목록으로 돌아가기
+    </a>
+
+    <section id="sale-detail" class="sale-detail">
+
+        <div class="sale-detail-left">
+
+            <div
+                    id="sale-detail-image"
+                    class="detail-image-wrap">
+
+                <div class="detail-mock-keyring">
+                    GUDIT
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="sale-detail-right">
+
+            <span
+                    id="sale-status-badge"
+                    class="status-badge detail-status">
+            </span>
+
+            <h1
+                    id="sale-name"
+                    class="detail-product-name">
+            </h1>
+
+            <p
+                    id="sale-price"
+                    class="detail-price">
+            </p>
+
+            <p
+                    id="sale-description"
+                    class="detail-description">
+                Gudit 한정 굿즈입니다.
+            </p>
+
+            <div class="detail-info-card">
+
+                <div class="detail-info-row">
+                    <span>판매 상태</span>
+
+                    <strong id="sale-status-text"></strong>
+                </div>
+
+                <div class="detail-info-row">
+                    <span>남은 수량</span>
+
+                    <strong
+                            id="sale-stock"
+                            class="stock-emphasis">
+                    </strong>
+                </div>
+
+                <div class="detail-stock-bar">
+                    <div
+                            id="sale-stock-bar"
+                            class="detail-stock-bar-fill">
+                    </div>
+                </div>
+
+                <div class="detail-info-row">
+                    <span>판매 기간</span>
+
+                    <strong id="sale-period"></strong>
+                </div>
+
+                <div class="detail-info-row">
+                    <span>구매 가능 수량</span>
+
+                    <strong id="sale-max-purchase"></strong>
+                </div>
+
+            </div>
+
+            <div
+                    id="countdown-card"
+                    class="countdown-card">
+
+                <span
+                        id="countdown-label"
+                        class="countdown-label">
+                    판매 종료까지 남은 시간
+                </span>
+
+                <div class="countdown">
+
+                    <div>
+                        <strong id="countdown-hours">00</strong>
+                        <span>시간</span>
+                    </div>
+
+                    <span class="countdown-colon">:</span>
+
+                    <div>
+                        <strong id="countdown-minutes">00</strong>
+                        <span>분</span>
+                    </div>
+
+                    <span class="countdown-colon">:</span>
+
+                    <div>
+                        <strong id="countdown-seconds">00</strong>
+                        <span>초</span>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <button
+                    id="purchase-button"
+                    type="button"
+                    class="purchase-button">
+                구매하기
+            </button>
+
+            <p
+                    id="purchase-notice"
+                    class="purchase-notice">
+            </p>
+
+        </div>
+
+    </section>
+
+</main>
+
+<script src="/js/sale/detail.js"></script>
+
+</body>
+</html>

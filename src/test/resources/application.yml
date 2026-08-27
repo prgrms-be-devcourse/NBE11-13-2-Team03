@@ -1,0 +1,40 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+
+  sql:
+    init:
+      mode: never
+
+  security:
+    oauth2:
+      client:
+        registration:
+          kakao:
+            client-id: test-client-id
+            client-secret: test-client-secret
+            redirect-uri: "{baseUrl}/login/oauth2/code/kakao"
+            authorization-grant-type: authorization_code
+            client-authentication-method: client_secret_post
+            scope:
+              - profile_nickname
+              - account_email
+        provider:
+          kakao:
+            authorization-uri: https://kauth.kakao.com/oauth/authorize
+            token-uri: https://kauth.kakao.com/oauth/token
+            user-info-uri: https://kapi.kakao.com/v2/user/me
+            user-name-attribute: id
+
+jwt:
+  issuer: test@naver.com
+  secret_key: dGVzdC1qd3Qtc2VjcmV0LWtleS1mb3ItZ3VkaXQtaHM1MTItdGVzdGluZy1vbmx5LTY0LWJ5dGVzLW1pbmltdW0ta2V5LTIwMjY= # 테스트용
+  access-token-validity: 2h
+  refresh-token-validity: 7d

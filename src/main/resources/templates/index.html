@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gudit</title>
+
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<header th:replace="~{fragments/header :: header}"></header>
+
+<main class="main">
+    <section class="hero">
+        <span class="hero-badge">LIMITED GOODS</span>
+
+        <h1>
+            한정 굿즈를<br>
+            선착순으로 만나보세요
+        </h1>
+
+        <p>
+            한정 수량으로 준비된 굿즈를 확인하고<br>
+            판매가 시작되면 빠르게 구매하세요.
+        </p>
+
+        <a href="/sales" class="primary-button">
+            판매 중인 굿즈 보기
+        </a>
+    </section>
+
+    <section class="feature-section">
+        <div class="feature-card">
+            <span class="feature-number">01</span>
+            <h2>한정 수량</h2>
+            <p>정해진 수량의 굿즈를 선착순으로 구매합니다.</p>
+        </div>
+
+        <div class="feature-card">
+            <span class="feature-number">02</span>
+            <h2>실시간 판매 상태</h2>
+            <p>판매 예정, 판매 중, 품절 여부를 바로 확인합니다.</p>
+        </div>
+
+        <div class="feature-card">
+            <span class="feature-number">03</span>
+            <h2>간편한 구매</h2>
+            <p>상품을 확인한 뒤 간단하게 구매를 완료합니다.</p>
+        </div>
+    </section>
+</main>
+
+</body>
+</html>

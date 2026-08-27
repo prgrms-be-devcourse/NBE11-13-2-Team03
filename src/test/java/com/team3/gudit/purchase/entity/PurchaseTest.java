@@ -1,0 +1,84 @@
+package com.team3.gudit.purchase.entity;
+
+import com.team3.gudit.sale.domain.entity.Sale;
+import com.team3.gudit.user.domain.entity.User;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+
+class PurchaseTest {
+
+    @Test
+    @DisplayName("구매 정보를 생성하면 결제 대기 상태로 생성된다")
+    void createPurchase() {
+        // given
+        User user = mock(User.class);
+        Sale sale = mock(Sale.class);
+
+        // when
+        Purchase purchase = Purchase.create(
+                user,
+                sale,
+                1,
+                15_000
+        );
+
+        // then
+        assertThat(purchase.getUser()).isEqualTo(user);
+        assertThat(purchase.getSale()).isEqualTo(sale);
+        assertThat(purchase.getQuantity()).isEqualTo(1);
+        assertThat(purchase.getPurchasePrice()).isEqualTo(15_000);
+        assertThat(purchase.getStatus())
+                .isEqualTo(PurchaseStatus.PENDING_PAYMENT);
+        assertThat(purchase.getPurchasedAt()).isNull();
+        assertThat(purchase.getCanceledAt()).isNull();
+    }
+
+    @Test
+    @DisplayName("결제를 완료하면 구매 상태와 구매 완료 시간이 변경된다")
+    void completePurchase() {
+        // given
+        User user = mock(User.class);
+        Sale sale = mock(Sale.class);
+
+        Purchase purchase = Purchase.create(
+                user,
+                sale,
+                1,
+                15_000
+        );
+
+        // when
+        purchase.complete();
+
+        // then
+        assertThat(purchase.getStatus())
+                .isEqualTo(PurchaseStatus.PURCHASED);
+        assertThat(purchase.getPurchasedAt()).isNotNull();
+    }
+
+    @Test
+    @DisplayName("구매를 취소하면 상태와 취소 시간이 변경된다")
+    void cancelPurchase() {
+        // given
+        User user = mock(User.class);
+        Sale sale = mock(Sale.class);
+
+        Purchase purchase = Purchase.create(
+                user,
+                sale,
+                1,
+                15_000
+        );
+
+        // when
+        purchase.cancel();
+
+        // then
+        assertThat(purchase.getStatus())
+                .isEqualTo(PurchaseStatus.CANCELED);
+        assertThat(purchase.getCanceledAt()).isNotNull();
+    }
+}

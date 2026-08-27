@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>구매 상세 | Gudit</title>
+
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<header th:replace="~{fragments/header :: header}"></header>
+
+<main class="main purchase-detail-page">
+
+    <a href="/mypage/purchases" class="back-link">
+        ← 내 구매 내역으로 돌아가기
+    </a>
+
+    <section id="purchase-detail" class="purchase-detail">
+
+        <div id="purchase-detail-image" class="purchase-detail-image">
+            <div class="detail-mock-keyring">
+                GUDIT
+            </div>
+        </div>
+
+        <div class="purchase-detail-content">
+
+            <div class="purchase-detail-header">
+                <div>
+                    <span
+                            id="purchase-status-badge"
+                            class="purchase-status">
+                    </span>
+
+                    <h1 id="purchase-goods-name">-</h1>
+
+                    <p
+                            id="purchase-price"
+                            class="purchase-detail-price">
+                        -
+                    </p>
+                </div>
+            </div>
+
+            <div class="purchase-detail-info">
+
+                <div class="purchase-detail-row">
+                    <span>수량</span>
+                    <strong id="purchase-quantity">-</strong>
+                </div>
+
+                <div class="purchase-detail-row">
+                    <span>구매 금액</span>
+                    <strong id="purchase-total-price">-</strong>
+                </div>
+
+                <div class="purchase-detail-row">
+                    <span>구매 상태</span>
+                    <strong
+                            id="purchase-status-text"
+                            class="purchase-state-text">
+                        -
+                    </strong>
+                </div>
+
+                <div class="purchase-detail-row">
+                    <span>구매 일시</span>
+                    <strong id="purchase-date">-</strong>
+                </div>
+
+            </div>
+
+            <div
+                    id="purchase-detail-message"
+                    class="purchase-detail-message">
+            </div>
+
+            <button
+                    id="purchase-cancel-button"
+                    type="button"
+                    class="purchase-cancel-button"
+                    hidden>
+                구매 취소
+            </button>
+
+        </div>
+
+    </section>
+
+</main>
+
+<script src="/js/purchase/detail.js"></script>
+
+</body>
+</html>
